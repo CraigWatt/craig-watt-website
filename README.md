@@ -11,8 +11,11 @@ Next-ui
 Milestones consist of:
 
 Home Page &/ Portfolio
+
 Blog
+
 'Craig's React Cookbook'
+
 
 
 ```:)
