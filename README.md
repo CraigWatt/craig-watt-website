@@ -1,6 +1,9 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# craigwatt.co.uk
 
-## My Personal Website
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Deployment**: [Vercel](https://vercel.com)
+- **CMS**: [Sanity](https://www.sanity.io/)
+- **Styling**: [Stitches](https://stitches.dev/)
 
 The Main Goal is to bootstrap a personal CV website quickly using:
 
@@ -16,9 +19,7 @@ Blog
 
 'Craig's React Cookbook'
 
+## Running Locally
 
-
-```
-Good Luck!
-
+```Good Luck!
 ```
