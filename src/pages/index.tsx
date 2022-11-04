@@ -1,9 +1,17 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import type { NextPage } from 'next'
+import React, { FC } from 'react'
+import { SiteLayout } from '@components/common'
 // import styles from '../styles/Home.module.css'
 
-export default function Home() {
+//For Pages, use 'function' syntax to allow for .getLayout
+// I prefer this syntax in future: 
+// const Home: FC<NextPage> = () => {
+export default function Home<NextPage>() {
   return (
+    <>
+    <div>I am Home Component</div>
     <div className="REMOVE_ME">
       <Head>
         <title>Create Next App</title>
@@ -11,9 +19,11 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
+
+
       <main className="REMOVE_ME">
         <h1 className="REMOVE_ME">
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
+          Welcome to <a href="https://nextjs.org">Craig's Website!</a>
         </h1>
 
         <p className="REMOVE_ME">
@@ -67,5 +77,8 @@ export default function Home() {
         </a>
       </footer>
     </div>
+    </>
   )
 }
+
+Home.getLayout = SiteLayout

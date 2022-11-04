@@ -1,1 +1,1 @@
-export { SiteLayout } from './SiteLayout'
+export { default as SiteLayout } from './SiteLayout'
