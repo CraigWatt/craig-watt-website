@@ -6,7 +6,7 @@ SiteLayout is effectively a default Layout for the website.
 
 
 export interface SiteLayoutProps {
-  children?: React.ReactNode
+  children?: React.ReactNode,
 }
 
 export const SiteLayout: FC<SiteLayoutProps> = ({
@@ -18,6 +18,8 @@ export const SiteLayout: FC<SiteLayoutProps> = ({
   return (
     <>
     <div> I am Site Layout Component</div>
+
+    
     <main>{children}</main>
     </>
   );
