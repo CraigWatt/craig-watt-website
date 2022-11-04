@@ -9,7 +9,7 @@ In this case Navbar area and footer area etc.
 
 import React from 'react';
 import { Meta, Story } from '@storybook/react';
-import { SiteLayout } from './index'
+import SiteLayout from './index'
 import { SiteLayoutProps } from './index';
 
 export default {
