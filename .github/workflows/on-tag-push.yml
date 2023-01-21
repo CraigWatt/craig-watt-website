@@ -1,0 +1,143 @@
+# name: 🚀 Deploy
+
+# on:
+#   push:
+#     tags:
+#       - "v*.*.*"
+
+# jobs:
+#   changes: 
+#     name: 🔎 Determine deployable changes
+#     runs-on: ubuntu-latest
+#     outputs:
+#       DEPLOYABLE: ${{steps.changes.outputs.DEPLOYABLE}}
+#     steps:
+#       - name: ⬇️ Checkout repo
+#         uses: actions/checkout@v.3.3.0
+#         with:
+#           fetch-depth: '50'
+
+#       - name: ⎔ Setup node
+#         uses: actions/setup-node@v3.6.0
+#         with:
+#           node-version: 18
+
+#       - name: 🔎 Determine deployable changes
+#         id: changes
+#         run: >-
+#           echo ::set-output name=DEPLOYABLE::$(node ./other/is-deployable.js ${{
+#           github.sha }})
+
+#       - name: ❓ Deployable
+#         run: >-
+#           echo "DEPLOYABLE: ${{steps.changes.outputs.DEPLOYABLE}}"
+
+#   lint:
+#     name: ⬣ ESLint
+#     needs: [changes]
+#     if: needs.changes.outputs.DEPLOYABLE == 'true'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: 🛑 Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.11.0
+
+#       - name: ⬇️ Checkout repo
+#         uses: actions/checkout@v.3.3.0
+
+#       - name: ⎔ Setup node
+#         uses: actions/setup-node@v3.6.0
+#         with:
+#           node-version: 18
+
+#       - name: 📥 Download deps
+#         uses: bahmutov/npm-install@v1.6.0
+
+#       - name: 🔬 Lint
+#         run: npm run lint
+
+#   typecheck:
+#     name: ʦ TypeScript
+#     needs: [changes]
+#     if: needs.changes.outputs.DEPLOYABLE == 'true'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: 🛑 Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.11.0
+
+#       - name: ⬇️ Checkout repo
+#         uses: actions/checkout@v.3.3.0
+
+#       - name: ⎔ Setup node
+#         uses: actions/setup-node@v3.6.0
+#         with:
+#           node-version: 18
+
+#       - name: 📥 Download deps
+#         uses: bahmutov/npm-install@v1.6.0
+
+#       - name: 🔎 Type check
+#         run: npm run typecheck
+
+#   jest:
+#     name: 🃏 Jest
+#     needs: [changes]
+#     if: needs.changes.outputs.DEPLOYABLE == 'true'
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: 🛑 Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.11.0
+
+#       - name: ⬇️ Checkout repo
+#         uses: actions/checkout@v.3.3.0
+
+#       - name: ⎔ Setup node
+#         uses: actions/setup-node@v3.6.0
+#         with:
+#           node-version: 18
+
+#       - name: 📥 Download deps
+#         uses: bahmutov/npm-install@v1.6.0
+
+#       - name: 🃏 Run jest
+#         run: npm run test -- --coverage
+
+#   build:
+#     name: 🐳 Build
+#     needs: [changes]
+#     if:
+#       ${{ (github.ref == 'refs/heads/main' &&
+#       github.event_name == 'push' && needs.changes.outputs.DEPLOYABLE == 'true'
+#       }}
+#     runs-on: ubuntu-latest
+#     # only build/deploy main branch on pushes
+#     steps:
+#       - name: 🛑 Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.11.0
+
+#       - name: ⬇️ Checkout repo
+#         uses: actions/checkout@v.3.3.0
+
+#       - name: 👀 Read app name
+#         uses: SebRollen/toml-action@v1.0.2
+#         id: app_name
+#         with:
+#           file: 'fly.toml'
+#           field: 'app'
+
+#       - name: 🐳 Set up Docker Buildx
+#         uses: docker/setup-buildx-action@v2.2.1
+#         with:
+#           version: v0.9.1
+
+#       # Setup cache
+
+
+
+
+
+
+
+
+
+
+
