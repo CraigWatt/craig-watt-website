@@ -1,9 +1,5 @@
-import React, { FC } from 'react';
+import React from 'react';
 // import { Navbar, Button, Link, Text, Card, Radio } from "@nextui-org/react";
-
-/*
-SiteLayout is effectively a default Layout for the website.
-*/
 
 export interface FooterProps {
   children?: React.ReactNode,
