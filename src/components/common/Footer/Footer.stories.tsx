@@ -9,12 +9,12 @@ export default {
 
 const Template: Story<FooterProps> = (args) => <Footer {...args} />;
 
-// export const Primary = Template.bind({});
-// Primary.args = {
+export const Primary = Template.bind({});
+Primary.args = {
   
-// };
+};
 
-// export const Secondary = Template.bind({});
-// Secondary.args = {
+export const Secondary = Template.bind({});
+Secondary.args = {
   
-// };
+};
