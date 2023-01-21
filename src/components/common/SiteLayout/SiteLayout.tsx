@@ -1,10 +1,5 @@
-import React, { FC } from 'react';
-import { SiteNavbar } from '@components/common'
-import { Footer } from '@components/common'
-
-
-
-import { Navbar, Button, Link, Text, Card, Radio } from "@nextui-org/react";
+import React from 'react';
+import { SiteNavbar, Footer } from '../index';
 
 /*
 SiteLayout is effectively a default Layout for the website.
