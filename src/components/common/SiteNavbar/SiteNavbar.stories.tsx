@@ -9,12 +9,12 @@ export default {
 
 const Template: Story<SiteNavbarProps> = (args) => <SiteNavbar {...args} />;
 
-// export const Primary = Template.bind({});
-// Primary.args = {
+export const Primary = Template.bind({});
+Primary.args = {
   
-// };
+};
 
-// export const Secondary = Template.bind({});
-// Secondary.args = {
+export const Secondary = Template.bind({});
+Secondary.args = {
   
-// };
+};
