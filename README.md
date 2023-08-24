@@ -5,6 +5,10 @@
 - **CMS**: [Sanity](https://www.sanity.io/)
 - **Styling**: [Stitches](https://stitches.dev/)
 
+Other considerations:
+- **Radix**: [Radix](https://www.radix-ui.com/)
+
+
 The Main Goal is to bootstrap a personal CV website quickly using:
 
 TypeScript
