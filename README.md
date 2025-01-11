@@ -6,7 +6,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 
 | Feature	| React + Next.js	| Vue + Nuxt.js	| Svelte + SvelteKit |
 | ------------- |:-------------:| :-----:| -----:|
-Language	JavaScript / TypeScript	JavaScript / TypeScript	JavaScript / TypeScript
+| Language | JavaScript / TypeScript	| JavaScript / TypeScript	| JavaScript / TypeScript |
 Framework	Next.js (built on React)	Nuxt (built on Vue)	SvelteKit (built on Svelte)
 SSR/SSG	Yes (built-in)	Yes (built-in)	Yes (built-in)
 CMS	Sanity (agnostic)	Sanity (agnostic)	Sanity (agnostic)
