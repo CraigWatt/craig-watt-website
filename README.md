@@ -7,7 +7,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 ## Framework Comparison table
 
 | Feature	| React + Next.js	| Vue + Nuxt.js	| Svelte + SvelteKit |
-| ------------- |:-------------:| :-----:| -----:|
+| :--- |:---| :---|:---|
 | Language | JavaScript / TypeScript | JavaScript / TypeScript	| JavaScript / TypeScript |
 | Framework | Next.js (built on React) | Nuxt (built on Vue) | SvelteKit (built on Svelte) |
 | SSR/SSG | Yes (built-in) | Yes (built-in) | Yes (built-in) |
@@ -21,7 +21,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 ## Kubernetes / DevOps Deployment Table
 
 | Aspect | Kubernetes (Cloud-Agnostic)	| Docker-only (Single VM / Container PaaS)	| Fully Managed PaaS (e.g. Vercel, Netlify) |
-| ------------- |:-------------:| :-----:| -----:|
+|:--- |:---| :---|:---|
 | Containerization | <ul><li> **Mandatory**: Build a multi-stage Docker image. </li><li> Use a registry accessible by your K8s cluster (ECR, GCR, GHCR, Docker Hub, etc.). </li></ul> | Mandatory, but typically simpler to deploy directly to a single host or a container-based PaaS (Render, Railway).	| Often optional: the platform does the build/deploy. If you do provide a Dockerfile (Netlify can handle it, Vercel in some scenarios), the system manages containers under the hood. |
 | Deployment | K8s Manifests: Deployment, Service, Ingress (or a Helm chart).  You manage Ingress Controller (NGINX, Traefik, etc.) and certificates (with cert-manager).  Horizontal scaling with HPA. | Docker run or simple config in a container platform’s UI.  Possibly manual scaling or partial auto-scaling if the platform supports it. | Typically push to Git → platform auto-builds & deploys.  Scaling is often automatic (Vercel) or limited (Netlify for SSR). |
 | CI/CD | Build & Test in external CI (GitHub Actions, GitLab, etc.).  Push container image to registry.  Deploy with kubectl apply, Helm, or a GitOps tool (Argo CD, Flux). | Similar steps to build & test.  Then either:  1) SSH into the VM to pull/run the new image, or 2) Use the container platform’s deployment mechanism. | Often built-in. E.g., Vercel integrates with GitHub → automatically triggers a build/test/deploy.  Low config overhead. |
