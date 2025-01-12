@@ -4,7 +4,7 @@ Sat 11 Jan 2025 update:
 
 README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
 
-Framework Comparison table
+##Framework Comparison table
 
 | Feature	| React + Next.js	| Vue + Nuxt.js	| Svelte + SvelteKit |
 | ------------- |:-------------:| :-----:| -----:|
@@ -18,7 +18,7 @@ Framework Comparison table
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. |
 
 
-Kubernetes / DevOps Deployment Table
+##Kubernetes / DevOps Deployment Table
 
 | Aspect	| Kubernetes (Cloud-Agnostic)	| Docker-only (Single VM / Container PaaS)	| Fully Managed PaaS (e.g. Vercel, Netlify) |
 | ------------- |:-------------:| :-----:| -----:|
