@@ -96,9 +96,83 @@ craigwatt.co.uk/
 
 Using a Dockerised development environment will ensure all developers to this project are ensuring consistency, scalability and ease of onboarding new developers.  By containerizing our environment, we can eliminate "it works on my machine" issues, streamline setup processes, and maintain uniform configurations across all team members' systems.
 
-## Foundation dependencies
+## Foundation Dependencies
 
-Working on this NOW
+### **Base Dependencies**
+- [ ] **Node.js** (Specify version in `engines` field of `package.json`):
+  - Recommended LTS version: `>=18.x` (stable and widely supported).
+- [ ] **Framework-Specific**:
+  - Next.js (`next`): `^13.0.1`
+  - Nuxt.js (`nuxt`): `^3.x`
+  - SvelteKit (`@sveltejs/kit`): Latest stable version.
+  - React Standalone:
+    - `react`: `18.2.0`
+    - `react-dom`: `18.2.0`
+- [ ] **TypeScript**:
+  - `typescript`: `^5.0.0` (latest stable version)
+  - Framework-specific type definitions:
+    - `@types/react`
+    - `@types/react-dom`
+    - `@types/node`
+
+---
+
+### **Development Dependencies**
+- [ ] **Code Quality**:
+  - **Linting**:
+    - Base: `eslint`
+    - Framework-Specific:
+      - `eslint-config-next`
+      - `eslint-plugin-vue`
+      - `eslint-plugin-svelte`
+  - **Formatting**: `prettier`
+- [ ] **Testing**:
+  - **Unit Testing**:
+    - Base: `jest`
+    - Framework-specific testing libraries:
+      - `@testing-library/react`
+      - `@vue/test-utils`
+      - `@testing-library/svelte`
+  - **E2E Testing**:
+    - Choose one: `cypress` or `playwright`
+- [ ] **Storybook**:
+  - Core:
+    - `@storybook/react`
+    - `@storybook/vue3`
+    - `@storybook/svelte`
+  - Optional Addons:
+    - `@storybook/addon-actions`
+    - `@storybook/addon-essentials`
+    - `@storybook/addon-interactions`
+
+---
+
+### **Monorepo Management**
+- [ ] **Nx Plugins**:
+  - `@nrwl/workspace`
+  - `@nrwl/next`
+  - `@nrwl/react`
+  - `@nrwl/vue`
+  - `@nrwl/svelte`
+
+---
+
+### **Observability and SEO**
+- [ ] **Observability Tools**:
+  - `@opentelemetry/api`
+  - `@opentelemetry/sdk-node`
+  - `lighthouse`
+- [ ] **SEO Tools**:
+  - `lighthouse-ci`
+  - `sitemap`
+
+---
+
+### **Scripts in `package.json`**
+Ensure scripts for development, testing, and Storybook are defined:
+- `dev`, `build`, `start`, `lint`, `test`, `storybook`, `build-storybook`.
+
+
 
 ## this is a project that prioritises component-driven-development
 
