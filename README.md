@@ -6,6 +6,22 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 
 ## 🚀 Milestones Checklist
 
+### **0. Establish Dependencies and Version Numbers**
+- [ ] **Define Core Dependencies**
+  - [ ] Specify Node.js version
+  - [ ] Define versions for frameworks (Next.js, Vue + Nuxt.js, SvelteKit, React Standalone)
+- [ ] **Set Up Package Managers**
+  - [ ] Decide between npm or Yarn (if not already)
+  - [ ] Specify versions for package managers
+- [ ] **Lock Dependency Versions**
+  - [ ] Ensure `package.json` and lock files (`yarn.lock`/`package-lock.json`) are up-to-date
+- [ ] **Document Dependency Versions**
+  - [ ] Create a `DEPENDENCIES.md` or add a section in `README.md` detailing all dependencies and their versions
+- [ ] **Set Up Version Control for Dependencies**
+  - [ ] Use tools like Renovate or Dependabot for automated dependency updates
+- [ ] **Review and Approve Dependencies**
+  - [ ] Conduct a team review to ensure all necessary dependencies are included and approved
+
 ### **1. Initialize Nx Monorepo**
 - [ ] Set Up Nx Workspace
 - [ ] Add Existing Applications (`nextjs-app`, `vue-nuxt-app`, `sveltekit-app`, `react-standalone`)
