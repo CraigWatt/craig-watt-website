@@ -17,6 +17,10 @@ craigwatt.co.uk/
   └─ ...
 ```
 
+## To work on this project, please ensure you are using our Dockerised Development Environment
+
+TBA
+
 ## this is a project that prioritises component-driven-development
 
 ## Evolving tree explanation
