@@ -6,8 +6,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 
 ## Framework Comparison table
 
-<small>
-
+<details>
 | Feature | React + Next.js	| Vue + Nuxt.js	| Svelte + SvelteKit | React (No Meta-Framework)
 | :--- |:---| :---|:---|:---|
 | Language | JavaScript / TypeScript | JavaScript / TypeScript	| JavaScript / TypeScript | JavaScript / TypeScript |
@@ -18,8 +17,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 | Unit Testing | React Testing Library | Vue Testing Library | Svelte Testing Library | React Testing Library |
 | E2E Testing |	Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) |
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. | Netlify, Vercel, Docker/Kubernetes, or any static file host
-
-</small>
+</details>
 
 ## Kubernetes / DevOps Deployment Table
 
