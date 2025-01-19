@@ -4,6 +4,22 @@ Sat 11 Jan 2025 update:
 
 README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#tables
 
+## This is an Nx Monorepo
+```
+craigwatt.co.uk/
+  ├─ README.md         (the doc you drafted)
+  ├─ packages/         (optionally for shared code, if you want)
+  ├─ apps/
+  │   ├─ nextjs-app/
+  │   ├─ vue-nuxt-app/
+  │   ├─ sveltekit-app/
+  │   └─ react-standalone/
+  └─ ...
+```
+
+## this is a project that prioritises component-driven-development
+
+
 ## Framework Comparison table
 
 | Feature | React + Next.js	| Vue + Nuxt.js	| Svelte + SvelteKit | React (No Meta-Framework)
@@ -96,7 +112,6 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 - Home Page & Portfolio
 - Blog
 - 'Craig's React Cookbook'
-
 ## New Milestones consist of:
 - Home Page & Portfolio
 - Slow Cooking Recipes 
