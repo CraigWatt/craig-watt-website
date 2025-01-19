@@ -13,6 +13,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 | SSR/SSG | Yes (built-in) | Yes (built-in) | Yes (built-in) | None by default; custom SSR/SSG possible via ReactDOMServer or build scripts (no built-in approach). |
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
 | Storybook	| @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
+| Styling | Stitches (CSS-in-JS) + Radix UI for accessible, unstyled components | Use Vue’s scoped CSS or a minimal headless library (e.g., Headless UI for Vue) | Leverage Svelte’s built-in scoped styling or a minimal community library (e.g., SvelteUI) (no official Radix port) | Stitches (CSS-in-JS) + Radix UI (no built-in approach) |
 | Unit Testing | React Testing Library | Vue Testing Library | Svelte Testing Library | React Testing Library |
 | E2E Testing |	Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) |
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. | Netlify, Vercel, Docker/Kubernetes, or any static file host
@@ -30,6 +31,30 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 | Lock-In | Low: Standard K8s objects. Move to any other K8s cluster with minimal changes.  Avoid cluster-specific features (some advanced cloud add-ons) if you want pure portability. | Moderate: If you rely on specific features of a container PaaS (like proprietary add-ons), switching might require changes. A single VM is not locked in, but is more manual. | Higher: Relying on Vercel or Netlify’s serverless functions, Edge Middleware, or other proprietary features can make migration more involved. |
 | Cost | Varies: Managed K8s on AWS/GCP/Azure adds cluster and node costs. Self-managed can be cheaper hardware but more staff time.  For a small site, can be overkill unless you already have a cluster. | - Potentially cheaper if you’re running one small VM or a container-based service for personal projects.  Container PaaS typically pay-per-resource or usage. | Free/low-tier options exist (Vercel, Netlify), but can get pricier with higher traffic or advanced features. |
 | Ideal Use Cases | Complex apps or microservices needing advanced orchestration, rolling updates, canary deployments.  DevOps demonstration or already comfortable with K8s.  Avoiding cloud lock-in across multiple providers or on-prem. | Mid-sized apps where you want Docker’s portability but not the overhead of K8s.  Simpler than a full cluster if you’re comfortable with Docker. | Personal sites, small projects, or large projects that want minimal DevOps overhead.  Extremely quick to market; robust platform features. |
+
+
+## Some Styling Definitions
+
+<ol>
+  <li>**Stitches**
+    <ul>
+      <li>**What It Is**: A modern CSS-in-JS library for React.  It lets you define your styling directly in JavaScript/TypeScript without creating seperate .css files.</li>
+      <li>
+        Key Features:
+        <ul>
+          <li>Zero-runtime or low-runtime overhead (compared to older CSS-in-JS libraries).</li>
+          <li>**Theming:** Eas</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li></li>
+  <li></li>
+</ol>
+<ul>
+
+</ul>
+
 
 
 - **Framework**: [Next.js](https://nextjs.org/)
