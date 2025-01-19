@@ -96,6 +96,8 @@ craigwatt.co.uk/
 
 Using a Dockerised development environment will ensure all developers to this project are ensuring consistency, scalability and ease of onboarding new developers.  By containerizing our environment, we can eliminate "it works on my machine" issues, streamline setup processes, and maintain uniform configurations across all team members' systems.
 
+## Foundation dependencies
+
 
 
 ## this is a project that prioritises component-driven-development
