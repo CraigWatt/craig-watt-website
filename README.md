@@ -36,9 +36,10 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 ## Some Styling Definitions
 
 <ol>
-  <li>__Stitches__
+  <li><strong>Stitches</strong>
     <ul>
-      <li>**What It Is**: A modern CSS-in-JS library for React.  It lets you define your styling directly in JavaScript/TypeScript without creating seperate .css files.</li>
+      <li>**What It Is**: A modern CSS-in-JS library for React.  It lets you define your styling directly in JavaScript/TypeScript without creating seperate .css files.
+      </li>
       <li>
         Key Features:
         <ul>
@@ -52,7 +53,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
   <li></li>
 </ol>
 <ul>
-
+  <li></li>
 </ul>
 
 
