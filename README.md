@@ -19,6 +19,24 @@ craigwatt.co.uk/
 
 ## this is a project that prioritises component-driven-development
 
+## Evolving tree explanation
+
+From the `tree` output, we can see your current project is a **Next.js** app with the following structure:
+
+- **`.next/`**: The build/output folder containing Next.js artifacts.
+- **`node_modules/`**: Dependencies installed via `npm` or `yarn`.
+- **`src/`**, **`public/`**, **`styles/`**: Core directories for source code, static assets, and global styles respectively.
+- **`.storybook/`**: Configuration files for Storybook, indicating an existing Storybook setup.
+- **Root-level Files**:
+  - `package.json`: Defines project dependencies and scripts.
+  - `yarn.lock` / `package-lock.json`: Lockfiles for dependency versions.
+  - `next.config.js`: Configuration file for Next.js.
+  - `tsconfig.json`: TypeScript configuration.
+  - `README.md`: Project documentation.
+  - Other configuration and environment files as needed.
+
+This structure is typical of a single Next.js repository augmented with additional tools and configurations, such as Storybook for component development and testing. It reflects a well-organized setup aimed at maintaining scalability and ease of development.
+
 
 ## Framework Comparison table
 
