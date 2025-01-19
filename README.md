@@ -19,7 +19,9 @@ craigwatt.co.uk/
 
 ## To work on this project, please ensure you are using our Dockerised Development Environment
 
-TBA
+Using a Dockerised development environment will ensure all developers to this project are ensuring consistency, scalability and ease of onboarding new developers.  By containerizing our environment, we can eliminate "it works on my machine" issues, streamline setup processes, and maintain uniform configurations across all team members' systems.
+
+
 
 ## this is a project that prioritises component-driven-development
 
@@ -71,14 +73,20 @@ This structure is typical of a single Next.js repository augmented with addition
 | :--- |:---| :---|:---|:---|
 | Language | JavaScript / TypeScript | JavaScript / TypeScript	| JavaScript / TypeScript | JavaScript / TypeScript |
 | Framework | Next.js (built on React) | Nuxt (built on Vue) | SvelteKit (built on Svelte) | N/A (using 'Create React App, Vite, or a custom setup) |
+| Monorepo Management | Nx | Nx | Nx | Nx |
+| Development Environment | Dockerized | Dockerized | Dockerized | Dockerized |
 | SSR/SSG | Yes (built-in) | Yes (built-in) | Yes (built-in) | None by default; custom SSR/SSG possible via ReactDOMServer or build scripts (no built-in approach). |
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
-| Storybook	| @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
+| component-driven-development	| @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
 | Styling | Stitches (CSS-in-JS) + Radix UI for accessible, unstyled components | Use Vue’s scoped CSS or a minimal headless library (e.g., Headless UI for Vue) | Leverage Svelte’s built-in scoped styling or a minimal community library (e.g., SvelteUI) (no official Radix port) | Stitches (CSS-in-JS) + Radix UI (no built-in approach) |
+| Code Quality | ESLint | ESLint | ESLint | ESLint |
+| Code Formatting | Prettier | Prettier | Prettier | Prettier |
+| Testing Framework | Jest | Jest | Jest | Jest |
 | Unit Testing | React Testing Library | Vue Testing Library | Svelte Testing Library | React Testing Library |
 | E2E Testing |	Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) |
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. | Netlify, Vercel, Docker/Kubernetes, or any static file host
-| Observability | TBA | TBA | TBA | TBA |
+| Observability | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools|
+| SEO Optimization | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits |
 
 
 ## Kubernetes / DevOps Deployment Table
