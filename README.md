@@ -22,6 +22,7 @@ craigwatt.co.uk/
 ## Evolving tree explanation
 
 ```
+From the `tree` output, we can see your current project is a **Next.js** app with the following structure:
 .
 ├── .git
 ├── .github
