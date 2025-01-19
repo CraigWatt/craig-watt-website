@@ -164,6 +164,8 @@ This structure is typical of a single Next.js repository augmented with addition
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Netlify, Vercel, Docker/Kubernetes, or any static file host
 | Observability | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools | Prometheus, Grafana, Loki, OpenTelemetry, Telegraf, Mimir, Tempo; Google Lighthouse; SEO Tools|
 | SEO Optimization | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits |
+| Dependency Tooling | Dependabot | Dependabot | Dependabot | Dependabot
+| Security Tooling | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk
 
 
 ## Kubernetes / DevOps Deployment Table
