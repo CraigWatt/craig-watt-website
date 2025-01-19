@@ -77,7 +77,7 @@ This structure is typical of a single Next.js repository augmented with addition
 | Development Environment | Dockerized | Dockerized | Dockerized | Dockerized |
 | SSR/SSG | Yes (built-in) | Yes (built-in) | Yes (built-in) | None by default; custom SSR/SSG possible via ReactDOMServer or build scripts (no built-in approach). |
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
-| Component-Driven-Development	| @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
+| Component-Driven-Development | @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
 | Styling | Stitches (CSS-in-JS) + Radix UI for accessible, unstyled components | Use Vue’s scoped CSS or a minimal headless library (e.g., Headless UI for Vue) | Leverage Svelte’s built-in scoped styling or a minimal community library (e.g., SvelteUI) (no official Radix port) | Stitches (CSS-in-JS) + Radix UI (no built-in approach) |
 | Code Quality | ESLint | ESLint | ESLint | ESLint |
 | Code Formatting | Prettier | Prettier | Prettier | Prettier |
