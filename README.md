@@ -32,29 +32,63 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 | Cost | Varies: Managed K8s on AWS/GCP/Azure adds cluster and node costs. Self-managed can be cheaper hardware but more staff time.  For a small site, can be overkill unless you already have a cluster. | - Potentially cheaper if you’re running one small VM or a container-based service for personal projects.  Container PaaS typically pay-per-resource or usage. | Free/low-tier options exist (Vercel, Netlify), but can get pricier with higher traffic or advanced features. |
 | Ideal Use Cases | Complex apps or microservices needing advanced orchestration, rolling updates, canary deployments.  DevOps demonstration or already comfortable with K8s.  Avoiding cloud lock-in across multiple providers or on-prem. | Mid-sized apps where you want Docker’s portability but not the overhead of K8s.  Simpler than a full cluster if you’re comfortable with Docker. | Personal sites, small projects, or large projects that want minimal DevOps overhead.  Extremely quick to market; robust platform features. |
 
-
 ## Some Styling Definitions
 
 <ol>
   <li><strong>Stitches</strong>
     <ul>
-      <li>**What It Is**: A modern CSS-in-JS library for React.  It lets you define your styling directly in JavaScript/TypeScript without creating seperate .css files.
-      </li>
+      <li><strong>What It Is</strong>: A modern CSS-in-JS library for React. It lets you define your styling directly in JavaScript/TypeScript without creating separate <em>.css</em> files.</li>
       <li>
         Key Features:
         <ul>
-          <li>Zero-runtime or low-runtime overhead (compared to older CSS-in-JS libraries).</li>
-          <li>**Theming:** Eas</li>
+          <li>Zero-runtime or low-runtime overhead compared to older CSS-in-JS libraries.</li>
+          <li><strong>Theming</strong>: Easily define global design tokens (colors, spacing, fonts) and swap themes at runtime.</li>
+          <li>Scoped &amp; composable styled components, reducing naming collisions.</li>
         </ul>
       </li>
     </ul>
   </li>
-  <li></li>
-  <li></li>
+  <li><strong>Radix UI</strong>
+    <ul>
+      <li><strong>What It Is</strong>: A set of unstyled, accessible React component primitives (e.g., Dialog, Dropdown, Tabs).</li>
+      <li>
+        Key Features:
+        <ul>
+          <li><strong>Accessibility</strong>: Automatically manages ARIA attributes, keyboard navigation, and focus states.</li>
+          <li>Unopinionated design – you add your own styles (works great with Stitches).</li>
+          <li>Comprehensive library of UI patterns for consistent, production-ready components.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Headless UI for Vue</strong>
+    <ul>
+      <li><strong>What It Is</strong>: A Vue-focused collection of unstyled, fully accessible UI components (similar to Radix UI, but for Vue).</li>
+      <li>
+        Key Features:
+        <ul>
+          <li>Offers headless <em>(unstyled)</em> building blocks (Menu, Dialog, Listbox, etc.) you can customize freely.</li>
+          <li>Maintains proper accessibility without dictating your design choices.</li>
+          <li>Works seamlessly with Vue’s <strong>scoped CSS</strong> or a utility-first framework like Tailwind.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li><strong>Svelte’s Built-In Scoped Styling</strong>
+    <ul>
+      <li><strong>What It Is</strong>: Svelte automatically scopes <em>&lt;style&gt;</em> blocks within each <em>.svelte</em> component, preventing naming collisions.</li>
+      <li>
+        Key Features:
+        <ul>
+          <li>All styles are isolated to the component by default (no global leaks).</li>
+          <li>No need for separate files or a dedicated CSS-in-JS library.</li>
+          <li>Simple yet powerful approach for smaller projects or to build custom design systems.</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
 </ol>
-<ul>
-  <li></li>
-</ul>
+
 
 
 
