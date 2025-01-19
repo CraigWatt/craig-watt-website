@@ -14,7 +14,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
 | Storybook	| @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte |
 | Unit Testing | React Testing Library | Vue Testing Library | Svelte Testing Library |
-| E2E Testing |	Cypress (framework-agnostic) | Cypress (framework-agnostic) | Cypress (framework-agnostic) |
+| E2E Testing |	Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) |
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. |
 
 
