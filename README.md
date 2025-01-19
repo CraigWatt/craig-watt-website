@@ -33,6 +33,7 @@ craigwatt.co.uk/
 | Unit Testing | React Testing Library | Vue Testing Library | Svelte Testing Library | React Testing Library |
 | E2E Testing |	Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) | Cypress / Playwright (both framework-agnostic) |
 | Deployment | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify, Docker/Kubernetes, etc. | Vercel, Netlify,Docker/Kubernetes, etc. | Netlify, Vercel, Docker/Kubernetes, or any static file host
+| Observability | TBA | TBA | TBA | TBA |
 
 
 ## Kubernetes / DevOps Deployment Table
