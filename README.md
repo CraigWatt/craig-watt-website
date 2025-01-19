@@ -21,6 +21,28 @@ craigwatt.co.uk/
 
 ## Evolving tree explanation
 
+```
+.
+├── .git
+├── .github
+├── .gitignore
+├── .next
+├── .storybook
+├── README.md
+├── next-env.d.ts
+├── next.config.js
+├── node_modules
+├── package-lock.json
+├── package.json
+├── public
+├── src
+├── structure.txt
+├── structure_mini.txt
+├── styles
+├── tsconfig.json
+└── yarn.lock
+```
+
 From the `tree` output, we can see your current project is a **Next.js** app with the following structure:
 
 - **`.next/`**: The build/output folder containing Next.js artifacts.
