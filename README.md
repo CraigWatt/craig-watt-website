@@ -101,6 +101,9 @@ Using a Dockerised development environment will ensure all developers to this pr
 ### **Base Dependencies**
 - [ ] **Node.js** (Specify version in `engines` field of `package.json`):
   - Recommended LTS version: `>=18.x` (stable and widely supported).
+- [ ] **Package Manager**: `npm` (bundled with Node.js):
+  - Use `npm` to manage dependencies and scripts consistently across all environments.
+  - Ensure `npm` version is compatible with Node.js (update via `npm install -g npm` if needed).
 - [ ] **Framework-Specific**:
   - Next.js (`next`): `^13.0.1`
   - Nuxt.js (`nuxt`): `^3.x`
