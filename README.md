@@ -243,6 +243,8 @@ This structure is typical of a single Next.js repository augmented with addition
 | SEO Optimization | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits | Integrated SEO tools (e.g., Google Search Console, Ahrefs, SEMrush); Lighthouse CI for performance audits |
 | Dependency Tooling | Dependabot | Dependabot | Dependabot | Dependabot
 | Security Tooling | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk | GitHub Secret Scanning, Snyk
+| Database | Supabase | Supabase | Supabase | Supabase |
+| Certificate Generation | acme.sh | acme.sh | acme.sh | acme.sh |
 
 
 ## Kubernetes / DevOps Deployment Table
