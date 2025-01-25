@@ -227,7 +227,7 @@ This structure is typical of a single Next.js repository augmented with addition
 | :--- |:---| :---|:---|:---|
 | Language | JavaScript / TypeScript | JavaScript / TypeScript	| JavaScript / TypeScript | JavaScript / TypeScript |
 | Framework | Next.js (built on React) | Nuxt (built on Vue) | SvelteKit (built on Svelte) | N/A (using 'Create React App, Vite, or a custom setup) |
-| Monorepo Management | Nx (CI provider: GitHub Actions) | Nx (CI provider: GitHub Actions | Nx (CI provider GitHub Actions | Nx (CI provider GitHub Actions |
+| Monorepo Management | Nx (CI provider: GitHub Actions, Code Formatter: Prettier) | Nx (CI provider: GitHub Actions, Code Formatter: Prettier) | Nx (CI provider: GitHub Actions, Code Formatter: Prettier) | Nx (CI provider: GitHub Actions, Code Formatter: Prettier) |
 | Development Environment | Dockerized | Dockerized | Dockerized | Dockerized |
 | SSR/SSG | Yes (built-in) | Yes (built-in) | Yes (built-in) | None by default; custom SSR/SSG possible via ReactDOMServer or build scripts (no built-in approach). |
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
