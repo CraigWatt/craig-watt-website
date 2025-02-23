@@ -45,3 +45,5 @@ storybook-static
 # Next.js
 .next
 out
+
+**/.cache/storybook/
