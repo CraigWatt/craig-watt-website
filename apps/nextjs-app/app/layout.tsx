@@ -1,3 +1,4 @@
+// apps/nextjs-app/app/layout.tsx
 import './global.css';
 
 export const metadata = {
