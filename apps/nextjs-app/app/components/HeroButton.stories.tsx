@@ -1,16 +1,19 @@
 // apps/nextjs-app/app/components/HeroButton.stories.tsx
 import React from 'react';
-import { Meta, Story } from '@storybook/react';
-import { CustomHeroButton } from './HeroButton';
+import { Meta, StoryObj } from '@storybook/react';
+import { HeroButton } from './HeroButton'; // Updated name
 
-export default {
+const meta: Meta<typeof HeroButton> = {
   title: 'Components/HeroButton',
-  component: CustomHeroButton,
-} as Meta;
+  component: HeroButton,
+};
 
-const Template: Story = (args) => <CustomHeroButton {...args} />;
+export default meta;
 
-export const Default = Template.bind({});
-Default.args = {
-  // You can set default props here
+type Story = StoryObj<typeof HeroButton>;
+
+export const Default: Story = {
+  args: {
+    // Set any default props here (do not include "auto" unless it's valid)
+  },
 };
