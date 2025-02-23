@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/' # Monitor root-level package.json
+    schedule:
+      interval: 'weekly' # Check for updates weekly
+  - package-ecosystem: 'npm'
+    directory: '/apps/nextjs-app' # Monitor dependencies for the Next.js app
+    schedule:
+      interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/apps/vue-nuxt-app' # Monitor dependencies for the Vue/Nuxt app
+    schedule:
+      interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/apps/sveltekit-app' # Monitor dependencies for the SvelteKit app
+    schedule:
+      interval: 'weekly'
+  - package-ecosystem: 'npm'
+    directory: '/apps/react-standalone' # Monitor dependencies for the React standalone app
+    schedule:
+      interval: 'weekly'
