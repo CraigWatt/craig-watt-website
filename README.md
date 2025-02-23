@@ -10,6 +10,7 @@ README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Ma
 - [ ] **Define Core Dependencies**
   - [ ] Specify Node.js version
   - [ ] Define versions for frameworks (Next.js, Vue + Nuxt.js, SvelteKit, React Standalone)
+  - [ ] Should also look up Vite at some point
 - [ ] **Set Up Package Managers**
   - [ ] Decide between npm or Yarn (if not already)
   - [ ] Specify versions for package managers
@@ -327,4 +328,4 @@ This structure is typical of a single Next.js repository augmented with addition
 - 'Craig's React Cookbook'
 ## New Milestones consist of:
 - Home Page & Portfolio
-- Slow Cooking Recipes 
+- Slow Cooking Recipes
