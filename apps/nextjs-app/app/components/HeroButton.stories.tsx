@@ -14,6 +14,6 @@ type Story = StoryObj<typeof HeroButton>;
 
 export const Default: Story = {
   args: {
-    // Set any default props here (do not include "auto" unless it's valid)
+    // Set any default props here
   },
 };
