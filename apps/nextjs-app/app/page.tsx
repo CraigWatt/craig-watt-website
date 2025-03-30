@@ -1,9 +1,11 @@
+import { ThemeSwitcher } from './components/ThemeSwitcher';
 import { Button as StitchesButton } from './components/Button';
 import { Button } from '@heroui/button';
 
 export default function App() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen p-8 gap-4">
+      <ThemeSwitcher />
       <StitchesButton>Hello from Stitches</StitchesButton>
       <Button color="primary">Hello from Hero UI</Button>
       <Button color="primary">Click Me</Button>
