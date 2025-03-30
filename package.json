@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-      "apps/*",
-      "libs/*"
-    ],
+    "apps/*",
+    "libs/*"
+  ],
   "engines": {
     "node": ">=20.x",
     "npm": ">=11.x"
@@ -27,6 +27,7 @@
     "@tailwindcss/postcss": "^4.0.8",
     "framer-motion": "^12.4.7",
     "next": "^15.1.7",
+    "next-themes": "^0.4.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "rimraf": "^6.0.1",
