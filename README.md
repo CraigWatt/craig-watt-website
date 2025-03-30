@@ -4,6 +4,26 @@ Sat 11 Jan 2025 update:
 
 README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
+## Urgent notes to remain mindfull of:
+In a typical Nx setup:
+
+Root node_modules is the single source of truth. All dependencies should ideally be installed at the root so that the workspace can manage them efficiently.
+
+Individual apps/libs, like your nextjs-app, don’t need their own node_modules folders. Instead, they rely on the root-level dependencies declared in the root package.json.
+
+So, best practice:
+✅ Only have node_modules at the root level.
+
+✅ Each app/lib has its own package.json only if it has specific runtime dependencies (which Nx will hoist).
+
+✅ Tailwind config files (tailwind.config.ts) live in the app that uses them, but if they need to reference external packages like Hero UI from node_modules, paths should be relative from that config file, even if that means ../../node_modules/....
+
+This way:
+
+Your apps are isolated in logic and config.
+
+But dependency installation is centralised and efficient.
+
 ## 🚀 Milestones Checklist
 
 ### **0. Establish Dependencies and Version Numbers**
