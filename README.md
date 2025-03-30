@@ -24,6 +24,16 @@ Your apps are isolated in logic and config.
 
 But dependency installation is centralised and efficient.
 
+----
+Tailwind = the layout + design system backbone.
+
+Hero UI = beautiful out-of-the-box components.
+
+Stitches = custom, scoped styles where Tailwind is awkward.
+
+Radix UI = rock-solid accessible behaviours you wrap yourself.
+----
+
 ## 🚀 Milestones Checklist
 
 ### **0. Establish Dependencies and Version Numbers**
