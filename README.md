@@ -264,7 +264,7 @@ This structure is typical of a single Next.js repository augmented with addition
 | CMS	| Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) | Sanity (agnostic) |
 | Component-Driven-Development | @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
 | Unstyled Components | Stitches (CSS-in-JS) + Radix UI | Headless UI for Vue | SvelteUI (headless library) | Stitches (CSS-in-JS) + Radix UI |
-| Styled Components | Hero UI | Vuetify or PrimeVue | Flowbite-Svelte or Skeleton | Hero UI |
+| Styled Components | Hero UI (Tailwind-based) | Vuetify or PrimeVue | Flowbite-Svelte or Skeleton | Hero UI (Tailwind-based) |
 | Code Quality | ESLint | ESLint | ESLint | ESLint |
 | Code Formatting | Prettier | Prettier | Prettier | Prettier |
 | Testing Framework | Jest | Jest | Jest | Jest |
