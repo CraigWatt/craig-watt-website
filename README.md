@@ -1,5 +1,11 @@
 # craigwatt.co.uk
 
+May 1st 2025 update:
+
+Handy commands:
+
+
+
 Sat 11 Jan 2025 update:
 
 README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
@@ -265,6 +271,7 @@ This structure is typical of a single Next.js repository augmented with addition
 | Component-Driven-Development | @storybook/react | @storybook/vue3 (or @storybook/vue) | @storybook/svelte | @storybook/react |
 | Unstyled Components | Stitches (CSS-in-JS) + Radix UI | Headless UI for Vue | SvelteUI (headless library) | Stitches (CSS-in-JS) + Radix UI |
 | Styled Components | Hero UI (Tailwind-based) | Vuetify or PrimeVue | Flowbite-Svelte or Skeleton | Hero UI (Tailwind-based) |
+| Icons | lucide-react | unknown | unknown | unknown |
 | Code Quality | ESLint | ESLint | ESLint | ESLint |
 | Code Formatting | Prettier | Prettier | Prettier | Prettier |
 | Testing Framework | Jest | Jest | Jest | Jest |
