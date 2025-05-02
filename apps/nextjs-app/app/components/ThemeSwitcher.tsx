@@ -1,9 +1,9 @@
-// app/components/ThemeSwitcher.tsx
 'use client';
 
-import { Button } from '@heroui/react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
+import { Button } from '@heroui/react';
+import { Moon, Sun } from 'lucide-react'; // or use your own icons
 
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false);
@@ -13,17 +13,16 @@ export function ThemeSwitcher() {
 
   if (!mounted) return null;
 
+  const isDark = theme === 'dark';
+
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-sm">
-        Current theme: <strong>{theme}</strong>
-      </span>
-      <Button variant="ghost" onPress={() => setTheme('light')}>
-        Light
-      </Button>
-      <Button variant="ghost" onPress={() => setTheme('dark')}>
-        Dark
-      </Button>
-    </div>
+    <Button
+      isIconOnly
+      variant="light"
+      aria-label="Toggle theme"
+      onPress={() => setTheme(isDark ? 'light' : 'dark')}
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </Button>
   );
 }
