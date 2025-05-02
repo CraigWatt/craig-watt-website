@@ -16,48 +16,18 @@ import {
   DropdownMenu,
   DropdownItem,
 } from '@heroui/react';
-import {
-  AcmeLogo,
-  ChevronDown,
-  Scale,
-  Lock,
-  Activity,
-  Flash,
-  Server,
-  TagUser,
-} from './icons';
 
-const icons = {
-  chevron: <ChevronDown fill="currentColor" size={16} />,
-  scale: <Scale className="text-warning" fill="currentColor" size={30} />,
-  lock: <Lock className="text-success" fill="currentColor" size={30} />,
-  activity: (
-    <Activity className="text-secondary" fill="currentColor" size={30} />
-  ),
-  flash: <Flash className="text-primary" fill="currentColor" size={30} />,
-  server: <Server className="text-success" fill="currentColor" size={30} />,
-  user: <TagUser className="text-danger" fill="currentColor" size={30} />,
-};
+import { AcmeLogo, ChevronDown } from './icons';
+import { navItems, frameworkSwitcher } from '../config/nav.config';
+
+import { ThemeSwitcher } from './ThemeSwitcher';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  const mobileMenuItems = [
-    'Profile',
-    'Dashboard',
-    'Activity',
-    'Analytics',
-    'System',
-    'Deployments',
-    'My Settings',
-    'Team Settings',
-    'Help & Feedback',
-    'Log Out',
-  ];
-
   return (
     <HeroNavbar onMenuOpenChange={setIsMenuOpen}>
-      {/* Left: Logo and Mobile Toggle */}
+      {/* Left: Logo / Home */}
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -65,96 +35,117 @@ export const Navbar = () => {
         />
         <NavbarBrand>
           <AcmeLogo />
-          <p className="font-bold text-inherit ml-2">MySite</p>
+          <Link href="/" className="ml-2 font-bold text-inherit">
+            Craig Watt
+          </Link>
         </NavbarBrand>
       </NavbarContent>
 
       {/* Center: Desktop Menu */}
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {navItems.map((item) =>
+          item.children ? (
+            <Dropdown key={item.label}>
+              <NavbarItem>
+                <DropdownTrigger>
+                  <Button
+                    disableRipple
+                    className="p-0 bg-transparent data-[hover=true]:bg-transparent"
+                    endContent={<ChevronDown fill="currentColor" size={16} />}
+                    radius="sm"
+                    variant="light"
+                  >
+                    {item.label}
+                  </Button>
+                </DropdownTrigger>
+              </NavbarItem>
+              <DropdownMenu
+                aria-label={`${item.label} dropdown`}
+                itemClasses={{ base: 'gap-4' }}
+              >
+                {item.children.map((child) => (
+                  <DropdownItem
+                    key={child.label}
+                    description={child.description}
+                    startContent={child.icon}
+                    href={child.href}
+                  >
+                    {child.label}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          ) : (
+            <NavbarItem key={item.label}>
+              <Link
+                href={item.href}
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
+              >
+                {item.label}
+              </Link>
+            </NavbarItem>
+          )
+        )}
+      </NavbarContent>
+
+      {/* Right: Framework Switcher */}
+      <NavbarContent justify="end">
+        <NavbarItem className="hidden sm:flex">
+          <ThemeSwitcher />
+        </NavbarItem>
+
         <Dropdown>
           <NavbarItem>
             <DropdownTrigger>
               <Button
-                disableRipple
-                className="p-0 bg-transparent data-[hover=true]:bg-transparent"
-                endContent={<ChevronDown fill="currentColor" size={16} />}
-                radius="sm"
                 variant="light"
+                className="text-sm font-semibold capitalize"
+                endContent={<ChevronDown fill="currentColor" size={16} />}
               >
-                Features
+                {frameworkSwitcher.current}
               </Button>
             </DropdownTrigger>
           </NavbarItem>
-          <DropdownMenu
-            aria-label="Site features"
-            itemClasses={{ base: 'gap-4' }}
-          >
-            <DropdownItem
-              key="autoscaling"
-              description="Scales apps based on demand"
-              startContent={icons.scale}
-            >
-              Autoscaling
-            </DropdownItem>
-            <DropdownItem
-              key="usage_metrics"
-              description="Real-time insights to debug and improve"
-            >
-              Usage Metrics
-            </DropdownItem>
-            <DropdownItem
-              key="production_ready"
-              description="Ready for serious workloads"
-            >
-              Production Ready
-            </DropdownItem>
+          <DropdownMenu aria-label="Frontend Framework">
+            {frameworkSwitcher.options.map((option) => (
+              <DropdownItem
+                key={option.label}
+                href={option.href}
+                target={option.href.startsWith('http') ? '_blank' : undefined}
+              >
+                {option.label}
+              </DropdownItem>
+            ))}
           </DropdownMenu>
         </Dropdown>
-
-        <NavbarItem isActive>
-          <Link aria-current="page" href="#">
-            Customers
-          </Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Link color="foreground" href="#">
-            Integrations
-          </Link>
-        </NavbarItem>
       </NavbarContent>
 
-      {/* Right: Auth actions */}
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden lg:flex">
-          <Link href="#">Login</Link>
-        </NavbarItem>
-        <NavbarItem>
-          <Button as={Link} color="primary" href="#" variant="flat">
-            Sign Up
-          </Button>
-        </NavbarItem>
-      </NavbarContent>
-
-      {/* Mobile Dropdown Menu */}
+      {/* Mobile Menu */}
       <NavbarMenu>
-        {mobileMenuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
-            <Link
-              className="w-full"
-              color={
-                index === 2
-                  ? 'primary'
-                  : index === mobileMenuItems.length - 1
-                  ? 'danger'
-                  : 'foreground'
-              }
-              href="#"
-              size="lg"
-            >
-              {item}
-            </Link>
-          </NavbarMenuItem>
-        ))}
+        {navItems.map((item) =>
+          item.children ? (
+            item.children.map((child) => (
+              <NavbarMenuItem key={child.label}>
+                <Link href={child.href} className="w-full" size="lg">
+                  {child.label}
+                </Link>
+              </NavbarMenuItem>
+            ))
+          ) : (
+            <NavbarMenuItem key={item.label}>
+              <Link
+                href={item.href}
+                className="w-full"
+                size="lg"
+                target={item.external ? '_blank' : undefined}
+                rel={item.external ? 'noopener noreferrer' : undefined}
+              >
+                {item.label}
+              </Link>
+            </NavbarMenuItem>
+          )
+        )}
       </NavbarMenu>
     </HeroNavbar>
   );
