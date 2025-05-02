@@ -16,8 +16,28 @@ import {
   DropdownMenu,
   DropdownItem,
 } from '@heroui/react';
-import { ChevronDown } from './icons/ChevronDown';
-import { AcmeLogo } from './icons/AcmeLogo';
+import {
+  AcmeLogo,
+  ChevronDown,
+  Scale,
+  Lock,
+  Activity,
+  Flash,
+  Server,
+  TagUser,
+} from './icons';
+
+const icons = {
+  chevron: <ChevronDown fill="currentColor" size={16} />,
+  scale: <Scale className="text-warning" fill="currentColor" size={30} />,
+  lock: <Lock className="text-success" fill="currentColor" size={30} />,
+  activity: (
+    <Activity className="text-secondary" fill="currentColor" size={30} />
+  ),
+  flash: <Flash className="text-primary" fill="currentColor" size={30} />,
+  server: <Server className="text-success" fill="currentColor" size={30} />,
+  user: <TagUser className="text-danger" fill="currentColor" size={30} />,
+};
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -72,6 +92,7 @@ export const Navbar = () => {
             <DropdownItem
               key="autoscaling"
               description="Scales apps based on demand"
+              startContent={icons.scale}
             >
               Autoscaling
             </DropdownItem>
