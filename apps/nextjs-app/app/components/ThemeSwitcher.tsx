@@ -3,7 +3,7 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { Button } from '@heroui/react';
-import { Moon, Sun } from 'lucide-react'; // or use your own icons
+import { Moon, Sun } from 'lucide-react';
 
 export function ThemeSwitcher() {
   const [mounted, setMounted] = useState(false);
