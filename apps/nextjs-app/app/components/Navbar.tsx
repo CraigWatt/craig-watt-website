@@ -15,12 +15,12 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
+  Avatar,
 } from '@heroui/react';
-
-import { AcmeLogo, ChevronDown } from './icons';
+import { ChevronDown } from './icons';
 import { navItems, frameworkSwitcher } from '../config/nav.config';
-
 import { ThemeSwitcher } from './ThemeSwitcher';
+import Image from 'next/image';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -34,9 +34,18 @@ export const Navbar = () => {
           className="sm:hidden"
         />
         <NavbarBrand>
-          <AcmeLogo />
-          <Link href="/" className="ml-2 font-bold text-inherit">
-            Craig Watt
+          <Link href="/" className="flex items-center space-x-2 text-inherit">
+            <div className="relative h-10 w-10 rounded-full overflow-hidden">
+              <Image
+                src="/images/avatar.jpg"
+                alt="Craig Watt’s avatar"
+                fill
+                sizes="40px"
+                priority
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+            <span className="font-bold">Craig Watt</span>
           </Link>
         </NavbarBrand>
       </NavbarContent>
