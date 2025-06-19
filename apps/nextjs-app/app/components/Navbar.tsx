@@ -15,11 +15,10 @@ import {
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
-  Avatar,
 } from '@heroui/react';
 import { ChevronDown } from './icons';
-import { navItems, frameworkSwitcher } from '../config/nav.config';
-import { ThemeSwitcher } from './ThemeSwitcher';
+import { navItems } from '../config/nav.config';
+import { NavbarRightIcons } from './NavbarRightIcons';
 import Image from 'next/image';
 
 export const Navbar = () => {
@@ -52,90 +51,66 @@ export const Navbar = () => {
 
       {/* Center: Desktop Menu */}
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        {navItems.map((item) =>
-          item.children ? (
-            <Dropdown key={item.label}>
-              <NavbarItem>
-                <DropdownTrigger>
-                  <Button
-                    disableRipple
-                    className="p-0 bg-transparent data-[hover=true]:bg-transparent"
-                    endContent={<ChevronDown fill="currentColor" size={16} />}
-                    radius="sm"
-                    variant="light"
-                  >
-                    {item.label}
-                  </Button>
-                </DropdownTrigger>
+        {navItems.map((item) => {
+          if (Array.isArray(item.children)) {
+            return (
+              <Dropdown key={item.label}>
+                <NavbarItem>
+                  <DropdownTrigger>
+                    <Button
+                      disableRipple
+                      className="p-0 bg-transparent data-[hover=true]:bg-transparent"
+                      endContent={<ChevronDown fill="currentColor" size={16} />}
+                      radius="sm"
+                      variant="light"
+                    >
+                      {item.label}
+                    </Button>
+                  </DropdownTrigger>
+                </NavbarItem>
+                <DropdownMenu
+                  aria-label={`${item.label} dropdown`}
+                  itemClasses={{ base: 'gap-4' }}
+                >
+                  {item.children.map((child) => (
+                    <DropdownItem
+                      key={child.label}
+                      description={child.description}
+                      startContent={child.icon}
+                      href={child.href}
+                    >
+                      {child.label}
+                    </DropdownItem>
+                  ))}
+                </DropdownMenu>
+              </Dropdown>
+            );
+          } else {
+            const isExternal = item.href.startsWith('http');
+            return (
+              <NavbarItem key={item.label}>
+                <Link
+                  href={item.href}
+                  className="text-inherit"
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                >
+                  {item.label}
+                </Link>
               </NavbarItem>
-              <DropdownMenu
-                aria-label={`${item.label} dropdown`}
-                itemClasses={{ base: 'gap-4' }}
-              >
-                {item.children.map((child) => (
-                  <DropdownItem
-                    key={child.label}
-                    description={child.description}
-                    startContent={child.icon}
-                    href={child.href}
-                  >
-                    {child.label}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          ) : (
-            <NavbarItem key={item.label}>
-              <Link
-                href={item.href}
-                className="text-inherit"
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
-              >
-                {item.label}
-              </Link>
-            </NavbarItem>
-          )
-        )}
+            );
+          }
+        })}
       </NavbarContent>
 
-      {/* Right: Framework Switcher */}
-      <NavbarContent justify="end">
-        <NavbarItem className="hidden sm:flex">
-          <ThemeSwitcher />
-        </NavbarItem>
-
-        <Dropdown>
-          <NavbarItem>
-            <DropdownTrigger>
-              <Button
-                variant="light"
-                className="text-sm font-semibold"
-                endContent={<ChevronDown fill="currentColor" size={16} />}
-              >
-                {frameworkSwitcher.current}
-              </Button>
-            </DropdownTrigger>
-          </NavbarItem>
-          <DropdownMenu aria-label="Frontend Framework">
-            {frameworkSwitcher.options.map((option) => (
-              <DropdownItem
-                key={option.label}
-                href={option.href}
-                target={option.href.startsWith('http') ? '_blank' : undefined}
-              >
-                {option.label}
-              </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </Dropdown>
-      </NavbarContent>
+      {/* Right: External tools + theme + framework */}
+      <NavbarRightIcons />
 
       {/* Mobile Menu */}
       <NavbarMenu>
-        {navItems.map((item) =>
-          item.children ? (
-            item.children.map((child) => (
+        {navItems.map((item) => {
+          if (Array.isArray(item.children)) {
+            return item.children.map((child) => (
               <NavbarMenuItem key={child.label}>
                 <Link
                   href={child.href}
@@ -145,21 +120,24 @@ export const Navbar = () => {
                   {child.label}
                 </Link>
               </NavbarMenuItem>
-            ))
-          ) : (
-            <NavbarMenuItem key={item.label}>
-              <Link
-                href={item.href}
-                className="w-full text-inherit"
-                size="lg"
-                target={item.external ? '_blank' : undefined}
-                rel={item.external ? 'noopener noreferrer' : undefined}
-              >
-                {item.label}
-              </Link>
-            </NavbarMenuItem>
-          )
-        )}
+            ));
+          } else {
+            const isExternal = item.href.startsWith('http');
+            return (
+              <NavbarMenuItem key={item.label}>
+                <Link
+                  href={item.href}
+                  className="w-full text-inherit"
+                  size="lg"
+                  target={isExternal ? '_blank' : undefined}
+                  rel={isExternal ? 'noopener noreferrer' : undefined}
+                >
+                  {item.label}
+                </Link>
+              </NavbarMenuItem>
+            );
+          }
+        })}
       </NavbarMenu>
     </HeroNavbar>
   );
