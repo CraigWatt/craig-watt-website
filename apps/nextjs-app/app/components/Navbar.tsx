@@ -88,6 +88,7 @@ export const Navbar = () => {
             <NavbarItem key={item.label}>
               <Link
                 href={item.href}
+                className="text-inherit"
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noopener noreferrer' : undefined}
               >
@@ -109,7 +110,7 @@ export const Navbar = () => {
             <DropdownTrigger>
               <Button
                 variant="light"
-                className="text-sm font-semibold capitalize"
+                className="text-sm font-semibold"
                 endContent={<ChevronDown fill="currentColor" size={16} />}
               >
                 {frameworkSwitcher.current}
@@ -136,7 +137,11 @@ export const Navbar = () => {
           item.children ? (
             item.children.map((child) => (
               <NavbarMenuItem key={child.label}>
-                <Link href={child.href} className="w-full" size="lg">
+                <Link
+                  href={child.href}
+                  className="w-full text-inherit"
+                  size="lg"
+                >
                   {child.label}
                 </Link>
               </NavbarMenuItem>
@@ -145,7 +150,7 @@ export const Navbar = () => {
             <NavbarMenuItem key={item.label}>
               <Link
                 href={item.href}
-                className="w-full"
+                className="w-full text-inherit"
                 size="lg"
                 target={item.external ? '_blank' : undefined}
                 rel={item.external ? 'noopener noreferrer' : undefined}
