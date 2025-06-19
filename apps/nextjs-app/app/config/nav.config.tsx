@@ -2,10 +2,6 @@ import { Activity, Flash, Scale, Server, TagUser } from '../components/icons';
 
 export const navItems = [
   {
-    label: 'Home',
-    href: '/',
-  },
-  {
     label: 'CV',
     href: '/cv',
   },
@@ -31,11 +27,6 @@ export const navItems = [
         icon: <Flash className="text-primary" fill="currentColor" size={30} />,
       },
     ],
-  },
-  {
-    label: 'Grafana',
-    href: 'https://your-grafana-url.com',
-    external: true,
   },
 ];
 
