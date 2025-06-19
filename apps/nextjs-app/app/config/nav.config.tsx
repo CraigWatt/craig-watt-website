@@ -1,6 +1,37 @@
-import { Activity, Flash, Scale, Server, TagUser } from '../components/icons';
+import { ReactNode } from 'react';
 
-export const navItems = [
+// Define types for navigation items
+export type NavLink = {
+  label: string;
+  href: string;
+  external?: boolean;
+  children?: undefined;
+};
+
+export type NavGroup = {
+  label: string;
+  children: Array<
+    NavLink & {
+      description: string;
+      icon: ReactNode;
+    }
+  >;
+};
+
+export type NavItem = {
+  label: string;
+  href: string;
+  children?: Array<{
+    label: string;
+    href: string;
+    description: string;
+    icon: ReactNode;
+  }>;
+};
+
+import { Activity, Flash } from '../components/icons';
+
+export const navItems: NavItem[] = [
   {
     label: 'CV',
     href: '/cv',
@@ -11,6 +42,7 @@ export const navItems = [
   },
   {
     label: 'Blog',
+    href: '/blog',
     children: [
       {
         label: 'All Posts',
