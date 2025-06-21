@@ -14,9 +14,14 @@ export default function BlogPage() {
   // 1. Read category from query param; default to 'All'
   const categoryParam = searchParams.get('category') || 'All';
 
-  // 2. Derive unique categories from posts
-  const categories = Array.from(new Set(posts.map((p) => p.category)));
-  // Ensure consistent order, e.g. alphabetical:
+  // 2. Derive unique categories from posts (filter out falsy)
+  const categoriesSet = new Set<string>();
+  for (const p of posts) {
+    if (p.category) {
+      categoriesSet.add(p.category);
+    }
+  }
+  const categories = Array.from(categoriesSet);
   categories.sort((a, b) => a.localeCompare(b));
   const allOptions = ['All', ...categories];
 
@@ -42,8 +47,8 @@ export default function BlogPage() {
 
   // 6. Build breadcrumbs:
   //    - Always: Home > Blog
-  //    - If filtering (selectedCategory !== 'All'), show Blog as link and category as current
-  const crumbs = [
+  //    - If filtering (selectedCategory !== 'All'), show “Blog” as link and category as current
+  const crumbs: Array<{ label: string; href?: string; current?: boolean }> = [
     { label: 'Home', href: '/' },
     selectedCategory === 'All'
       ? { label: 'Blog', current: true }
@@ -54,14 +59,14 @@ export default function BlogPage() {
   }
 
   return (
-    <main className="py-16 px-4 md:px-6 space-y-12">
-      {/* Breadcrumbs */}
+    <main className="py-16 px-4 md:px-6 space-y-12 max-w-5xl mx-auto">
+      {/* Breadcrumbs: left-aligned within content column */}
       <SiteBreadcrumbs items={crumbs} />
 
       {/* Page Title */}
       <h1 className="text-4xl font-bold text-center">Blog</h1>
 
-      {/* Filter UI: a <select> for simplicity */}
+      {/* Filter UI */}
       <div className="flex justify-center mb-6">
         <select
           value={selectedCategory}
@@ -82,7 +87,7 @@ export default function BlogPage() {
       </div>
 
       {/* Posts Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPosts.map((post) => (
           <BlogCard
             key={post.slug}

@@ -51,48 +51,45 @@ export function NavbarRightIcons() {
     <NavbarContent justify="end" className="hidden sm:flex gap-2">
       {externalTools.map((tool) => (
         <NavbarItem key={tool.alt}>
-          <Link
+          <Button
+            as="a"
             href={tool.href}
             target="_blank"
             rel="noopener noreferrer"
+            variant="light"
+            isIconOnly
+            className="h-10 w-10 p-0 rounded-medium"
             aria-label={tool.ariaLabel}
           >
-            <div className="h-10 w-10 flex items-center justify-center rounded-medium hover:bg-default/20 transition cursor-pointer">
-              {/*
-                If we have both lightSrc & darkSrc, show one or the other
-              */}
-              {tool.lightSrc && tool.darkSrc ? (
-                <>
-                  {/* Light‐mode icon: show normally, hide when .dark is present */}
-                  <Image
-                    src={tool.lightSrc}
-                    alt={tool.alt}
-                    width={tool.size ?? 24}
-                    height={tool.size ?? 24}
-                    className="block dark:hidden"
-                    priority={false}
-                  />
-                  {/* Dark‐mode icon: hide normally, show when .dark is present */}
-                  <Image
-                    src={tool.darkSrc}
-                    alt={tool.alt}
-                    width={tool.size ?? 24}
-                    height={tool.size ?? 24}
-                    className="hidden dark:block"
-                    priority={false}
-                  />
-                </>
-              ) : tool.src ? (
+            {tool.lightSrc && tool.darkSrc ? (
+              <>
                 <Image
-                  src={tool.src}
+                  src={tool.lightSrc}
                   alt={tool.alt}
                   width={tool.size ?? 24}
                   height={tool.size ?? 24}
+                  className="block dark:hidden"
                   priority={false}
                 />
-              ) : null}
-            </div>
-          </Link>
+                <Image
+                  src={tool.darkSrc}
+                  alt={tool.alt}
+                  width={tool.size ?? 24}
+                  height={tool.size ?? 24}
+                  className="hidden dark:block"
+                  priority={false}
+                />
+              </>
+            ) : tool.src ? (
+              <Image
+                src={tool.src}
+                alt={tool.alt}
+                width={tool.size ?? 24}
+                height={tool.size ?? 24}
+                priority={false}
+              />
+            ) : null}
+          </Button>
         </NavbarItem>
       ))}
 
