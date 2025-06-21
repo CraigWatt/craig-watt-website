@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import { NavbarContent, NavbarItem, Link } from '@heroui/react';
+import { NavbarContent, NavbarItem } from '@heroui/react';
 import Image from 'next/image';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { frameworkSwitcher } from '../config/nav.config';
