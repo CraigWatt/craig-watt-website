@@ -1,42 +1,70 @@
+// app/blog/[slug]/page.tsx
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
-import posts from '../../config/posts';
-import { Breadcrumbs, BreadcrumbItem, Button } from '@heroui/react';
 import Link from 'next/link';
+import { Button } from '@heroui/react';
+import { SiteBreadcrumbs } from '../../components/SiteBreadcrumbs';
+import posts from '../../config/posts';
 
 export function generateStaticParams() {
   return posts.map((p) => ({ slug: p.slug }));
 }
 
-export default function PostDetail({
-  params: { slug },
+export default async function PostDetail({
+  params,
 }: {
   params: { slug: string };
 }) {
+  const { slug } = params;
   const post = posts.find((p) => p.slug === slug);
   if (!post) return notFound();
 
-  // e.g. screens/images in body are in MDX or imported separately
+  const renderContent = () => {
+    switch (slug) {
+      case 'intro-to-observability':
+        return (
+          <>
+            <p>Observability is critical for maintaining reliable systems...</p>
+            {/* ... */}
+          </>
+        );
+      case 'k3s-on-raspberry-pi':
+        return (
+          <>
+            <p>In this guide, we’ll spin up k3s on Raspberry Pi devices...</p>
+            {/* ... */}
+          </>
+        );
+      default:
+        return <p>Content not found.</p>;
+    }
+  };
+
   return (
     <main className="py-16 px-4 md:px-6 max-w-3xl mx-auto space-y-12">
-      {/* Breadcrumbs */}
-      <Breadcrumbs className="mb-4" aria-label="Breadcrumbs">
-        <BreadcrumbItem href="/">Home</BreadcrumbItem>
-        <BreadcrumbItem href="/blog">Blog</BreadcrumbItem>
-        <BreadcrumbItem isCurrent>{post.title}</BreadcrumbItem>
-      </Breadcrumbs>
+      {/* Breadcrumbs via SiteBreadcrumbs */}
+      <SiteBreadcrumbs
+        items={[
+          { label: 'Home', href: '/' },
+          { label: 'Blog', href: '/blog' },
+          { label: post.title, current: true },
+        ]}
+      />
 
+      {/* Back */}
       <Link href="/blog">
         <Button as="span" variant="ghost" size="sm">
           ← All Posts
         </Button>
       </Link>
 
+      {/* Title */}
       <h1 className="text-4xl font-bold">{post.title}</h1>
 
+      {/* Hero */}
       {post.hero && (
         <div className="mx-auto w-full max-w-3xl">
-          <div className="relative w-full aspect-[3/1] overflow-hidden rounded-lg">
+          <div className="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
             <Image
               src={post.hero}
               alt={`${post.title} banner`}
@@ -49,20 +77,21 @@ export default function PostDetail({
         </div>
       )}
 
+      {/* Meta */}
       <p className="text-base leading-relaxed text-zinc-500 dark:text-zinc-400">
         <time dateTime={post.date}>
           {new Date(post.date).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
             day: 'numeric',
+            month: 'short',
+            year: 'numeric',
           })}
         </time>
         {post.readingTime && ` · ${post.readingTime}`}
       </p>
 
-      {/* The main content: you can render MDX here or static HTML */}
-      <article className="prose dark:prose-invert">
-        {/* ... your markdown content ... */}
+      {/* Content */}
+      <article className="prose dark:prose-invert max-w-none">
+        {renderContent()}
       </article>
     </main>
   );
