@@ -9,7 +9,6 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Link,
   Button,
   Dropdown,
   DropdownTrigger,
@@ -20,6 +19,7 @@ import { ChevronDown } from './icons';
 import { navItems } from '../config/nav.config';
 import { NavbarRightIcons } from './NavbarRightIcons';
 import Image from 'next/image';
+import NextLink from 'next/link';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -33,19 +33,32 @@ export const Navbar = () => {
           className="sm:hidden"
         />
         <NavbarBrand>
-          <Link href="/" className="flex items-center space-x-2 text-inherit">
-            <div className="relative h-10 w-10 rounded-full overflow-hidden">
-              <Image
-                src="/images/avatar.jpg"
-                alt="Craig Watt’s avatar"
-                fill
-                sizes="40px"
-                priority
-                style={{ objectFit: 'cover' }}
-              />
-            </div>
-            <span className="font-bold">Craig Watt</span>
-          </Link>
+          <NavbarItem asChild>
+            <NextLink
+              href="/"
+              className="group flex items-center space-x-2 p-0"
+            >
+              <div
+                className="
+                  relative h-10 w-10 rounded-full overflow-hidden
+                  transition-shadow transition-filter
+                  group-hover:shadow-outline
+                  group-hover:brightness-90
+                "
+              >
+                <Image
+                  src="/images/avatar.jpg"
+                  alt="Craig Watt’s avatar"
+                  fill
+                  sizes="40px"
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+              <span className="font-bold transition-opacity group-hover:opacity-80">
+                Craig Watt
+              </span>
+            </NextLink>
+          </NavbarItem>
         </NavbarBrand>
       </NavbarContent>
 
@@ -53,18 +66,19 @@ export const Navbar = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
+            // Dropdown trigger: use variant="light"
             return (
               <Dropdown key={item.label}>
-                <NavbarItem>
-                  <DropdownTrigger>
+                <NavbarItem asChild>
+                  <DropdownTrigger asChild>
                     <Button
-                      disableRipple
-                      className="p-0 bg-transparent data-[hover=true]:bg-transparent"
-                      endContent={<ChevronDown fill="currentColor" size={16} />}
-                      radius="sm"
+                      as="button"
                       variant="light"
+                      className="flex items-center space-x-1 p-0 border-none focus:ring-0"
+                      aria-label={`${item.label} menu`}
                     >
-                      {item.label}
+                      <span>{item.label}</span>
+                      <ChevronDown size={16} />
                     </Button>
                   </DropdownTrigger>
                 </NavbarItem>
@@ -88,15 +102,17 @@ export const Navbar = () => {
           } else {
             const isExternal = item.href.startsWith('http');
             return (
-              <NavbarItem key={item.label}>
-                <Link
+              <NavbarItem asChild key={item.label}>
+                <Button
+                  as="a"
                   href={item.href}
-                  className="text-inherit"
+                  variant="light"
+                  className="p-0 border-none focus:ring-0"
                   target={isExternal ? '_blank' : undefined}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
                 >
                   {item.label}
-                </Link>
+                </Button>
               </NavbarItem>
             );
           }
@@ -110,30 +126,39 @@ export const Navbar = () => {
       <NavbarMenu>
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
-            return item.children.map((child) => (
-              <NavbarMenuItem key={child.label}>
-                <Link
-                  href={child.href}
-                  className="w-full text-inherit"
-                  size="lg"
-                >
-                  {child.label}
-                </Link>
-              </NavbarMenuItem>
-            ));
+            return item.children.map((child) => {
+              const isExternal = child.href.startsWith('http');
+              return (
+                <NavbarMenuItem key={child.label}>
+                  <Button
+                    as="a"
+                    href={child.href}
+                    variant="ghost"
+                    className="w-full justify-start p-0 border-none focus:ring-0"
+                    target={isExternal ? '_blank' : undefined}
+                    rel={isExternal ? 'noopener noreferrer' : undefined}
+                    size="lg"
+                  >
+                    {child.label}
+                  </Button>
+                </NavbarMenuItem>
+              );
+            });
           } else {
             const isExternal = item.href.startsWith('http');
             return (
               <NavbarMenuItem key={item.label}>
-                <Link
+                <Button
+                  as="a"
                   href={item.href}
-                  className="w-full text-inherit"
-                  size="lg"
+                  variant="ghost"
+                  className="w-full justify-start p-0 border-none focus:ring-0"
                   target={isExternal ? '_blank' : undefined}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
+                  size="lg"
                 >
                   {item.label}
-                </Link>
+                </Button>
               </NavbarMenuItem>
             );
           }
