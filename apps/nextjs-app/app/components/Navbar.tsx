@@ -1,6 +1,9 @@
+// app/components/Navbar.tsx
 'use client';
 
 import React from 'react';
+import NextLink from 'next/link';
+import Image from 'next/image';
 import {
   Navbar as HeroNavbar,
   NavbarBrand,
@@ -9,7 +12,6 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Button,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
@@ -18,10 +20,9 @@ import {
 import { ChevronDown } from './icons';
 import { navItems } from '../config/nav.config';
 import { NavbarRightIcons } from './NavbarRightIcons';
-import Image from 'next/image';
-import NextLink from 'next/link';
 
 export const Navbar = () => {
+  // now this hook is valid because of 'use client' above
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
@@ -33,7 +34,7 @@ export const Navbar = () => {
           className="sm:hidden"
         />
         <NavbarBrand>
-          <NavbarItem asChild>
+          <NavbarItem>
             <NextLink
               href="/"
               className="group flex items-center space-x-2 p-0"
@@ -66,20 +67,18 @@ export const Navbar = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
-            // Dropdown trigger: use variant="light"
             return (
               <Dropdown key={item.label}>
-                <NavbarItem asChild>
-                  <DropdownTrigger asChild>
-                    <Button
-                      as="button"
-                      variant="light"
-                      className="flex items-center space-x-1 p-0 border-none focus:ring-0"
+                <NavbarItem>
+                  <DropdownTrigger>
+                    <button
+                      className="flex items-center space-x-1 p-0 border-none focus:ring-0 text-inherit text-base"
                       aria-label={`${item.label} menu`}
+                      type="button"
                     >
                       <span>{item.label}</span>
                       <ChevronDown size={16} />
-                    </Button>
+                    </button>
                   </DropdownTrigger>
                 </NavbarItem>
                 <DropdownMenu
@@ -102,17 +101,15 @@ export const Navbar = () => {
           } else {
             const isExternal = item.href.startsWith('http');
             return (
-              <NavbarItem asChild key={item.label}>
-                <Button
-                  as="a"
+              <NavbarItem key={item.label}>
+                <NextLink
                   href={item.href}
-                  variant="light"
-                  className="p-0 border-none focus:ring-0"
+                  className="text-inherit text-base p-0"
                   target={isExternal ? '_blank' : undefined}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
                 >
                   {item.label}
-                </Button>
+                </NextLink>
               </NavbarItem>
             );
           }
@@ -130,17 +127,14 @@ export const Navbar = () => {
               const isExternal = child.href.startsWith('http');
               return (
                 <NavbarMenuItem key={child.label}>
-                  <Button
-                    as="a"
+                  <NextLink
                     href={child.href}
-                    variant="ghost"
-                    className="w-full justify-start p-0 border-none focus:ring-0"
+                    className="w-full text-inherit text-base p-0 text-left"
                     target={isExternal ? '_blank' : undefined}
                     rel={isExternal ? 'noopener noreferrer' : undefined}
-                    size="lg"
                   >
                     {child.label}
-                  </Button>
+                  </NextLink>
                 </NavbarMenuItem>
               );
             });
@@ -148,17 +142,14 @@ export const Navbar = () => {
             const isExternal = item.href.startsWith('http');
             return (
               <NavbarMenuItem key={item.label}>
-                <Button
-                  as="a"
+                <NextLink
                   href={item.href}
-                  variant="ghost"
-                  className="w-full justify-start p-0 border-none focus:ring-0"
+                  className="w-full text-inherit text-base p-0 text-left"
                   target={isExternal ? '_blank' : undefined}
                   rel={isExternal ? 'noopener noreferrer' : undefined}
-                  size="lg"
                 >
                   {item.label}
-                </Button>
+                </NextLink>
               </NavbarMenuItem>
             );
           }

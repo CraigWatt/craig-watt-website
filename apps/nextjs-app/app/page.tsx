@@ -1,11 +1,17 @@
-// import { Button as StitchesButton } from './components/Button';
+// app/page.tsx (or wherever your main App component lives)
 import projects from './config/projects';
 import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { User } from '@heroui/user';
+import posts from './config/posts';
+import { BlogCard } from './components/BlogCard';
 
 export default function App() {
+  const recentPosts = [...posts]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 3);
+
   return (
     <main className="space-y-20">
       {/* 1) Hero Section */}
@@ -19,9 +25,9 @@ export default function App() {
           </p>
         </div>
         <div className="flex justify-center gap-6">
-          <Link href="/cv">
+          <Link href="/">
             <Button as="span" variant="solid">
-              View My CV
+              Get in touch
             </Button>
           </Link>
           <Link href="/projects">
@@ -63,14 +69,14 @@ export default function App() {
               title={p.title}
               href={`/projects/${p.slug}`}
               description={p.description}
-              image={p.thumb} // use thumb (16:9); ensure your config.projects uses thumb paths
+              image={p.thumb}
             />
           ))}
         </div>
 
         <div className="text-center mt-10">
-          <Link href="/projects" passHref>
-            <Button as="a" variant="ghost">
+          <Link href="/projects">
+            <Button as="span" variant="ghost">
               See All Projects
             </Button>
           </Link>
@@ -82,7 +88,27 @@ export default function App() {
         <h2 className="text-3xl font-semibold text-center mb-8">
           From the Blog
         </h2>
-        {/* list 2–3 BlogCard components similarly, using a different BlogCard */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          {recentPosts.map((post) => (
+            <BlogCard
+              key={post.slug}
+              title={post.title}
+              href={`/blog/${post.slug}`}
+              excerpt={post.excerpt}
+              image={post.thumb}
+              date={post.date}
+              readingTime={post.readingTime}
+              category={post.category}
+            />
+          ))}
+        </div>
+        <div className="text-center mt-10">
+          <Link href="/blog">
+            <Button as="span" variant="ghost">
+              See All Posts
+            </Button>
+          </Link>
+        </div>
       </section>
     </main>
   );
