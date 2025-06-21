@@ -19,12 +19,16 @@ export default function App() {
           </p>
         </div>
         <div className="flex justify-center gap-6">
-          <Button as="a" href="/cv" variant="solid">
-            View My CV
-          </Button>
-          <Button as="a" href="/projects" variant="bordered">
-            See Projects
-          </Button>
+          <Link href="/cv">
+            <Button as="span" variant="solid">
+              View My CV
+            </Button>
+          </Link>
+          <Link href="/projects">
+            <Button as="span" variant="ghost">
+              See All Projects
+            </Button>
+          </Link>
         </div>
       </section>
 

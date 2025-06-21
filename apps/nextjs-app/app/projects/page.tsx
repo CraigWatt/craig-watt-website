@@ -1,6 +1,4 @@
 // app/projects/page.tsx
-import Image from 'next/image';
-import Link from 'next/link';
 import projects from '../config/projects';
 import { ProjectCard } from '../components/ProjectCard';
 
