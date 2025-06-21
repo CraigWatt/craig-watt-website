@@ -1,12 +1,11 @@
 // app/components/SiteBreadcrumbs.tsx
 'use client';
 
-import Link from 'next/link';
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react';
 
 export type Crumb = {
   label: string;
-  href?: string; // if undefined or current=true, render as text
+  href?: string; // if present and not current, BreadcrumbItem will render as <a href=...>
   current?: boolean;
 };
 
@@ -19,15 +18,10 @@ export function SiteBreadcrumbs({ items }: { items: Crumb[] }) {
           {...(crumb.href && !crumb.current ? { href: crumb.href } : {})}
           isCurrent={crumb.current}
         >
-          {crumb.href && !crumb.current ? (
-            <Link href={crumb.href} className="hover:underline">
-              {crumb.label}
-            </Link>
-          ) : (
-            <span className={crumb.current ? 'font-medium' : undefined}>
-              {crumb.label}
-            </span>
-          )}
+          {/* Just render text; BreadcrumbItem will wrap in <a> if href provided */}
+          <span className={crumb.current ? 'font-medium' : undefined}>
+            {crumb.label}
+          </span>
         </BreadcrumbItem>
       ))}
     </Breadcrumbs>
