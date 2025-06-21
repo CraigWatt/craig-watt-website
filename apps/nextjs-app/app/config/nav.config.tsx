@@ -32,10 +32,10 @@ export type NavItem = {
 import { Activity, Flash } from '../components/icons';
 
 export const navItems: NavItem[] = [
-  {
-    label: 'CV',
-    href: '/cv',
-  },
+  // {
+  //   label: 'CV',
+  //   href: '/cv',
+  // },
   {
     label: 'Projects',
     href: '/projects',
@@ -47,6 +47,14 @@ export const navItems: NavItem[] = [
       {
         label: 'All Posts',
         href: '/blog',
+        description: 'View them all',
+        icon: (
+          <Activity className="text-secondary" fill="currentColor" size={30} />
+        ),
+      },
+      {
+        label: 'Tech',
+        href: '/blog?category=Tech',
         description: 'Technical musings and more',
         icon: (
           <Activity className="text-secondary" fill="currentColor" size={30} />
@@ -54,7 +62,7 @@ export const navItems: NavItem[] = [
       },
       {
         label: 'Cooking & Recipes',
-        href: '/blog/recipes',
+        href: '/blog?category=Cooking',
         description: 'Slow cooker ideas and food hacks',
         icon: <Flash className="text-primary" fill="currentColor" size={30} />,
       },
