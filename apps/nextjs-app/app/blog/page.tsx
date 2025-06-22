@@ -2,7 +2,6 @@
 'use client';
 
 import { useSearchParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { SiteBreadcrumbs } from '../components/SiteBreadcrumbs';
 import { BlogCard } from '../components/BlogCard';
 import posts from '../config/posts';
