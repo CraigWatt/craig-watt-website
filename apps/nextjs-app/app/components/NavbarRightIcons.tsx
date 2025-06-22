@@ -113,8 +113,20 @@ export function NavbarRightIcons() {
           {frameworkSwitcher.options.map((option) => (
             <DropdownItem
               key={option.label}
-              href={option.href}
-              target={option.href.startsWith('http') ? '_blank' : undefined}
+              // only give href when not disabled
+              href={option.disabled ? undefined : option.href}
+              target={
+                option.disabled || !option.href.startsWith('http')
+                  ? undefined
+                  : '_blank'
+              }
+              // HeroUI supports a `disabled` prop
+              isDisabled={option.disabled}
+              className={
+                option.disabled
+                  ? 'opacity-50 pointer-events-none cursor-not-allowed'
+                  : undefined
+              }
             >
               {option.label}
             </DropdownItem>

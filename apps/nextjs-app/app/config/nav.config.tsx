@@ -84,7 +84,7 @@ export const frameworkSwitcher = {
   current: 'Next.js',
   options: [
     { label: 'Next.js', href: '/' },
-    { label: 'Vue', href: 'https://your-vue-site.com' },
-    { label: 'Svelte', href: 'https://your-svelte-site.com' },
+    { label: 'Vue', href: 'https://your-vue-site.com', disabled: true },
+    { label: 'Svelte', href: 'https://your-svelte-site.com', disabled: true },
   ],
 };
