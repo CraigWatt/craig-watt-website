@@ -320,26 +320,48 @@ export const Navbar = () => {
             const isCurrent = option.label === frameworkSwitcher.current;
             return (
               <NavbarMenuItem key={option.label}>
-                <NextLink
-                  href={option.href}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`
-                    w-full flex items-center
-                    pl-8 ${mobileItemPadding}
-                    ${itemRounded}
-                    ${
-                      isCurrent
-                        ? 'font-semibold bg-default/20 dark:bg-default/30'
-                        : hoverBgClass
+                {option.disabled ? (
+                  // render non-link
+                  <div
+                    className={`
+                            w-full flex items-center
+                            pl-8 ${mobileItemPadding}
+                            ${itemRounded}
+                            opacity-50 pointer-events-none cursor-not-allowed
+                            text-inherit text-base
+                          `}
+                  >
+                    {option.label}
+                  </div>
+                ) : (
+                  // existing NextLink
+                  <NextLink
+                    href={option.href}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`
+                            w-full flex items-center
+                            pl-8 ${mobileItemPadding}
+                            ${itemRounded}
+                            ${
+                              isCurrent
+                                ? 'font-semibold bg-default/20 dark:bg-default/30'
+                                : hoverBgClass
+                            }
+                            text-inherit text-base
+                          `}
+                    target={
+                      option.href.startsWith('http') ? '_blank' : undefined
                     }
-                    text-inherit text-base
-                  `}
-                  target={ext ? '_blank' : undefined}
-                  rel={ext ? 'noopener noreferrer' : undefined}
-                  aria-current={isCurrent ? 'page' : undefined}
-                >
-                  {option.label}
-                </NextLink>
+                    rel={
+                      option.href.startsWith('http')
+                        ? 'noopener noreferrer'
+                        : undefined
+                    }
+                    aria-current={isCurrent ? 'page' : undefined}
+                  >
+                    {option.label}
+                  </NextLink>
+                )}
               </NavbarMenuItem>
             );
           })}
