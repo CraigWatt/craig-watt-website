@@ -24,7 +24,7 @@ type ExternalTool = {
   size?: number; // <<< allow an optional size
 };
 
-const externalTools: ExternalTool[] = [
+export const externalTools: ExternalTool[] = [
   {
     href: 'https://trading212.com',
     src: '/icons/trading212.svg',
