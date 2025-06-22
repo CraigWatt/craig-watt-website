@@ -29,7 +29,7 @@ export type NavItem = {
   }>;
 };
 
-import { Activity, Flash } from '../components/icons';
+import { ReceiptTextIcon, CpuIcon, CookingPotIcon } from '../components/icons';
 
 export const navItems: NavItem[] = [
   // {
@@ -49,7 +49,11 @@ export const navItems: NavItem[] = [
         href: '/blog',
         description: 'View them all',
         icon: (
-          <Activity className="text-secondary" fill="currentColor" size={30} />
+          <ReceiptTextIcon
+            className="text-secondary"
+            fill="currentColor"
+            size={30}
+          />
         ),
       },
       {
@@ -57,14 +61,20 @@ export const navItems: NavItem[] = [
         href: '/blog?category=Tech',
         description: 'Technical musings and more',
         icon: (
-          <Activity className="text-secondary" fill="currentColor" size={30} />
+          <CpuIcon className="text-secondary" fill="currentColor" size={30} />
         ),
       },
       {
         label: 'Cooking & Recipes',
         href: '/blog?category=Cooking',
         description: 'Slow cooker ideas and food hacks',
-        icon: <Flash className="text-primary" fill="currentColor" size={30} />,
+        icon: (
+          <CookingPotIcon
+            className="text-primary"
+            fill="currentColor"
+            size={30}
+          />
+        ),
       },
     ],
   },
