@@ -1,6 +1,7 @@
 // app/components/ContactForm.tsx
 'use client';
 import { useState } from 'react';
+import { Button } from '@heroui/react';
 
 type FormState = {
   name: string;
@@ -29,21 +30,42 @@ export default function ContactForm() {
     e.preventDefault();
     setStatus('sending');
     setErrorMsg('');
+
+    // Get reCAPTCHA token if siteKey is set and grecaptcha is available
+    let token: string | undefined;
+    const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+    if (
+      siteKey &&
+      typeof window !== 'undefined' &&
+      window.grecaptcha?.execute
+    ) {
+      try {
+        token = await window.grecaptcha.execute(siteKey, { action: 'contact' });
+      } catch (recapErr) {
+        console.error('reCAPTCHA error:', recapErr);
+        // you can choose to abort or proceed without token
+      }
+    }
+
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, token }),
       });
+      const data = await res.json().catch(() => null);
       if (!res.ok) {
-        const data = await res.json().catch(() => null);
         throw new Error(data?.error || 'Failed to submit');
       }
       setStatus('success');
       setForm({ name: '', email: '', message: '' });
-    } catch (err: any) {
-      console.error(err);
-      setErrorMsg(err.message || 'An error occurred');
+    } catch (err: unknown) {
+      console.error('ContactForm error:', err);
+      let msg = 'An error occurred';
+      if (err instanceof Error) {
+        msg = err.message;
+      }
+      setErrorMsg(msg);
       setStatus('error');
     }
   };
@@ -58,6 +80,7 @@ export default function ContactForm() {
       {status === 'error' && (
         <p className="text-red-600 dark:text-red-400">Error: {errorMsg}</p>
       )}
+
       <div>
         <label htmlFor="name" className="block text-sm font-medium">
           Name
@@ -72,6 +95,7 @@ export default function ContactForm() {
           className="mt-1 block w-full border border-default/40 dark:border-default/60 rounded px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:ring"
         />
       </div>
+
       <div>
         <label htmlFor="email" className="block text-sm font-medium">
           Email
@@ -86,6 +110,7 @@ export default function ContactForm() {
           className="mt-1 block w-full border border-default/40 dark:border-default/60 rounded px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:ring"
         />
       </div>
+
       <div>
         <label htmlFor="message" className="block text-sm font-medium">
           Message
@@ -100,14 +125,11 @@ export default function ContactForm() {
           className="mt-1 block w-full border border-default/40 dark:border-default/60 rounded px-3 py-2 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:ring"
         />
       </div>
-      <div>
-        <button
-          type="submit"
-          disabled={status === 'sending'}
-          className="inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark disabled:opacity-50"
-        >
+
+      <div className="text-right">
+        <Button type="submit" disabled={status === 'sending'} variant="solid">
           {status === 'sending' ? 'Sending…' : 'Send Message'}
-        </button>
+        </Button>
       </div>
     </form>
   );
