@@ -1,4 +1,4 @@
-// app/page.tsx (or wherever your main App component lives)
+// app/page.tsx
 import projects from './config/projects';
 import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
@@ -6,6 +6,7 @@ import { Button } from '@heroui/react';
 import { User } from '@heroui/user';
 import posts from './config/posts';
 import { BlogCard } from './components/BlogCard';
+import ContactForm from './components/ContactForm'; // we'll create this
 
 export default function App() {
   const recentPosts = [...posts]
@@ -25,11 +26,12 @@ export default function App() {
           </p>
         </div>
         <div className="flex justify-center gap-6">
-          <Link href="/">
+          {/* Scroll to #contact */}
+          <a href="#contact">
             <Button as="span" variant="solid">
               Get in touch
             </Button>
-          </Link>
+          </a>
           <Link href="/projects">
             <Button as="span" variant="ghost">
               See All Projects
@@ -57,7 +59,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* 3) Featured Projects using same ProjectCard */}
+      {/* 3) Featured Projects */}
       <section className="py-16 px-4 md:px-6">
         <h2 className="text-3xl font-semibold text-center mb-8">
           Featured Projects
@@ -73,7 +75,6 @@ export default function App() {
             />
           ))}
         </div>
-
         <div className="text-center mt-10">
           <Link href="/projects">
             <Button as="span" variant="ghost">
@@ -108,6 +109,17 @@ export default function App() {
               See All Posts
             </Button>
           </Link>
+        </div>
+      </section>
+
+      {/* 5) Contact Section */}
+      <section
+        id="contact"
+        className="py-16 px-4 md:px-6 bg-default/10 dark:bg-default/30"
+      >
+        <h2 className="text-3xl font-semibold text-center mb-8">Contact Me</h2>
+        <div className="max-w-xl mx-auto">
+          <ContactForm />
         </div>
       </section>
     </main>
