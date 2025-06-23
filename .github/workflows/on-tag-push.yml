@@ -1,143 +1,56 @@
-# name: 🚀 Deploy
+# .github/workflows/docker-publish.yml
+name: 🐳 Build & Publish Docker Image
 
-# on:
-#   push:
-#     tags:
-#       - "v*.*.*"
+# Trigger only on tag pushes (e.g. git tag v1.0.0 && git push --tags)
+on:
+  push:
+    tags:
+      - 'v*' # adjust this glob to match your tag scheme
 
-# jobs:
-#   changes: 
-#     name: 🔎 Determine deployable changes
-#     runs-on: ubuntu-latest
-#     outputs:
-#       DEPLOYABLE: ${{steps.changes.outputs.DEPLOYABLE}}
-#     steps:
-#       - name: ⬇️ Checkout repo
-#         uses: actions/checkout@v.3.3.0
-#         with:
-#           fetch-depth: '50'
+# Grant the GITHUB_TOKEN package write permissions so we can push to GHCR
+permissions:
+  contents: read
+  packages: write
 
-#       - name: ⎔ Setup node
-#         uses: actions/setup-node@v3.6.0
-#         with:
-#           node-version: 18
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Check out full history (so tags are available)
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-#       - name: 🔎 Determine deployable changes
-#         id: changes
-#         run: >-
-#           echo ::set-output name=DEPLOYABLE::$(node ./other/is-deployable.js ${{
-#           github.sha }})
+      # 2. Set up Node & cache deps
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
 
-#       - name: ❓ Deployable
-#         run: >-
-#           echo "DEPLOYABLE: ${{steps.changes.outputs.DEPLOYABLE}}"
+      # 3. Install & build your Next.js app via Nx
+      - name: 📦 Install dependencies
+        run: npm ci
 
-#   lint:
-#     name: ⬣ ESLint
-#     needs: [changes]
-#     if: needs.changes.outputs.DEPLOYABLE == 'true'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: 🛑 Cancel Previous Runs
-#         uses: styfle/cancel-workflow-action@0.11.0
+      - name: 🚧 Build production site
+        run: npx nx build nextjs-app --configuration=production
 
-#       - name: ⬇️ Checkout repo
-#         uses: actions/checkout@v.3.3.0
+      # 4. Log in to GHCR
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.CR_PAT }} # or use ${{ secrets.GITHUB_TOKEN }} if you prefer
 
-#       - name: ⎔ Setup node
-#         uses: actions/setup-node@v3.6.0
-#         with:
-#           node-version: 18
-
-#       - name: 📥 Download deps
-#         uses: bahmutov/npm-install@v1.6.0
-
-#       - name: 🔬 Lint
-#         run: npm run lint
-
-#   typecheck:
-#     name: ʦ TypeScript
-#     needs: [changes]
-#     if: needs.changes.outputs.DEPLOYABLE == 'true'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: 🛑 Cancel Previous Runs
-#         uses: styfle/cancel-workflow-action@0.11.0
-
-#       - name: ⬇️ Checkout repo
-#         uses: actions/checkout@v.3.3.0
-
-#       - name: ⎔ Setup node
-#         uses: actions/setup-node@v3.6.0
-#         with:
-#           node-version: 18
-
-#       - name: 📥 Download deps
-#         uses: bahmutov/npm-install@v1.6.0
-
-#       - name: 🔎 Type check
-#         run: npm run typecheck
-
-#   jest:
-#     name: 🃏 Jest
-#     needs: [changes]
-#     if: needs.changes.outputs.DEPLOYABLE == 'true'
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: 🛑 Cancel Previous Runs
-#         uses: styfle/cancel-workflow-action@0.11.0
-
-#       - name: ⬇️ Checkout repo
-#         uses: actions/checkout@v.3.3.0
-
-#       - name: ⎔ Setup node
-#         uses: actions/setup-node@v3.6.0
-#         with:
-#           node-version: 18
-
-#       - name: 📥 Download deps
-#         uses: bahmutov/npm-install@v1.6.0
-
-#       - name: 🃏 Run jest
-#         run: npm run test -- --coverage
-
-#   build:
-#     name: 🐳 Build
-#     needs: [changes]
-#     if:
-#       ${{ (github.ref == 'refs/heads/main' &&
-#       github.event_name == 'push' && needs.changes.outputs.DEPLOYABLE == 'true'
-#       }}
-#     runs-on: ubuntu-latest
-#     # only build/deploy main branch on pushes
-#     steps:
-#       - name: 🛑 Cancel Previous Runs
-#         uses: styfle/cancel-workflow-action@0.11.0
-
-#       - name: ⬇️ Checkout repo
-#         uses: actions/checkout@v.3.3.0
-
-#       - name: 👀 Read app name
-#         uses: SebRollen/toml-action@v1.0.2
-#         id: app_name
-#         with:
-#           file: 'fly.toml'
-#           field: 'app'
-
-#       - name: 🐳 Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v2.2.1
-#         with:
-#           version: v0.9.1
-
-#       # Setup cache
-
-
-
-
-
-
-
-
-
-
-
+      # 5. Build & push
+      - name: 🏷️ Build & Push Docker Image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: apps/nextjs-app/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/mysite:${{ github.ref_name }}
+            ghcr.io/${{ github.repository_owner }}/mysite:latest
