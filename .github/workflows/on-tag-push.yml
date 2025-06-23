@@ -17,6 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       MAILERSEND_API_KEY: ${{ secrets.MAILERSEND_API_KEY }}
+      CONTACT_EMAIL_TO: ${{ secrets.CONTACT_EMAIL_TO }}
+      CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+      RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
     steps:
       # 1. Check out full history (so tags are available)
       - name: 🔄 Checkout repo
