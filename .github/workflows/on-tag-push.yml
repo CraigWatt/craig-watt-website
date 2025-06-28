@@ -62,5 +62,5 @@ jobs:
           file: apps/nextjs-app/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/mysite:${{ github.ref_name }}
-            ghcr.io/${{ github.repository_owner }}/mysite:latest
+            ghcr.io/${{ toLower(github.repository_owner) }}/mysite:${{ github.ref_name }}
+            ghcr.io/${{ toLower(github.repository_owner) }}/mysite:latest
