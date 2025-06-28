@@ -48,7 +48,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Debug: show current working directory and locate Dockerfile
-      - name: 🐛 Debug: list files & find Dockerfile
+      - name: '🐛 Debug: list files & find Dockerfile'
         run: |
           echo "🔍 Working directory: $(pwd)"
           echo "--- Repo root contents ---"
