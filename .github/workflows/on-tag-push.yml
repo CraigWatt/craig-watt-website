@@ -51,7 +51,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: ./apps/nextjs-app/Dockerfile
+          dockerfile: ./apps/nextjs-app/Dockerfile
           push: true
           tags: |
             ghcr.io/craigwatt/mysite:${{ github.ref_name }}
