@@ -61,9 +61,7 @@ jobs:
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # 1) Use your repo root as the build context
           context: .
-          # 2) Give the exact path to your Dockerfile inside that context
           file: apps/nextjs-app/Dockerfile
           push: true
           tags: |
