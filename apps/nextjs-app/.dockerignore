@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+
+# Nx workspace artifacts
+.nx
+
+# Git metadata
+.git
+
+# Next.js build output (you don’t need local builds in the context)
+.next
+
+# Local env files
+.env.local
+.env.*.local
+
+# Tests
+**/*.spec.ts
+**/*.test.ts
+
+# Storybook
+.storybook
+
+# Specs folder
+specs
+
+# IDE / OS cruft
+.vscode
+.DS_Store
+
+# Coverage & logs
+coverage
+npm-debug.log*
+yarn-debug.log*
