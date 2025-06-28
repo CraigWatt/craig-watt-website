@@ -50,9 +50,9 @@ jobs:
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          dockerfile: ./apps/nextjs-app/Dockerfile
+          context: apps/nextjs-app # ← build from inside your Next.js app
+          file: Dockerfile # ← now Dockerfile is right at the root of that context
           push: true
           tags: |
-            ghcr.io/craigwatt/mysite:${{ github.ref_name }}
-            ghcr.io/craigwatt/mysite:latest
+            ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
+            ghcr.io/craigwatt/craig-watt-website:latest
