@@ -47,11 +47,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Debug: show current working directory and locate Dockerfile
+      - name: 🐛 Debug: list files & find Dockerfile
+        run: |
+          echo "🔍 Working directory: $(pwd)"
+          echo "--- Repo root contents ---"
+          ls -al .
+          echo "--- apps/nextjs-app folder contents ---"
+          ls -al apps/nextjs-app
+          echo "--- Searching for any Dockerfile in the workspace ---"
+          find . -type f -name "Dockerfile"
+
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          context: apps/nextjs-app # ← build from inside your Next.js app
-          file: Dockerfile # ← now Dockerfile is right at the root of that context
+          # 1) Use your repo root as the build context
+          context: .
+          # 2) Give the exact path to your Dockerfile inside that context
+          file: apps/nextjs-app/Dockerfile
           push: true
           tags: |
             ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
