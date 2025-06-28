@@ -21,6 +21,7 @@ jobs:
       CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
       NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
       RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+      OWNER: craigwatt
     steps:
       # 1. Check out full history (so tags are available)
       - name: 🔄 Checkout repo
@@ -62,5 +63,5 @@ jobs:
           file: apps/nextjs-app/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ toLower(github.repository_owner) }}/mysite:${{ github.ref_name }}
-            ghcr.io/${{ toLower(github.repository_owner) }}/mysite:latest
+            ghcr.io/${{ env.OWNER }}/mysite:${{ github.ref_name }}
+            ghcr.io/${{ env.OWNER }}/mysite:latest
