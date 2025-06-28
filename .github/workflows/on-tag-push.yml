@@ -62,7 +62,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           # 🎯 build context is your app folder
-          context: apps/nextjs-app
+          context: .
           # 🎯 Dockerfile path is now relative to that context
           file: apps/nextjs-app/Dockerfile
           build-args: |
