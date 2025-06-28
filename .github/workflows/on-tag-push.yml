@@ -64,7 +64,7 @@ jobs:
           # 🎯 build context is your app folder
           context: apps/nextjs-app
           # 🎯 Dockerfile path is now relative to that context
-          file: Dockerfile
+          file: apps/nextjs-app/Dockerfile
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
