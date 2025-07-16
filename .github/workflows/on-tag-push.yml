@@ -62,10 +62,10 @@ jobs:
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # only send the Next.js folder up to Docker
+          # send only apps/nextjs-app to the daemon
           context: apps/nextjs-app
-          # Dockerfile *path* is now relative to that context
-          file: Dockerfile
+          # point at the Dockerfile inside that folder
+          file: apps/nextjs-app/Dockerfile
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
