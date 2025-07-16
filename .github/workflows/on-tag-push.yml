@@ -82,10 +82,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ github.ref_name }}
-      ECR_REGISTRY: 275578070934.dkr.ecr.eu-west-2.amazonaws.com
+      ECR_REGISTRY: 123456789012.dkr.ecr.eu-west-2.amazonaws.com
       ECR_REPOSITORY: craig-watt-website
       AWS_REGION: eu-west-2
+
     steps:
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Configure AWS creds
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -98,28 +104,23 @@ jobs:
           GH_IMAGE=ghcr.io/craigwatt/craig-watt-website:${IMAGE_TAG}
           ECR_IMAGE=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
 
-          # 1) fetch ECR login and log in
           aws ecr get-login-password \
             --region $AWS_REGION \
           | docker login \
             --username AWS \
             --password-stdin $ECR_REGISTRY
 
-          # 2) pull from GHCR
           docker pull $GH_IMAGE
-
-          # 3) tag & push to ECR
           docker tag  $GH_IMAGE $ECR_IMAGE
           docker push $ECR_IMAGE
 
       - name: Deploy new task definition to ECS
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          aws-region: eu-west-2
           cluster: your-cluster
           service: your-service
           task-definition: aws/ecs-task-def.json
-          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          wait-for-service-stability: true
 
   # deploy-to-k3s:
   #   needs: build-and-push
