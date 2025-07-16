@@ -94,7 +94,7 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v1
         with:
-          registry: ${{ env.ECR_REGISTRY }}
+          registries: ${{ env.ECR_REGISTRY }}
 
       - name: Ensure ECR repository exists
         run: |
