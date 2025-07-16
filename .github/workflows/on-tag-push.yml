@@ -75,3 +75,70 @@ jobs:
           tags: |
             ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
             ghcr.io/craigwatt/craig-watt-website:latest
+  deploy-to-aws:
+    needs: build-and-push
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_TAG: ${{ github.ref_name }}
+      ECR_REGISTRY: 123456789012.dkr.ecr.eu-west-2.amazonaws.com
+      ECR_REPOSITORY: craig-watt-website
+    steps:
+      - name: Configure AWS creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories \
+            --repository-names $ECR_REPOSITORY \
+            --region eu-west-2 \
+          || aws ecr create-repository \
+            --repository-name $ECR_REPOSITORY \
+            --region eu-west-2
+
+      - name: Pull image from GHCR & re-tag/push to ECR
+        run: |
+          GH_IMAGE=ghcr.io/craigwatt/craig-watt-website:${IMAGE_TAG}
+          ECR_IMAGE=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+          docker pull $GH_IMAGE
+          docker tag  $GH_IMAGE $ECR_IMAGE
+          docker push $ECR_IMAGE
+
+      - name: Deploy new task definition to ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          aws-region: eu-west-2
+          cluster: your-cluster
+          service: your-service
+          task-definition: aws/ecs-task-def.json
+          image: ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+  # deploy-to-k3s:
+  #   needs: build-and-push
+  #   if: startsWith(github.ref, 'refs/tags/v')
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Set up K8s kubeconfig
+  #       run: |
+  #         echo "${{ secrets.K3S_KUBECONFIG }}" > kubeconfig
+  #         export KUBECONFIG=$PWD/kubeconfig
+
+  #     - name: Pull & re-tag into your private registry (if you use one)
+  #       run: |
+  #         IMAGE=ghcr.io/craigwatt/craig-watt-website:${GITHUB_REF_NAME#refs/tags/}
+  #         docker pull $IMAGE
+  #         docker tag $IMAGE my-registry.local/craig-watt-website:$IMAGE_TAG
+  #         docker push my-registry.local/craig-watt-website:$IMAGE_TAG
+
+  #     - name: Helm upgrade on k3s
+  #       run: |
+  #         helm upgrade --install craig-watt ./charts/craig-watt \
+  #           --namespace web --create-namespace \
+  #           --set image.repository=my-registry.local/craig-watt-website \
+  #           --set image.tag=$IMAGE_TAG

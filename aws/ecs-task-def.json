@@ -1,0 +1,32 @@
+{
+  "family": "craig-watt-website",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::275578070934:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::275578070934:role/ecsTaskRole",
+  "containerDefinitions": [
+    {
+      "name": "craig-watt-app",
+      "image": "275578070934.dkr.ecr.eu-west-2.amazonaws.com/craig-watt-website:${IMAGE_TAG}",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 3000,
+          "hostPort": 3000,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": [{ "name": "NODE_ENV", "value": "production" }],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/craig-watt-website",
+          "awslogs-region": "eu-west-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
