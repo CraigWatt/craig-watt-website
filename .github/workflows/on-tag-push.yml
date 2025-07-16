@@ -94,16 +94,16 @@ jobs:
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Ensure ECR repository exists
+      - name: Ensure ECR repo exists
         run: |
           aws ecr describe-repositories \
             --repository-names $ECR_REPOSITORY \
-            --region eu-west-2 \
+            --region $AWS_REGION \
           || aws ecr create-repository \
             --repository-name $ECR_REPOSITORY \
-            --region eu-west-2
+            --region $AWS_REGION
 
-      - name: Pull image from GHCR & re-tag/push to ECR
+      - name: Pull, re-tag & push
         run: |
           GH_IMAGE=ghcr.io/craigwatt/craig-watt-website:${IMAGE_TAG}
           ECR_IMAGE=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
