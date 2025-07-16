@@ -93,6 +93,8 @@ jobs:
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          skip-logout: true
 
       - name: Ensure ECR repo exists
         run: |
