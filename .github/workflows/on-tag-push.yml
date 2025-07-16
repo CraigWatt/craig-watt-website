@@ -84,32 +84,31 @@ jobs:
       IMAGE_TAG: ${{ github.ref_name }}
       ECR_REGISTRY: 123456789012.dkr.ecr.eu-west-2.amazonaws.com
       ECR_REPOSITORY: craig-watt-website
+      AWS_REGION: eu-west-2
     steps:
       - name: Configure AWS creds
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: eu-west-2
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to ECR
-        uses: aws-actions/amazon-ecr-login@v1
-        with:
-          skip-logout: true
-
-      - name: Ensure ECR repo exists
-        run: |
-          aws ecr describe-repositories \
-            --repository-names $ECR_REPOSITORY \
-            --region $AWS_REGION \
-          || aws ecr create-repository \
-            --repository-name $ECR_REPOSITORY \
-            --region $AWS_REGION
-
-      - name: Pull, re-tag & push
+      - name: Pull from GHCR, login to ECR & push
+        shell: bash
         run: |
           GH_IMAGE=ghcr.io/craigwatt/craig-watt-website:${IMAGE_TAG}
           ECR_IMAGE=${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}
+
+          # 1) fetch ECR login and log in
+          aws ecr get-login-password \
+            --region $AWS_REGION \
+          | docker login \
+            --username AWS \
+            --password-stdin $ECR_REGISTRY
+
+          # 2) pull from GHCR
           docker pull $GH_IMAGE
+
+          # 3) tag & push to ECR
           docker tag  $GH_IMAGE $ECR_IMAGE
           docker push $ECR_IMAGE
 
