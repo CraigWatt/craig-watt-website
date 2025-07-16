@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       IMAGE_TAG: ${{ github.ref_name }}
-      ECR_REGISTRY: 123456789012.dkr.ecr.eu-west-2.amazonaws.com
+      ECR_REGISTRY: 275578070934.dkr.ecr.eu-west-2.amazonaws.com
       ECR_REPOSITORY: craig-watt-website
       AWS_REGION: eu-west-2
     steps:
