@@ -103,6 +103,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Dump OIDC token for inspection
+        run: |
+          echo "::notice::OIDC_TOKEN=$(jq -r .token < $ACTIONS_ID_TOKEN_REQUEST_TOKEN)"
+
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
