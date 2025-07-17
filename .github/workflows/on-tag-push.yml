@@ -1,5 +1,5 @@
-# .github/workflows/ci-cd.yml
-name: CI / CD
+# .github/workflows/on-tag-push.yml
+name: 🐳 Build & Publish Docker Image
 
 on:
   push:
@@ -20,32 +20,46 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
+
+    env:
+      MAILERSEND_API_KEY: ${{ secrets.MAILERSEND_API_KEY }}
+      CONTACT_EMAIL_TO: ${{ secrets.CONTACT_EMAIL_TO }}
+      CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+      RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
+
     outputs:
       image_tag: ${{ github.ref_name }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
 
-      - run: npm install -g npm@11
+      - name: 🚀 Upgrade npm
+        run: npm install -g npm@11
 
-      - run: npm ci
+      - name: 📦 Install dependencies
+        run: npm ci
 
-      - run: npx nx build nextjs-app --configuration=production
+      - name: 🚧 Build production site
+        run: npx nx build nextjs-app --configuration=production
 
-      - name: Log in to GHCR
+      - name: 🔑 Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push
+      - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -66,8 +80,12 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
+
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔄 Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -82,11 +100,12 @@ jobs:
 
       - name: Terraform Init
         working-directory: infra
-        run: terraform init \
-          -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-          -backend-config="key=${{ github.ref_name }}/terraform.tfstate" \
-          -backend-config="region=${{ env.AWS_REGION }}" \
-          -backend-config="dynamodb_table=${{ secrets.TF_STATE_LOCK_TABLE }}"
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ github.ref_name }}/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${{ secrets.TF_STATE_LOCK_TABLE }}"
 
       - name: Terraform Apply
         working-directory: infra
