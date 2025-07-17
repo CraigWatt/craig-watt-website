@@ -88,8 +88,8 @@ jobs:
       - name: Configure AWS Credentials (via OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }} # ← your bootstrap role ARN
-          aws-region: eu-west-2
+          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }} # ← point this at your GitHub-OIDC IAM Role ARN
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -102,7 +102,7 @@ jobs:
           terraform init --reconfigure \
             -backend-config="bucket=craig-watt-tfstate" \
             -backend-config="key=prod/terraform.tfstate" \
-            -backend-config="region=eu-west-2" \
+            -backend-config="region=$AWS_REGION" \
             -backend-config="dynamodb_table=craig-watt-lock-table"
 
       - name: Terraform Apply
