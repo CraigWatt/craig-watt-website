@@ -75,3 +75,10 @@ backend.local.tf
 **/*.tfstate
 **/*.tfstate.*
 *.tfvars
+
+# Terraform core artifacts
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+**/*.tfvars
+**/backend.local.tf
