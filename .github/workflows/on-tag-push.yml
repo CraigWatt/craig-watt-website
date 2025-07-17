@@ -29,6 +29,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -65,8 +71,6 @@ jobs:
 
       - name: 🔑 Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
-        with:
-          region: ${{ env.AWS_REGION }}
 
       # ─── Build & Push to both GHCR and ECR ───
       - name: 🏷️ Build & Push Docker Image
