@@ -61,3 +61,7 @@ crash.log
 override.tf
 override.tf.*
 *.tfvars
+
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
