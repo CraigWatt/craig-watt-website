@@ -1,15 +1,15 @@
 # .github/workflows/on-tag-push.yml
-name: 🐳 Build & Publish Docker Image
+name: 🐳 Build, Publish & Deploy
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*' # only run on tag pushes like "v0.8.3"
 
 permissions:
-  id-token: write
+  id-token: write # for OIDC
   contents: read
-  packages: write
+  packages: write # for GHCR
 
 env:
   AWS_REGION: eu-west-2
@@ -20,14 +20,6 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-
-    env:
-      MAILERSEND_API_KEY: ${{ secrets.MAILERSEND_API_KEY }}
-      CONTACT_EMAIL_TO: ${{ secrets.CONTACT_EMAIL_TO }}
-      CONTACT_EMAIL_FROM: ${{ secrets.CONTACT_EMAIL_FROM }}
-      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-      RECAPTCHA_SECRET_KEY: ${{ secrets.RECAPTCHA_SECRET_KEY }}
-
     outputs:
       image_tag: ${{ github.ref_name }}
 
@@ -59,30 +51,42 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: 🔑 Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        with:
+          region: ${{ env.AWS_REGION }}
+
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: apps/nextjs-app/Dockerfile
+          push: true
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
             CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
             NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
             RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-          push: true
           tags: |
             ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
             ghcr.io/craigwatt/craig-watt-website:latest
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.ref_name }}
+            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
 
   deploy-infra:
+    name: Deploy Infra via Terraform
     needs: build-and-push
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
-      - uses: actions/checkout@v4
+      - name: 🔄 Checkout infra code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Configure AWS Credentials (via OIDC)
+      - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
@@ -99,18 +103,12 @@ jobs:
           terraform init --reconfigure \
             -backend-config="bucket=craig-watt-tfstate" \
             -backend-config="key=prod/terraform.tfstate" \
-            -backend-config="region=$AWS_REGION" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="dynamodb_table=craig-watt-lock-table"
 
       - name: Terraform Apply
         working-directory: infra
         run: |
-          terraform init --reconfigure \
-            -backend-config="bucket=craig-watt-tfstate" \
-            -backend-config="key=prod/terraform.tfstate" \
-            -backend-config="region=$AWS_REGION" \
-            -backend-config="dynamodb_table=craig-watt-lock-table"
-
           terraform apply -auto-approve \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
