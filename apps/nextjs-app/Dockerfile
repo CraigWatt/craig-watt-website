@@ -4,8 +4,8 @@
 FROM node:20-alpine AS deps
 WORKDIR /workspace
 
-# Copy just the manifests & monorepo config to maximize npm-ci cache hits
-COPY   package.json       package-lock.json  nx.json     tsconfig.base.json ./
+# Copy your actual monorepo manifests
+COPY   package.json       package-lock.json  nx.json     tsconfig.json ./
 COPY   apps/nextjs-app/package.json apps/nextjs-app/
 
 RUN npm ci
@@ -16,7 +16,6 @@ RUN npm ci
 FROM deps AS builder
 WORKDIR /workspace
 
-# Build-time secrets (for e.g. MailerSend, reCAPTCHA)
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -29,10 +28,8 @@ ENV MAILERSEND_API_KEY=$MAILERSEND_API_KEY \
     NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
     RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
 
-# Now copy the rest of the repo
 COPY . .
 
-# Run your production build
 RUN npx nx build nextjs-app --configuration=production
 
 # ====================
@@ -41,9 +38,9 @@ RUN npx nx build nextjs-app --configuration=production
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Copy only the standalone server + static assets
-COPY --from=builder /workspace/dist/apps/nextjs-app/standalone ./
-COPY --from=builder /workspace/dist/apps/nextjs-app/static    ./.next/static
+# Copy the standalone server + static assets
+COPY --from=builder /workspace/apps/nextjs-app/.next/standalone ./
+COPY --from=builder /workspace/apps/nextjs-app/.next/static    ./.next/static
 
 ENV NODE_ENV=production
 EXPOSE 3000
