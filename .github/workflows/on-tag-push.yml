@@ -81,17 +81,17 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS Credentials (via OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-        with: { terraform_version: 1.5.7 }
+        with:
+          terraform_version: 1.5.7
 
       - name: Terraform Init
         working-directory: infra
