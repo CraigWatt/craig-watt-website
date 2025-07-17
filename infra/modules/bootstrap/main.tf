@@ -1,75 +1,17 @@
-resource "aws_s3_bucket" "state" {
-  bucket = var.state_bucket_name
-  acl    = "private"
-
-  versioning {
-    enabled = true
-  }
-
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
+terraform {
+  required_version = ">= 1.4.0"
 }
 
-resource "aws_s3_bucket_public_access_block" "state" {
-  bucket = aws_s3_bucket.state.id
-
-  block_public_acls       = true
-  block_public_policy     = true
-  ignore_public_acls      = true
-  restrict_public_buckets = true
+provider "aws" {
+  region = var.aws_region
 }
 
-resource "aws_dynamodb_table" "lock" {
-  name         = var.lock_table_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
-}
-
-data "aws_iam_openid_connect_provider" "github" {
-  url = var.github_oidc_provider_url
-}
-
-resource "aws_iam_role" "github_actions" {
-  name = "${var.github_repo_short}-gha-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Effect = "Allow"
-      Principal = {
-        Federated = data.aws_iam_openid_connect_provider.github.arn
-      }
-      Condition = {
-        StringEquals = {
-          "${replace(var.github_oidc_provider_url, "https://", "")}:aud" = "sts.amazonaws.com"
-        }
-        StringLike = {
-          "${replace(var.github_oidc_provider_url, "https://", "")}:sub" = "repo:${var.github_repo}:ref:refs/tags/v*"
-        }
-      }
-    }]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "ecr" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "ecs" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
+module "bootstrap" {
+  source                   = "../modules/bootstrap"
+  state_bucket_name        = var.tf_state_bucket
+  lock_table_name          = var.tf_state_lock_table
+  github_oidc_provider_url = var.github_oidc_provider_url
+  github_repo              = var.github_repo
 }
 
 resource "aws_iam_role_policy_attachment" "s3" {
