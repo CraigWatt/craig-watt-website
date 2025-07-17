@@ -1,30 +1,25 @@
-# root .dockerignore
-
-# 1) Always ignore node_modules
+# 1) Never send node_modules
 /node_modules
 **/node_modules
 
-# 2) Ignore all build outputs
+# 2) Ignore all build outputs & static folders
 /dist
-/apps/*/dist
-/apps/*/.next
+/.nx
 /static
 
-# 3) Monorepo metadata & workspace artifacts
-/.nx
+# 3) Monorepo metadata & reports
 /nx-deps.html
 /audit.json
 /outdated.json
 
-# 4) Git & CI
+# 4) Git & CI config
 /.git
 /.github
-Dockerfile.*    # if you have multiple Dockerfiles
+Dockerfile.*            # in case you have extras
 docker-compose*.yml
 
 # 5) Logs, coverage, editor cruft
-npm-debug.log*
-yarn-debug.log*
+*.log
 coverage/
-/.vscode/
-/.DS_Store
+.vscode/
+.DS_Store
