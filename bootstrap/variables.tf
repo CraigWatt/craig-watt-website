@@ -19,3 +19,7 @@ variable "github_repo" {
   description = "GitHub repo in Owner/Name format (used in trust policy)"
   type        = string
 }
+
+variable "aws_region" {
+    type = string
+}

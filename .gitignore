@@ -1,3 +1,71 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Local environment variables
+.env.local
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# local env files
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+
+
+.nx/cache
+.nx/workspace-data
+
+storybook-static
+
+# Next.js
+.next
+out
+
+**/.cache/storybook/
+
+# Terraform plugin cache
+infra/.terraform/
+# Terraform state
+*.tfstate
+*.tfstate.*
+# Crash logs, override files
+crash.log
+override.tf
+override.tf.*
+*.tfvars
+
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+
 # Terraform artifacts
 **/.terraform/
 **/*.tfstate*

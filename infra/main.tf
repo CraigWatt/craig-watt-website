@@ -13,14 +13,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-module "bootstrap" {
-  source                   = "./modules/bootstrap"
-  state_bucket_name        = var.tf_state_bucket
-  lock_table_name          = var.tf_state_lock_table
-  github_oidc_provider_url = var.github_oidc_provider_url
-  github_repo              = var.github_repo
-}
-
 # ───────────────────────────────────────────────────────────────────────────────
 # 1) Network: discover or create VPC & subnets
 # ───────────────────────────────────────────────────────────────────────────────
