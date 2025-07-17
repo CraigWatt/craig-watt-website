@@ -62,9 +62,7 @@ jobs:
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # send only apps/nextjs-app to the daemon
           context: apps/nextjs-app
-          # point at the Dockerfile inside that folder
           file: apps/nextjs-app/Dockerfile
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
