@@ -1,3 +1,8 @@
+variable "tf_state_bucket"        { type = string }
+variable "tf_state_lock_table"    { type = string }
+variable "github_oidc_provider_url" { type = string }
+variable "github_repo"            { type = string }
+
 variable "aws_region" {
   description = "AWS region to deploy into"
   type        = string

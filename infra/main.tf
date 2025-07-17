@@ -1,10 +1,10 @@
 terraform {
   required_version = ">= 1.4.0"
   backend "s3" {
-    bucket         = "craig-watt-tfstate"
-    key            = "prod/terraform.tfstate"
-    region         = "eu-west-2"
-    dynamodb_table = "craig-watt-lock-table"
+    bucket         = var.tf_state_bucket
+    key            = "${var.environment}/terraform.tfstate"
+    region         = var.aws_region
+    dynamodb_table = var.tf_state_lock_table
     encrypt        = true
   }
 }
@@ -13,20 +13,43 @@ provider "aws" {
   region = var.aws_region
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# 0) Bootstrap the state bucket / lock table / GitHub-OIDC role
+# ───────────────────────────────────────────────────────────────────────────────
+module "bootstrap" {
+  source                   = "./modules/bootstrap"
+  state_bucket_name        = var.tf_state_bucket
+  lock_table_name          = var.tf_state_lock_table
+  github_oidc_provider_url = var.github_oidc_provider_url
+  github_repo              = var.github_repo
+}
+
+# ───────────────────────────────────────────────────────────────────────────────
+# 1) Network: discover or create VPC & subnets
+# ───────────────────────────────────────────────────────────────────────────────
 module "network" {
   source = "./modules/network"
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# 2) ECR
+# ───────────────────────────────────────────────────────────────────────────────
 module "ecr" {
   source          = "./modules/ecr"
   repository_name = var.ecr_repository
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# 3) ECS Cluster
+# ───────────────────────────────────────────────────────────────────────────────
 module "ecs_cluster" {
   source       = "./modules/ecs-cluster"
   cluster_name = var.ecs_cluster_name
 }
 
+# ───────────────────────────────────────────────────────────────────────────────
+# 4) Next.js Service
+# ───────────────────────────────────────────────────────────────────────────────
 module "nextjs_service" {
   source          = "./services/nextjs-app"
   cluster_arn     = module.ecs_cluster.cluster_arn
@@ -35,11 +58,8 @@ module "nextjs_service" {
   subnets         = module.network.subnet_ids
   security_groups = [ module.network.default_sg_id ]
 
-  desired_count     = var.desired_count
-
+  desired_count      = var.desired_count
   execution_role_arn = var.ecs_execution_role_arn
   task_role_arn      = var.ecs_task_role_arn
-
-  family_name       = "nextjs-app"
-  aws_region = var.aws_region
+  aws_region         = var.aws_region
 }
