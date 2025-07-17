@@ -76,53 +76,31 @@ jobs:
             ghcr.io/craigwatt/craig-watt-website:latest
 
   deploy-infra:
-    name: Deploy Terraform
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
-
     steps:
-      - name: 🔄 Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-
-      - name: 🕵️‍♀️ Dump OIDC token claims
-        shell: bash
-        run: |
-          # Extract the raw token
-          RAW="$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-          echo "raw: $RAW"
-
-          # Use jq to split on “.”, take the 2nd segment, Base64-decode it, parse JSON
-          echo "$RAW" \
-            | jq -R 'split(".")[1]
-                    | @base64d
-                    | fromjson
-                    | {sub, aud}'
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
+        with: { terraform_version: 1.5.7 }
 
-      - name: Terraform Init
+      - name: Terraform Init + Apply
         working-directory: infra
         run: |
-          terraform init \
-            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
-            -backend-config="key=${{ github.ref_name }}/terraform.tfstate" \
-            -backend-config="region=${{ env.AWS_REGION }}" \
-            -backend-config="dynamodb_table=${{ secrets.TF_STATE_LOCK_TABLE }}"
-
-      - name: Terraform Apply
-        working-directory: infra
-        run: terraform apply -auto-approve \
-          -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}"
+          terraform init -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+                          -backend-config="key=prod/terraform.tfstate" \
+                          -backend-config="region=eu-west-2" \
+                          -backend-config="use_lockfile=true"
+          terraform apply -auto-approve \
+            -var="image_tag=${{ github.ref_name }}" \
+            -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
+            -var="ecs_task_role_arn=${{ secrets.ECS_TASK_ROLE_ARN }}

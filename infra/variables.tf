@@ -4,28 +4,6 @@ variable "aws_region" {
   default     = "eu-west-2"
 }
 
-variable "environment" {
-  description = "Name of this deployment (eg. dev/stage/prod)"
-  type        = string
-  default     = "prod"
-}
-
-variable "tf_state_bucket" {
-  description = "S3 bucket for Terraform state"
-  type        = string
-}
-
-variable "tf_state_lock_table" {
-  description = "DynamoDB table name for state locking"
-  type        = string
-}
-
-variable "vpc_id" {
-  description = "(optional) VPC to deploy into. Leave empty to pick the default."
-  type        = string
-  default     = ""
-}
-
 variable "ecr_repository" {
   description = "Name of the ECR repository"
   type        = string
@@ -47,4 +25,14 @@ variable "desired_count" {
   description = "Number of ECS tasks to run"
   type        = number
   default     = 1
+}
+
+variable "ecs_execution_role_arn" {
+  description = "IAM role ARN for ECS task execution (e.g. ecsTaskExecutionRole)"
+  type        = string
+}
+
+variable "ecs_task_role_arn" {
+  description = "IAM role ARN for your ECS tasks (e.g. ecsTaskRole)"
+  type        = string
 }
