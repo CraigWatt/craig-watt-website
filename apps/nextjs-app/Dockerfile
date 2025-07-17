@@ -7,7 +7,6 @@ WORKDIR /workspace
 # Copy just the manifests & monorepo config to maximize npm-ci cache hits
 COPY   package.json       package-lock.json  nx.json     tsconfig.base.json ./
 COPY   apps/nextjs-app/package.json apps/nextjs-app/
-COPY   libs                     libs/
 
 RUN npm ci
 
