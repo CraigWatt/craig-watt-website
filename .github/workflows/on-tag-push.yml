@@ -87,13 +87,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install jq
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
       - name: 🕵️‍♀️ Dump OIDC token claims
         run: |
-          echo "OIDC_JWT: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"  # this is the raw token
-          # Install jq, then decode:
-          sudo apt-get update && sudo apt-get install -y jq
-          PAYLOAD=$(echo $ACTIONS_ID_TOKEN_REQUEST_TOKEN | cut -d'.' -f2 | tr '_-' '/+' | base64 -d)
-          echo "$PAYLOAD" | jq '{sub, aud}'
+          echo "RAW OIDC TOKEN:"
+          echo "$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+          echo
+          echo "DECODING…"
+          PAYLOAD=$(echo "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            | cut -d'.' -f2 \
+            | tr '_-' '/+' \
+            | sed 's/$/==/' \
+            | base64 -d)
+          echo "$PAYLOAD" | jq '{sub,aud}'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
