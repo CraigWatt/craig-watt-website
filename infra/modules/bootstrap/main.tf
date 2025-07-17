@@ -88,3 +88,16 @@ resource "aws_iam_role_policy_attachment" "dynamodb" {
   role       = aws_iam_role.github_actions.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
 }
+
+
+// allow listing/getting the GitHub OIDC provider
+resource "aws_iam_role_policy_attachment" "iam_readonly" {
+    role       = aws_iam_role.github_actions.name
+    policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+}
+
+// allow CloudWatch Logs reads (eg: ListTagsForResource)
+resource "aws_iam_role_policy_attachment" "cw_logs_readonly" {
+    role       = aws_iam_role.github_actions.name
+    policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+}
