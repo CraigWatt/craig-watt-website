@@ -84,25 +84,23 @@ jobs:
     steps:
       - name: 🔄 Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Install jq
-        run: |
-          sudo apt-get update && sudo apt-get install -y jq
+        run: sudo apt-get update && sudo apt-get install -y jq
 
       - name: 🕵️‍♀️ Dump OIDC token claims
+        shell: bash
         run: |
-          echo "RAW OIDC TOKEN:"
-          echo "$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-          echo
-          echo "DECODING…"
-          PAYLOAD=$(echo "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            | cut -d'.' -f2 \
-            | tr '_-' '/+' \
-            | sed 's/$/==/' \
-            | base64 -d)
-          echo "$PAYLOAD" | jq '{sub,aud}'
+          # Extract the raw token
+          RAW="$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+          echo "raw: $RAW"
+
+          # Use jq to split on “.”, take the 2nd segment, Base64-decode it, parse JSON
+          echo "$RAW" \
+            | jq -R 'split(".")[1]
+                    | @base64d
+                    | fromjson
+                    | {sub, aud}'
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
