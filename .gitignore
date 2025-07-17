@@ -70,3 +70,8 @@ infra/terraform.tfstate.backup
 **/.terraform/
 **/*.tfstate*
 backend.local.tf
+
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+*.tfvars

@@ -13,7 +13,6 @@ data "aws_iam_openid_connect_provider" "github" {
 
 resource "aws_s3_bucket" "state" {
   bucket = var.state_bucket_name
-  acl    = "private"
 
   versioning {
     enabled = true
@@ -25,6 +24,9 @@ resource "aws_s3_bucket" "state" {
         sse_algorithm = "AES256"
       }
     }
+  }
+  lifecycle {
+    ignore_changes = [acl]
   }
 }
 
@@ -71,10 +73,32 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-# Attach all the policies the CI will need:
-resource "aws_iam_role_policy_attachment" "ecr"          { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess" }
-resource "aws_iam_role_policy_attachment" "ecs"          { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess" }
-resource "aws_iam_role_policy_attachment" "s3"           { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess" }
-resource "aws_iam_role_policy_attachment" "dynamodb"     { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess" }
-resource "aws_iam_role_policy_attachment" "iam_readonly" { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess" }
-resource "aws_iam_role_policy_attachment" "cw_logs"      { role = aws_iam_role.github_actions.name policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess" }
+resource "aws_iam_role_policy_attachment" "ecr" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "ecs" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "s3" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "iam_readonly" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
+}
+
+resource "aws_iam_role_policy_attachment" "cw_logs_readonly" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+}

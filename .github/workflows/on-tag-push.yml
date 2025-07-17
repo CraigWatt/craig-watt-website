@@ -105,6 +105,12 @@ jobs:
       - name: Terraform Apply
         working-directory: infra
         run: |
+          terraform init --reconfigure \
+            -backend-config="bucket=craig-watt-tfstate" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=$AWS_REGION" \
+            -backend-config="dynamodb_table=craig-watt-lock-table"
+
           terraform apply -auto-approve \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
