@@ -79,13 +79,16 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: production
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure AWS Credentials (via OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
+          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }} # ← your bootstrap role ARN
           aws-region: eu-west-2
 
       - name: Setup Terraform
