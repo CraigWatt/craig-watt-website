@@ -62,9 +62,8 @@ jobs:
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
-          # buildKit context must be the repo root so your Dockerfile can COPY /libs, /nx.json, etc.
-          context: .
-          file: apps/nextjs-app/Dockerfile
+          context: . # root of your monorepo
+          file: apps/nextjs-app/Dockerfile # relative path to that Dockerfile
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
