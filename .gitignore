@@ -50,3 +50,14 @@ storybook-static
 out
 
 **/.cache/storybook/
+
+# Terraform plugin cache
+infra/.terraform/
+# Terraform state
+*.tfstate
+*.tfstate.*
+# Crash logs, override files
+crash.log
+override.tf
+override.tf.*
+*.tfvars
