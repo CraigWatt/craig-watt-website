@@ -1,15 +1,14 @@
-# .github/workflows/on-tag-push.yml
 name: 🐳 Build, Publish & Deploy
 
 on:
   push:
     tags:
-      - 'v*' # only run on tag pushes like "v0.8.3"
+      - 'v*'
 
+# top-level defaults (optional)
 permissions:
-  id-token: write # for OIDC-based assume-role
   contents: read
-  packages: write # for GHCR
+  packages: write
 
 env:
   AWS_REGION: eu-west-2
@@ -20,6 +19,13 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
+
+    # ← explicit job-level permissions
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+
     outputs:
       image_tag: ${{ github.ref_name }}
 
@@ -29,11 +35,18 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ← DEBUG: make sure OIDC vars are present
+      - name: Dump OIDC request info
+        run: |
+          echo "REQUEST_URL:   $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
       - name: ⚙️ Setup Node.js
         uses: actions/setup-node@v4
@@ -47,7 +60,6 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      # ─── Make sure Next.js can see your server-only secrets ───
       - name: ✏️ Write apps/nextjs-app/.env.production
         run: |
           cat > apps/nextjs-app/.env.production <<EOF
@@ -61,7 +73,6 @@ jobs:
       - name: 🚧 Build production site
         run: npx nx build nextjs-app --configuration=production
 
-      # ─── Log in to both registries ───
       - name: 🔑 Log in to GHCR
         uses: docker/login-action@v2
         with:
@@ -72,7 +83,6 @@ jobs:
       - name: 🔑 Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      # ─── Build & Push to both GHCR and ECR ───
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
         with:
@@ -93,9 +103,14 @@ jobs:
 
   deploy-infra:
     name: Deploy Infra via Terraform
-    needs: build-and-push
     runs-on: ubuntu-latest
+    needs: build-and-push
     environment: production
+
+    # ← explicit job-level permissions
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: 🔄 Checkout infra code
@@ -103,15 +118,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Dump OIDC token for inspection
+      - name: Dump OIDC request info
         run: |
-          echo "::notice::OIDC_TOKEN=$(jq -r .token < $ACTIONS_ID_TOKEN_REQUEST_TOKEN)"
+          echo "REQUEST_URL:   $ACTIONS_ID_TOKEN_REQUEST_URL"
+          echo "REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
