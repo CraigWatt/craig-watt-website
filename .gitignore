@@ -82,3 +82,4 @@ backend.local.tf
 **/*.tfstate.*
 **/*.tfvars
 **/backend.local.tf
+bootstrap/backend.local.tf
