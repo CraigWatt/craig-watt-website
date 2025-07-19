@@ -102,7 +102,6 @@ jobs:
     name: Deploy Infra via Terraform
     needs: build-and-push
     runs-on: ubuntu-latest
-    environment: production
     permissions:
       id-token: write
       contents: read
