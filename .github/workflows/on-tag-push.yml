@@ -32,7 +32,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # ← ASSUME your IAM role via OIDC so AWS CLI can use it
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -57,6 +56,10 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npx nx build nextjs-app --configuration=production
+
+      # ─── NEW ─── ensure Dockerfile sees your lockfile ───
+      - name: Copy lockfile into Docker context
+        run: cp package-lock.json apps/nextjs-app/package-lock.json
 
       - name: 🔑 Log in to GHCR
         uses: docker/login-action@v2
