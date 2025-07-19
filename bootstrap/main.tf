@@ -53,19 +53,21 @@ resource "aws_iam_role" "github_actions" {
   name = "${local.repo_short}-gha-role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
       Action    = "sts:AssumeRoleWithWebIdentity"
       Principal = { Federated = data.aws_iam_openid_connect_provider.github.arn }
       Condition = {
         StringEquals = {
+          # this has to exactly match what GitHub sends:
           "${local.provider_id}:aud" = "sts.amazonaws.com"
         }
         StringLike = {
+          # NOTE: this MUST be a JSON array of both patterns
           "${local.provider_id}:sub" = [
             "repo:${var.github_repo}:ref:refs/tags/v*",
-            "repo:${var.github_repo}:environment:production:ref:refs/tags/v*"
+            "repo:${var.github_repo}:environment:production:ref:refs/tags/v*",
           ]
         }
       }
