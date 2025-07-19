@@ -1,3 +1,19 @@
+name: 🐳 Build, Publish & Deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  AWS_REGION: eu-west-2
+  ECR_REGISTRY: 275578070934.dkr.ecr.eu-west-2.amazonaws.com
+  ECR_REPOSITORY: craig-watt-website
+
 jobs:
   build-and-push:
     name: Build & Push Docker Image
