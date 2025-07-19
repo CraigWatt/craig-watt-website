@@ -123,6 +123,13 @@ jobs:
           echo "REQUEST_URL:   $ACTIONS_ID_TOKEN_REQUEST_URL"
           echo "REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
 
+      - name: Decode OIDC token
+        run: |
+          echo "raw token: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
+          # extract payload, base64-decode and pretty-print
+          payload=$(echo $ACTIONS_ID_TOKEN_REQUEST_TOKEN | cut -d'.' -f2 | base64 -w0 | base64 -d)
+          echo "$payload" | jq '{sub,aud,iss}'
+
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
