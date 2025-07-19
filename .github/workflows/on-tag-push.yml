@@ -1,3 +1,4 @@
+# .github/workflows/on-tag-push.yml
 name: 🐳 Build, Publish & Deploy
 
 on:
@@ -54,11 +55,14 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
-      - run: npm ci
-      - run: npx nx build nextjs-app --configuration=production
 
-      # ─── NEW ─── ensure Dockerfile sees your lockfile ───
-      - name: Copy lockfile into Docker context
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npx nx build nextjs-app --configuration=production
+
+      - name: Copy Lockfile into Docker Context
         run: cp package-lock.json apps/nextjs-app/package-lock.json
 
       - name: 🔑 Log in to GHCR
@@ -93,3 +97,44 @@ jobs:
             ghcr.io/craigwatt/craig-watt-website:latest
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.ref_name }}
             ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+
+  deploy-infra:
+    name: Deploy Infra via Terraform
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: 🔄 Checkout infra code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init & Apply
+        working-directory: infra
+        run: |
+          terraform init --reconfigure \
+            -backend-config="bucket=craig-watt-tfstate" \
+            -backend-config="key=prod/terraform.tfstate" \
+            -backend-config="region=${{ env.AWS_REGION }}" \
+            -backend-config="dynamodb_table=craig-watt-lock-table"
+
+          terraform apply -auto-approve \
+            -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
+            -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
+            -var="ecs_task_role_arn=${{ secrets.ECS_TASK_ROLE_ARN }}"
