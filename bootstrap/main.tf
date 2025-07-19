@@ -50,24 +50,26 @@ resource "aws_dynamodb_table" "lock" {
 }
 
 resource "aws_iam_role" "github_actions" {
-  # … same as before …
+  name = "${local.repo_short}-gha-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version   = "2012-10-17"
     Statement = [{
       Effect    = "Allow"
       Action    = "sts:AssumeRoleWithWebIdentity"
-      Principal = { Federated = data.aws_iam_openid_connect_provider.github.arn }
+      Principal = {
+        Federated = data.aws_iam_openid_connect_provider.github.arn
+      }
       Condition = {
         StringEquals = {
-          # allow either the AWS‐STS audience or the default VSO audience
+          # allow either the standard AWS audience or GitHub’s runner-specific one
           "${local.provider_id}:aud" = [
             "sts.amazonaws.com",
             "vso:*"
           ]
         }
         StringLike = {
-          # restrict to your repo’s tag refs
+          # only your repo’s tagged refs can assume
           "${local.provider_id}:sub" = "repo:${var.github_repo}:ref:refs/tags/v*"
         }
       }
