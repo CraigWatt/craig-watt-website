@@ -91,6 +91,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
 
       - uses: hashicorp/setup-terraform@v2
         with: { terraform_version: 1.5.7 }
