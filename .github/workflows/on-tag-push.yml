@@ -5,7 +5,6 @@ on:
     tags:
       - 'v*'
 
-# top-level defaults (optional)
 permissions:
   contents: read
   packages: write
@@ -19,10 +18,8 @@ jobs:
   build-and-push:
     name: Build & Push Docker Image
     runs-on: ubuntu-latest
-
-    # ← explicit job-level permissions
     permissions:
-      id-token: write
+      id-token: write # you still need this to expose $ACTIONS_ID_TOKEN_*
       contents: read
       packages: write
 
@@ -30,37 +27,11 @@ jobs:
       image_tag: ${{ github.ref_name }}
 
     steps:
-      - name: 🔄 Checkout repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      # ← DEBUG: make sure OIDC vars are present
-      - name: Dump OIDC request info
-        run: |
-          echo "REQUEST_URL:   $ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'npm'
-
-      - name: 🚀 Upgrade npm
-        run: npm install -g npm@11
-
-      - name: 📦 Install dependencies
-        run: npm ci
-
-      - name: ✏️ Write apps/nextjs-app/.env.production
-        run: |
+      # Build your Next.js app (injecting .env.production so secrets are baked in)
+      - run: |
           cat > apps/nextjs-app/.env.production <<EOF
           MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
           CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
@@ -68,22 +39,24 @@ jobs:
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
           RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
           EOF
+        name: Write .env.production
 
-      - name: 🚧 Build production site
-        run: npx nx build nextjs-app --configuration=production
+      - name: Setup Node.js & Build
+        uses: actions/setup-node@v4
+        with: { node-version: '20.x', cache: 'npm' }
+      - run: npm ci
+      - run: npx nx build nextjs-app --configuration=production
 
-      - name: 🔑 Log in to GHCR
-        uses: docker/login-action@v2
+      # Push to GHCR and ECR
+      - uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: 🔑 Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v1
+      - uses: aws-actions/amazon-ecr-login@v1
 
-      - name: 🏷️ Build & Push Docker Image
-        uses: docker/build-push-action@v4
+      - uses: docker/build-push-action@v4
         with:
           context: .
           file: apps/nextjs-app/Dockerfile
@@ -102,50 +75,28 @@ jobs:
 
   deploy-infra:
     name: Deploy Infra via Terraform
-    runs-on: ubuntu-latest
     needs: build-and-push
+    runs-on: ubuntu-latest
     environment: production
-
-    # ← explicit job-level permissions
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: 🔄 Checkout infra code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: Dump OIDC request info
-        run: |
-          echo "REQUEST_URL:   $ACTIONS_ID_TOKEN_REQUEST_URL"
-          echo "REQUEST_TOKEN: $ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-
-      - name: Decode OIDC token
-        shell: bash
-        run: |
-          echo "raw token:"
-          echo "$ACTIONS_ID_TOKEN_REQUEST_TOKEN"
-          # pull out the middle segment, convert URL-safe Base64 to standard, pad, then decode
-          payload=$(printf '%s' "$ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
-            | cut -d'.' -f2 \
-            | sed -e 's/-/+/g; s/_/\//g; s/\(\S\{2\}\)$/\1=/' )
-          echo "decoded payload:"
-          printf '%s' "$payload" | base64 --decode | jq '{iss,sub,aud}'
-
+      # assume the GHA role (no audience override!)
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.5.7
+      - uses: hashicorp/setup-terraform@v2
+        with: { terraform_version: 1.5.7 }
 
-      - name: Terraform Init
+      - name: Terraform Init & Apply
         working-directory: infra
         run: |
           terraform init --reconfigure \
@@ -154,9 +105,6 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="dynamodb_table=craig-watt-lock-table"
 
-      - name: Terraform Apply
-        working-directory: infra
-        run: |
           terraform apply -auto-approve \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
