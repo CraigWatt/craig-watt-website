@@ -25,6 +25,8 @@ resource "aws_lb_target_group" "this" {
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
 
+  target_type = "ip"
+
   health_check {
     path                = "/"
     protocol            = "HTTP"
