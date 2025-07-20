@@ -42,6 +42,10 @@ WORKDIR /app
 COPY --from=builder /workspace/apps/nextjs-app/.next/standalone ./
 COPY --from=builder /workspace/apps/nextjs-app/.next/static    ./.next/static
 
+# ─── install runtime deps ───
+# this will pull in `next`, `react`, etc at runtime
+RUN npm install --production
+
 ENV NODE_ENV=production
 EXPOSE 3000
 
