@@ -16,7 +16,7 @@ resource "aws_lb" "this" {
 # ───────────────────────────────────────────────────────────────────────────────
 locals {
   # only take the first 6 letters of “nextjs-app” → “nextjs”
-  tg_prefix = substr(local.family, 0, 6)
+  tg_prefix = substr(local.family, 0, 2)
 }
 
 resource "aws_lb_target_group" "this" {
