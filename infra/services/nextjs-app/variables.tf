@@ -67,3 +67,8 @@ variable "family_name" {
   description = "ECS task family name (must be alphanumeric, `-` or `_` only)"
   type        = string
 }
+
+variable "vpc_id" {
+  description = "The VPC ID to attach the ALB to"
+  type        = string
+}

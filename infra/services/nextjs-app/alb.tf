@@ -18,7 +18,7 @@ resource "aws_lb_target_group" "this" {
   name_prefix = "${local.family}-tg-"
   port        = var.container_port              # 3000
   protocol    = "HTTP"
-  vpc_id      = module.network.vpc_id           # import your VPC ID
+  vpc_id      = var.vpc_id
 
   health_check {
     path                = "/"
