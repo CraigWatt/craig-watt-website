@@ -14,8 +14,13 @@ resource "aws_lb" "this" {
 # ───────────────────────────────────────────────────────────────────────────────
 # Target Group (for port 3000)
 # ───────────────────────────────────────────────────────────────────────────────
+locals {
+  # only take the first 6 letters of “nextjs-app” → “nextjs”
+  tg_prefix = substr(local.family, 0, 6)
+}
+
 resource "aws_lb_target_group" "this" {
-  name_prefix = "${local.family}-tg-"
+  name_prefix = "${local.tg_prefix}-tg-"
   port        = var.container_port              # 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
