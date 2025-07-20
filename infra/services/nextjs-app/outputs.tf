@@ -17,3 +17,8 @@ output "log_group_name" {
   description = "CloudWatch log group created for this service"
   value       = aws_cloudwatch_log_group.this.name
 }
+
+output "service_url" {
+  description = "Public URL of the Next.js service (ALB DNS name)"
+  value       = aws_lb.this.dns_name
+}
