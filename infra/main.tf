@@ -46,6 +46,7 @@ module "nextjs_service" {
 
   subnets         = module.network.subnet_ids
   security_groups = [ module.network.default_sg_id ]
+  vpc_id          = module.network.vpc_id
 
   desired_count      = var.desired_count
   execution_role_arn = var.ecs_execution_role_arn
