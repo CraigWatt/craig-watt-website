@@ -69,6 +69,6 @@ variable "family_name" {
 }
 
 variable "vpc_id" {
-  description = "The VPC ID to attach the ALB to"
+  description = "The VPC ID where the ALB and TG will live"
   type        = string
 }
