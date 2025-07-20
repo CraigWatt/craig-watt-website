@@ -63,6 +63,12 @@ resource "aws_ecs_service" "this" {
     assign_public_ip = true
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.this.arn
+    container_name   = local.family
+    container_port   = var.container_port
+  }
+
   depends_on = [
     aws_ecs_task_definition.this
   ]
