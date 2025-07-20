@@ -70,6 +70,7 @@ resource "aws_ecs_service" "this" {
   }
 
   depends_on = [
-    aws_ecs_task_definition.this
+    aws_ecs_task_definition.this,
+    aws_lb_listener.http,
   ]
 }
