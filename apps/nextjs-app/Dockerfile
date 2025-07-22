@@ -50,4 +50,7 @@ COPY --from=builder /workspace/apps/nextjs-app/public ./public
 ENV NODE_ENV=production
 EXPOSE 3000
 
+# Debug
+RUN ls -lR ./public/images
+
 CMD ["node", "server.js"]
