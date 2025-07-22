@@ -1,3 +1,4 @@
+```dockerfile
 # ====================
 # Stage 1: deps
 # ====================
@@ -8,7 +9,8 @@ WORKDIR /workspace
 COPY   package.json       package-lock.json  nx.json     tsconfig.json ./
 COPY   apps/nextjs-app/package.json apps/nextjs-app/
 
-RUN npm ci
+# Install dependencies but skip any postinstall scripts (like Cypress) that might fail in Docker
+RUN npm ci --ignore-scripts
 
 # ====================
 # Stage 2: builder
@@ -41,12 +43,12 @@ WORKDIR /app
 # Copy the standalone server + static assets
 COPY --from=builder /workspace/apps/nextjs-app/.next/standalone ./
 COPY --from=builder /workspace/apps/nextjs-app/.next/static    ./.next/static
-COPY --from=builder /workspace/apps/nextjs-app/public        ./public
 
-# ─── reuse deps from the deps stage ───
-COPY --from=deps /workspace/node_modules ./node_modules
+# Copy public assets so images exist
+COPY --from=builder /workspace/apps/nextjs-app/public        ./public
 
 ENV NODE_ENV=production
 EXPOSE 3000
 
 CMD ["node", "server.js"]
+```
