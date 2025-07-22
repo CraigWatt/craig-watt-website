@@ -41,6 +41,7 @@ WORKDIR /app
 # Copy the standalone server + static assets
 COPY --from=builder /workspace/apps/nextjs-app/.next/standalone ./
 COPY --from=builder /workspace/apps/nextjs-app/.next/static    ./.next/static
+COPY --from=builder /workspace/apps/nextjs-app/public        ./public
 
 # ─── reuse deps from the deps stage ───
 COPY --from=deps /workspace/node_modules ./node_modules
