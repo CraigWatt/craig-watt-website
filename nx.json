@@ -2,36 +2,23 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "outputs": [
-        "{projectRoot}/.next"
-      ],
+      "outputs": ["{projectRoot}/.next"],
       "cache": true
     },
     "build-storybook": {
-      "outputs": [
-        "{projectRoot}/storybook-static"
-      ],
+      "outputs": ["{projectRoot}/storybook-static"],
       "cache": true
     },
     "test": {
-      "outputs": [
-        "{projectRoot}/coverage"
-      ],
+      "outputs": ["{projectRoot}/coverage"],
       "cache": true
     },
     "lint": {
       "cache": true
     },
     "e2e-ci--**/*": {
-      "dependsOn": [
-        "^build"
-      ]
+      "dependsOn": ["^build"]
     }
-=======
-    "test": { "outputs": ["{projectRoot}/coverage"], "cache": true },
-    "lint": { "cache": true },
-    "e2e-ci--**/*": { "dependsOn": ["^build"] }
->>>>>>> e76ab3923546073300455a1903612b2f89415051
   },
   "plugins": [
     {
@@ -54,12 +41,11 @@
         "watchDepsTargetName": "watch-deps"
       }
     },
-    { "plugin": "@nx/playwright/plugin", "options": { "targetName": "e2e" } },
-    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
-    { "plugin": "@nx/jest/plugin", "options": { "targetName": "test" } }
+    { "plugin": "@nx/playwright/plugin",   "options": { "targetName": "e2e" } },
+    { "plugin": "@nx/eslint/plugin",       "options": { "targetName": "lint" } },
+    { "plugin": "@nx/jest/plugin",         "options": { "targetName": "test" } }
   ],
   "generators": {
-<<<<<<< HEAD
     "@nx/next": {
       "application": {
         "style": "none",
@@ -68,9 +54,4 @@
     }
   },
   "nxCloudId": "6880bfb5dec2964b27d8d62e"
-=======
-    "@nx/next": { "application": { "style": "none", "linter": "eslint" } }
-  },
-  "nxCloudId": "6880c01c2caf789e4fe9d834"
->>>>>>> e76ab3923546073300455a1903612b2f89415051
 }
