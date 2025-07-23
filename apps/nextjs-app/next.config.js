@@ -1,3 +1,4 @@
+// apps/nextjs-app/next.config.js
 // @ts-check
 
 import { composePlugins, withNx } from '@nx/next';
@@ -11,40 +12,16 @@ const nextConfig = {
     // Set this to true if you would like to use SVGR
     svgr: false,
   },
+
   // ⚠️ Skip type-check errors during build to unblock CI temporarily
   typescript: {
     ignoreBuildErrors: true,
   },
+
   // ⚠️ Skip ESLint checks during build to unblock CI temporarily
   eslint: {
     ignoreDuringBuilds: true,
   },
 };
 
-const plugins = [
-  // Add more Next.js plugins to this list if needed.
-  withNx,
-];
-
-export default composePlugins(...plugins)(nextConfig);
-
-// what things where BEFORE GITHUB ACTIONS BLOCKER
-
-// // @ts-check
-
-// import { composePlugins, withNx } from '@nx/next';
-
-// /** @type {import('@nx/next/plugins/with-nx').WithNxOptions} */
-// const nextConfig = {
-//   nx: {
-//     // Set this to true if you would like to to use SVGR
-//     svgr: false,
-//   },
-// };
-
-// const plugins = [
-//   // Add more Next.js plugins to this list if needed.
-//   withNx,
-// ];
-
-// export default composePlugins(...plugins)(nextConfig);
+export default composePlugins(withNx)(nextConfig);

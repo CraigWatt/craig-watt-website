@@ -50,7 +50,7 @@ COPY --from=builder /workspace/apps/nextjs-app/public ./public
 ENV NODE_ENV=production
 EXPOSE 3000
 
-# Debug
+# Debugging: List contents of public/images to verify assets
 RUN ls -lR ./public/images
 
 CMD ["node", "server.js"]
