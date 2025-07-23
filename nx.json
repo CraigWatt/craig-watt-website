@@ -2,22 +2,30 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "outputs": ["{projectRoot}/.next"],
+      "outputs": [
+        "{projectRoot}/.next"
+      ],
       "cache": true
     },
     "build-storybook": {
-      "outputs": ["{projectRoot}/storybook-static"],
+      "outputs": [
+        "{projectRoot}/storybook-static"
+      ],
       "cache": true
     },
     "test": {
-      "outputs": ["{projectRoot}/coverage"],
+      "outputs": [
+        "{projectRoot}/coverage"
+      ],
       "cache": true
     },
     "lint": {
       "cache": true
     },
     "e2e-ci--**/*": {
-      "dependsOn": ["^build"]
+      "dependsOn": [
+        "^build"
+      ]
     }
   },
   "plugins": [
@@ -67,5 +75,6 @@
         "linter": "eslint"
       }
     }
-  }
+  },
+  "nxCloudId": "6880bfb5dec2964b27d8d62e"
 }
