@@ -1,23 +1,18 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
-<<<<<<< HEAD
     "build": {
       "outputs": [
         "{projectRoot}/.next"
       ],
       "cache": true
     },
-=======
-    "build": { "outputs": ["{projectRoot}/.next"], "cache": true },
->>>>>>> e76ab3923546073300455a1903612b2f89415051
     "build-storybook": {
       "outputs": [
         "{projectRoot}/storybook-static"
       ],
       "cache": true
     },
-<<<<<<< HEAD
     "test": {
       "outputs": [
         "{projectRoot}/coverage"
