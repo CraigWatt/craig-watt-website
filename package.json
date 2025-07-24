@@ -36,7 +36,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "stylus": "npm:empty-npm-package@1.0.0",
+    "stylus": "0.64.0",
     "@babel/core": "^7.28.0",
     "@chromatic-com/storybook": "^4.0.1",
     "@eslint/eslintrc": "^3.3.1",
@@ -94,6 +94,7 @@
     "typescript-eslint": "^8.38.0"
   },
   "overrides": {
+    "stylus": "0.64.0",
     "glob": "^9.0.0",
     "rimraf": "^6.0.1",
     "inflight": "^2.0.0",
