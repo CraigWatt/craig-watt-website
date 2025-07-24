@@ -5,7 +5,10 @@
   "main": "next.config.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "generate-images": "tsx scripts/generate-images.ts"
+    "generate-images": "tsx scripts/generate-images.ts",
+    "dev":   "nx serve nextjs-app",
+    "build": "nx build nextjs-app",
+    "start": "nx serve nextjs-app:start"
   },
   "keywords": [],
   "author": "",

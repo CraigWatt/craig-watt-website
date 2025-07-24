@@ -13,14 +13,12 @@ const nextConfig = {
     svgr: false,
   },
 
-  // ⚠️ Skip type-check errors during build to unblock CI temporarily
+  // ⚠️
   typescript: {
-    ignoreBuildErrors: true,
   },
 
-  // ⚠️ Skip ESLint checks during build to unblock CI temporarily
+  // ⚠️
   eslint: {
-    ignoreDuringBuilds: true,
   },
 };
 
