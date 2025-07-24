@@ -316,7 +316,8 @@ export const Navbar = () => {
         </NavbarMenuItem>
         {mobileFrameworkOpen &&
           frameworkSwitcher.options.map((option) => {
-            const ext = option.href.startsWith('http');
+            // not sure what or why this ext was ever put here, so keeping it commented out
+            // const ext = option.href.startsWith('http');
             const isCurrent = option.label === frameworkSwitcher.current;
             return (
               <NavbarMenuItem key={option.label}>

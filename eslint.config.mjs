@@ -1,12 +1,17 @@
 import nx from '@nx/eslint-plugin';
 
 export default [
+  // 1) IGNORE GENERATED ARTIFACTS
+  {
+    ignores: ['**/.next/**', '**/dist/**'],
+  },
+
+  // 2) NX “flat” base configs
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
-  {
-    ignores: ['**/dist'],
-  },
+
+  // 3) Enforce module boundaries
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
     rules: {
@@ -25,6 +30,8 @@ export default [
       ],
     },
   },
+
+  // 4) Your other overrides (if any)
   {
     files: [
       '**/*.ts',
@@ -36,7 +43,8 @@ export default [
       '**/*.cjs',
       '**/*.mjs',
     ],
-    // Override or add rules here
-    rules: {},
+    rules: {
+      // add project-specific tweaks here
+    },
   },
 ];
