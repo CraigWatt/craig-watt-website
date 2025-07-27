@@ -16,7 +16,6 @@ RUN npm ci --ignore-scripts
 FROM deps AS builder
 WORKDIR /workspace
 
-# Bring in your secrets at build time
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -30,13 +29,12 @@ ENV \
   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
   RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
 
-# Copy everything else & build
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# Re‐flatten the monorepo’s standalone bundle into .next/standalone
-RUN mkdir -p .next/standalone \
- && cp -r apps/nextjs-app/.next/standalone/apps/nextjs-app/* .next/standalone/
+# Flatten the standalone output
+RUN mkdir -p apps/nextjs-app/.next/standalone_flat && \
+    cp -r apps/nextjs-app/.next/standalone/* apps/nextjs-app/.next/standalone_flat
 
 # ====================
 # Stage 3: runner
