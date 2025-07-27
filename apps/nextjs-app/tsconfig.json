@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
     "strict": true,
@@ -10,25 +10,29 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "composite": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
     "**/*.js",
     "**/*.jsx",
     "**/*.ts",
     "**/*.tsx",
-    "../../apps/nextjs-app/.next/types/**/*.ts",
     "../../dist/apps/nextjs-app/.next/types/**/*.ts",
     "next-env.d.ts",
     ".next/types/**/*.ts"
@@ -40,10 +44,5 @@
     "**/*.test.ts",
     "**/*.stories.ts",
     "**/*.stories.js"
-  ],
-  "references": [
-    {
-      "path": "./tsconfig.storybook.json"
-    }
   ]
 }
