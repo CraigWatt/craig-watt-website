@@ -1,14 +1,4 @@
 # ====================
-# Stage 1: deps
-# ====================
-FROM node:20-slim AS deps
-WORKDIR /workspace
-
-COPY package.json package-lock.json nx.json tsconfig.json ./
-COPY apps/nextjs-app/package.json apps/nextjs-app/
-RUN npm ci --ignore-scripts
-
-# ====================
 # Stage 2: builder
 # ====================
 FROM deps AS builder
@@ -30,11 +20,10 @@ ENV \
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# collect the standalone server bundle (server.js + package.json)
-# then install only prod deps
+# copy the standalone server bundle *from* the nested apps/nextjs-app folder
 RUN mkdir /standalone \
- && cp -r apps/nextjs-app/.next/standalone/* /standalone \
- && cd /standalone \
+ && cp -r apps/nextjs-app/.next/standalone/apps/nextjs-app /standalone \
+ && cd /standalone/nextjs-app \
  && npm install --omit=dev
 
 # ====================
@@ -43,10 +32,10 @@ RUN mkdir /standalone \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# bring in standalone bundle (includes node_modules now)
-COPY --from=builder /standalone/ ./
+# bring in the server bundle, now with its node_modules (including next)
+COPY --from=builder /standalone/nextjs-app/ ./
 
-# static assets + public
+# static assets & public
 RUN mkdir -p .next/static
 COPY --from=builder /workspace/apps/nextjs-app/.next/static/ .next/static/
 COPY --from=builder /workspace/apps/nextjs-app/public/ public/

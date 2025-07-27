@@ -106,6 +106,16 @@ jobs:
           echo "=== .next in /app ==="
           docker run --rm debug-nextjs-app:ci ls -1 /app/.next || echo "(missing)"
 
+      - name: 🔍 Verify Next in node_modules
+        run: |
+          echo "=== Checking that next is installed ==="
+          if docker run --rm debug-nextjs-app:ci test -d /app/node_modules/next; then
+            echo "✅ next found in node_modules"
+          else
+            echo "❌ next NOT found in node_modules!"
+            exit 1
+          fi
+
       - name: 🛑 Validate `/app` Structure
         run: |
           set -e
