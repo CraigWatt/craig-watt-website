@@ -29,14 +29,17 @@ ENV \
   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
   RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
 
-# copy everything & build the Next app in‐place
+# Copy everything & build the Next app in‐place
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# flatten the standalone bundle (handle both nested & flat layouts)
+# Flatten the standalone output so that
+# server.js, package.json and node_modules
+# all sit at the root of `.next/standalone`
 RUN cd apps/nextjs-app/.next/standalone && \
     if [ -d apps/nextjs-app ]; then \
-      mv apps/nextjs-app/* . && rm -rf apps/nextjs-app; \
+      mv apps/nextjs-app/* . && \
+      rm -rf apps/nextjs-app; \
     fi
 
 # ====================
@@ -45,12 +48,12 @@ RUN cd apps/nextjs-app/.next/standalone && \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# 1) pull in the standalone server bundle
+# 1) standalone server bundle
 COPY --from=builder \
      /workspace/apps/nextjs-app/.next/standalone/server.js \
      ./server.js
 
-# 2) pull in the standalone package.json and node_modules
+# 2) its package.json + node_modules
 COPY --from=builder \
      /workspace/apps/nextjs-app/.next/standalone/package.json \
      ./package.json
