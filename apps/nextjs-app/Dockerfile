@@ -1,61 +1,86 @@
-# 1) deps stage: install all workspace deps
+###############################################################################
+# 1) deps stage: install everything for the workspace
+###############################################################################
 FROM node:20-slim AS deps
-
 WORKDIR /workspace
-COPY package.json package-lock.json nx.json tsconfig.json ./
-COPY apps/nextjs-app/package.json apps/nextjs-app/
+
+# copy root manifests for full dependency install
+COPY package.json        package-lock.json  nx.json  tsconfig.json ./
+# copy only your app’s manifest so npm knows about the workspace
+COPY apps/nextjs-app/package.json    apps/nextjs-app/
+
 RUN npm ci --ignore-scripts
 
-# debug: show top of workspace/node_modules
+# debug: just to be sure
 RUN echo "=== deps: workspace/node_modules snippet ===" \
-  && ls -1R /workspace/node_modules | head -n 30
+  && ls -1R node_modules | head -n50
 
-# 2) builder stage: build Next.js
+###############################################################################
+# 2) builder stage: compile the Next.js app
+###############################################################################
 FROM deps AS builder
-
 WORKDIR /workspace
+
+# bring in your source
 COPY . .
+
 RUN npx nx build nextjs-app --configuration=production
 
-# debug: show built standalone output
+# debug: inspect .next/standalone
 RUN echo "=== builder: .next/standalone tree ===" \
   && ls -R apps/nextjs-app/.next/standalone
 
-# 3) standalone stage: prepare standalone server + its own node_modules
+# prepare a flattened /standalone snapshot
+RUN mkdir /standalone \
+  && cp -r apps/nextjs-app/.next/standalone/* /standalone
+
+# debug:
+RUN echo "=== builder: /standalone before npm ci ===" \
+  && ls -1 /standalone
+
+###############################################################################
+# 3) standalone stage: pull in *real* runtime deps
+###############################################################################
 FROM node:20-slim AS standalone
-
 WORKDIR /standalone
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/package.json ./
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/server.js   ./
 
-# install only prod deps (pulls in next, react, etc)
-RUN echo "=== standalone: before npm install ===" \
-  && ls -1 \
-  && npm install --omit=dev --no-audit --no-fund \
-  && echo "=== standalone: node_modules tree ===" \
-  && ls -1 node_modules | head -n 30
+# copy only what Next’s standalone build needs
+COPY --from=builder /standalone/package.json ./
+COPY --from=builder /standalone/server.js    ./
 
+# copy _your_ lockfile+manifest so npm ci will pull in next/react/etc
+COPY --from=deps     /workspace/package.json       ./package.json
+COPY --from=deps     /workspace/package-lock.json  ./package-lock.json
+
+RUN npm ci --omit=dev --no-audit --no-fund
+
+# debug: verify next is truly here
+RUN echo "=== standalone: node_modules snippet ===" \
+  && ls -1 node_modules | grep -E "^(next|react|react-dom)"
+
+###############################################################################
 # 4) final runner image
+###############################################################################
 FROM node:20-slim AS runner
-
 WORKDIR /app
 
-# pull in standalone server + its deps
+# copy the standalone server snapshot
 COPY --from=standalone /standalone/server.js    ./
 COPY --from=standalone /standalone/package.json ./
 COPY --from=standalone /standalone/node_modules ./node_modules
 
-# critical: bring in the full build output
-COPY --from=builder /workspace/apps/nextjs-app/.next     ./.next
+# copy the static build output and your public folder
+RUN mkdir -p .next/static
+COPY --from=builder /workspace/apps/nextjs-app/.next/static .next/static
+COPY --from=builder /workspace/apps/nextjs-app/public      public
 
-# copy static assets
-COPY --from=builder /workspace/apps/nextjs-app/public   public
-
-# debug: final layout
+# final sanity check
 RUN echo "=== runner: final /app tree ===" \
-  && ls -R . | head -n 50 \
-  && test -d .next && echo "✅ .next present" || (echo "❌ .next missing!" && exit 1)
+  && ls -R . | head -n50 \
+  && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
 
 ENV PORT=3000
 EXPOSE 3000
-CMD ["node", "server.js"]
+
+# this is critical—run the standalone server, not `next start`
+CMD ["node","server.js"]
