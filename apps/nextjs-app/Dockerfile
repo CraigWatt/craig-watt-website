@@ -4,9 +4,13 @@
 FROM node:20-slim AS deps
 WORKDIR /workspace
 
-# install workspace deps so we can build
-COPY package.json   package-lock.json  nx.json   tsconfig.json ./
-COPY apps/nextjs-app/package.json        apps/nextjs-app/
+# copy your monorepo root manifest + lock
+COPY package.json        package-lock.json  nx.json   tsconfig.json ./
+
+# copy the Next.js app’s own manifest + lock too
+COPY apps/nextjs-app/package.json  apps/nextjs-app/package-lock.json  apps/nextjs-app/
+
+# install workspace deps (no scripts, so build remains hermetic)
 RUN npm ci --ignore-scripts
 
 # --------------------
@@ -15,6 +19,7 @@ RUN npm ci --ignore-scripts
 FROM deps AS builder
 WORKDIR /workspace
 
+# bring in secrets
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -28,13 +33,14 @@ ENV \
   NEXT_PUBLIC_RECAPTCHA_SITE_KEY=$NEXT_PUBLIC_RECAPTCHA_SITE_KEY \
   RECAPTCHA_SECRET_KEY=$RECAPTCHA_SECRET_KEY
 
-# bring in all sources & build
+# copy everything & build
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# prune dev deps for the app (this installs only prod deps into apps/nextjs-app/node_modules)
+# now switch into the app folder and install only prod deps
+# this uses the lockfile we copied in Stage 1, so next@… will be pulled in
 RUN cd apps/nextjs-app \
- && npm install --omit=dev
+ && npm ci --omit=dev
 
 # --------------------
 # Stage 3: runtime
@@ -42,17 +48,17 @@ RUN cd apps/nextjs-app \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# 1) copy the built server bundle
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/server.js      .
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/package.json   .
+# 1) copy the built standalone server bundle
+COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/server.js    .
+COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/package.json .
 
-# 2) copy the pruned prod node_modules (this will include 'next')
-COPY --from=builder /workspace/apps/nextjs-app/node_modules   ./node_modules
+# 2) bring in the freshly pruned prod node_modules (includes next!)
+COPY --from=builder /workspace/apps/nextjs-app/node_modules ./node_modules
 
 # 3) static assets + public
 RUN mkdir -p .next/static
-COPY --from=builder /workspace/apps/nextjs-app/.next/static/  .next/static/
-COPY --from=builder /workspace/apps/nextjs-app/public/       public/
+COPY --from=builder /workspace/apps/nextjs-app/.next/static .next/static
+COPY --from=builder /workspace/apps/nextjs-app/public    public
 
 ENV NODE_ENV=production
 EXPOSE 3000
