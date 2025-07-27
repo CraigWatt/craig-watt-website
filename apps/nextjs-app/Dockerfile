@@ -30,12 +30,12 @@ ENV \
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# collect the standalone server bundle
-# (server.js + package.json + list of prod deps)
+# collect the standalone server bundle (server.js + package.json)
+# then install only prod deps
 RUN mkdir /standalone \
  && cp -r apps/nextjs-app/.next/standalone/* /standalone \
  && cd /standalone \
- && npm ci --omit=dev
+ && npm install --omit=dev
 
 # ====================
 # Stage 3: runtime
@@ -43,8 +43,10 @@ RUN mkdir /standalone \
 FROM node:20-slim AS runner
 WORKDIR /app
 
+# bring in standalone bundle (includes node_modules now)
 COPY --from=builder /standalone/ ./
 
+# static assets + public
 RUN mkdir -p .next/static
 COPY --from=builder /workspace/apps/nextjs-app/.next/static/ .next/static/
 COPY --from=builder /workspace/apps/nextjs-app/public/ public/
