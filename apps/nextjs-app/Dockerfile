@@ -15,7 +15,7 @@ RUN npm ci --ignore-scripts
 FROM deps AS builder
 WORKDIR /workspace
 
-# pass your secrets in as build-args
+# build-time secrets
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -33,9 +33,9 @@ ENV \
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# copy the standalone bundle out to a fixed location
+# copy the standalone server bundle into a flat /standalone dir
 RUN mkdir /standalone \
- && cp -r apps/nextjs-app/.next/standalone/* /standalone
+ && cp -r apps/nextjs-app/.next/standalone/apps/nextjs-app/* /standalone
 
 # ====================
 # Stage 3: runtime
@@ -43,17 +43,18 @@ RUN mkdir /standalone \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# 1) bring in the standalone bundle
+# 1) bring in the standalone bundle (includes server.js, package.json, node_modules)
 COPY --from=builder /standalone/ ./
 
-# 2) bring in your static assets
+# 2) bring in your Next.js static output
 RUN mkdir -p .next/static
 COPY --from=builder /workspace/apps/nextjs-app/.next/static/ .next/static/
 
 # 3) bring in your public folder
-COPY --from=builder /workspace/apps/nextjs-app/public/ public/
+COPY --from=builder /workspace/apps/nextjs-app/public/ ./public/
 
 ENV NODE_ENV=production
 EXPOSE 3000
 
+# start the standalone server
 CMD ["node", "server.js"]
