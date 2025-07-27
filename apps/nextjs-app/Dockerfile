@@ -1,7 +1,7 @@
 # ====================
 # Stage 1: deps
 # ====================
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /workspace
 
 # Only copy monorepo manifests (maximizes layer‐caching)
@@ -36,7 +36,7 @@ RUN npx nx build nextjs-app --configuration=production
 # ====================
 # Stage 3: runner
 # ====================
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
 # 1) Pull in the standalone server bundle (with its own package.json + node_modules + server.js)
