@@ -45,18 +45,26 @@ RUN cd apps/nextjs-app/.next/standalone && \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# Pull in the flattened standalone server bundle (with its own package.json + node_modules + server.js)
+# 1) pull in the standalone server bundle
 COPY --from=builder \
-     /workspace/apps/nextjs-app/.next/standalone/ \
-     ./
+     /workspace/apps/nextjs-app/.next/standalone/server.js \
+     ./server.js
 
-# Next’s runtime static assets (_next/static)
+# 2) pull in the standalone package.json and node_modules
+COPY --from=builder \
+     /workspace/apps/nextjs-app/.next/standalone/package.json \
+     ./package.json
+COPY --from=builder \
+     /workspace/apps/nextjs-app/.next/standalone/node_modules \
+     ./node_modules
+
+# 3) Next’s runtime static assets (_next/static)
 RUN mkdir -p .next/static
 COPY --from=builder \
      /workspace/apps/nextjs-app/.next/static/ \
      ./.next/static/
 
-# Your public folder (images, icons, etc)
+# 4) Your public folder (images, icons, etc)
 COPY --from=builder \
      /workspace/apps/nextjs-app/public/ \
      ./public/
