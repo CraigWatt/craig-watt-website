@@ -1,77 +1,89 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# 1) deps stage: install ALL workspace deps so Next can produce its own standalone
-# ─────────────────────────────────────────────────────────────────────────────
+# 1) deps stage: install everything for the workspace
+# ---------------------------------------------------
 FROM node:20-slim AS deps
+
 WORKDIR /workspace
 
-# copy only workspace root manifests
+# copy root manifests for full dependency install
 COPY package.json package-lock.json nx.json tsconfig.json ./
-
-# copy the Next app’s own package.json (only for workspace install)
+# copy just your app’s manifest so CI knows about workspaces
 COPY apps/nextjs-app/package.json apps/nextjs-app/
 
-# install everything in the monorepo (so /workspace/node_modules has next, react, etc)
+# install *all* workspace deps (including next, react, react-dom)
 RUN npm ci --ignore-scripts
 
-# debug: show a snippet of workspace/node_modules
-RUN echo "=== deps: workspace/node_modules snippet ===" && \
-    ls -1R /workspace/node_modules | head -n50
+# debug: show top-level node_modules
+RUN echo "=== deps: workspace/node_modules snippet ===" \
+ && ls -1R node_modules | head -n50
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 2) builder stage: build Next and extract its standalone bundle
-# ─────────────────────────────────────────────────────────────────────────────
+# 2) builder stage: compile the Next.js app
+# ------------------------------------------
 FROM deps AS builder
+
 WORKDIR /workspace
 
-# copy all source
+# copy rest of the code
 COPY . .
 
-# build with Nx -> this generates .next in apps/nextjs-app/.next
+# build production output
 RUN npx nx build nextjs-app --configuration=production
 
-# debug: show the standalone output tree
-RUN echo "=== builder: .next/standalone tree ===" && \
-    ls -R apps/nextjs-app/.next/standalone
+# debug: inspect the standalone output Next generated
+RUN echo "=== builder: .next/standalone tree ===" \
+ && ls -R apps/nextjs-app/.next/standalone
 
-# copy the standalone server bundle + its package.json into /standalone
-RUN mkdir /standalone && \
-    cp -r apps/nextjs-app/.next/standalone/* /standalone
+# prepare /standalone with the minimal Next standalone
+RUN mkdir /standalone \
+ && cp -r apps/nextjs-app/.next/standalone/* /standalone
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 3) standalone stage: install ONLY the runtime deps that Next declared
-# ─────────────────────────────────────────────────────────────────────────────
+# debug: verify standalone contents
+RUN echo "=== builder: /standalone before npm ci ===" \
+ && ls -1 /standalone
+
+# 3) standalone stage: pull in *real* runtime deps
+# -------------------------------------------------
 FROM node:20-slim AS standalone
+
 WORKDIR /standalone
 
-# bring in Next’s standalone package.json + server.js
-COPY --from=builder /standalone/package.json .
-COPY --from=builder /standalone/server.js .
+# bring in Next’s own package.json + server.js
+COPY --from=builder /standalone/package.json ./
+COPY --from=builder /standalone/server.js    ./
 
-# run install (not ci, because there is no lockfile here)
-RUN echo "=== standalone: before npm install ===" && ls -1 && \
-    npm install --omit=dev && \
-    echo "=== standalone: node_modules tree ===" && ls -1 node_modules
+# **critical**: also copy the **root** lockfile and package.json
+# so npm will install next, react, react-dom, etc.
+COPY --from=deps     /workspace/package.json       ./package.json
+COPY --from=deps     /workspace/package-lock.json  ./package-lock.json
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 4) runner stage: assemble the final minimal image
-# ─────────────────────────────────────────────────────────────────────────────
+# install only prod deps (includes next because of the real lockfile)
+RUN npm ci --omit=dev
+
+# debug: verify next is present
+RUN echo "=== standalone: node_modules snippet ===" \
+ && ls -1 node_modules | grep -E "^(next|react|react-dom|@?[^/]+)"
+
+# 4) final runner image
+# ----------------------
 FROM node:20-slim AS runner
+
 WORKDIR /app
 
-# copy the server.js + runtime node_modules
-COPY --from=standalone /standalone/server.js .
+# copy built server + node_modules from standalone
+COPY --from=standalone /standalone/server.js    ./
+COPY --from=standalone /standalone/package.json ./
 COPY --from=standalone /standalone/node_modules ./node_modules
-COPY --from=standalone /standalone/package.json .
 
-# copy the static assets
+# copy static assets + static build output
 RUN mkdir -p .next/static
 COPY --from=builder /workspace/apps/nextjs-app/.next/static .next/static
 COPY --from=builder /workspace/apps/nextjs-app/public public
 
-# debug final layout
-RUN echo "=== runner: final /app tree ===" && ls -R . | head -n50 && \
-    test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
+# debug: final check
+RUN echo "=== runner: final /app tree ===" \
+ && ls -R . | head -n50 \
+ && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
 
-# tell Docker which port to expose and how to run
+# finally, run
+ENV PORT=3000
 EXPOSE 3000
 CMD ["node", "server.js"]
