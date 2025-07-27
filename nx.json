@@ -14,7 +14,10 @@
       "cache": true
     },
     "lint": {
-      "cache": true
+      // never use a stale/remote-only graph
+      "cache": false,
+      // ensure a local build (and thus graph) runs first
+      "dependsOn": ["^build"]
     },
     "e2e-ci--**/*": {
       "dependsOn": ["^build"]
@@ -31,19 +34,17 @@
       }
     },
     {
-      "plugin": "@nx/next/plugin",
-      "options": {
-        "startTargetName": "start",
-        "buildTargetName": "build",
-        "devTargetName": "serve",
-        "serveStaticTargetName": "serve-static",
-        "buildDepsTargetName": "build-deps",
-        "watchDepsTargetName": "watch-deps"
-      }
+      "plugin": "@nx/playwright/plugin",
+      "options": { "targetName": "e2e" }
     },
-    { "plugin": "@nx/playwright/plugin", "options": { "targetName": "e2e" } },
-    { "plugin": "@nx/eslint/plugin", "options": { "targetName": "lint" } },
-    { "plugin": "@nx/jest/plugin", "options": { "targetName": "test" } }
+    {
+      "plugin": "@nx/eslint/plugin",
+      "options": { "targetName": "lint" }
+    },
+    {
+      "plugin": "@nx/jest/plugin",
+      "options": { "targetName": "test" }
+    }
   ],
   "generators": {
     "@nx/next": {

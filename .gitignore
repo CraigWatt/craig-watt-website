@@ -83,3 +83,5 @@ backend.local.tf
 **/*.tfvars
 **/backend.local.tf
 bootstrap/backend.local.tf
+
+/dist

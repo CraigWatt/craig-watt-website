@@ -1,5 +1,18 @@
 # craigwatt.co.uk
 
+July 27th 2025 update:
+
+npx nx serve nextjs-app                 Starts the Next.js dev server (equivalent to next dev)
+npx nx build nextjs-app                 Produces an optimized production build (static + SSG)
+npx nx start nextjs-app                 Runs the built app in production mode (next start)
+npx nx lint nextjs-app                  Runs ESLint (using your Nx + Next.js config)
+npx nx test nextjs-app                  Runs Jest unit tests
+npx nx run nextjs-app:storybook         Serves your Storybook UI on the port you choose
+npx nx run nextjs-app:build-storybook   Produces a static Storybook build
+
+
+
+
 May 1st 2025 update:
 
 Handy commands:
