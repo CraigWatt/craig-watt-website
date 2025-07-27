@@ -10,8 +10,26 @@ npx nx test nextjs-app                  Runs Jest unit tests
 npx nx run nextjs-app:storybook         Serves your Storybook UI on the port you choose
 npx nx run nextjs-app:build-storybook   Produces a static Storybook build
 
+docker build \
+  --build-arg MAILERSEND_API_KEY=foobar \
+  --build-arg CONTACT_EMAIL_TO=you@example.com \
+  --build-arg CONTACT_EMAIL_FROM=me@example.com \
+  --build-arg NEXT_PUBLIC_RECAPTCHA_SITE_KEY=abcd \
+  --build-arg RECAPTCHA_SECRET_KEY=secret123 \
+  -f apps/nextjs-app/Dockerfile \
+  -t nextjs-app:local \
+  .
 
+docker run --rm -it nextjs-app:local sh
 
+# inside the shell:
+ls -R .next/standalone
+ls -R .next/static
+ls -R public/images
+
+docker run --rm nextjs-app:local ls -R /app
+
+docker run --rm -it nextjs-app:local sh -c "ls -R /app && ls -R /app/.next/static && ls -R /app/public/images"
 
 May 1st 2025 update:
 
