@@ -33,32 +33,30 @@ ENV \
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
+# flatten the standalone bundle (handle both nested & flat layouts)
+RUN cd apps/nextjs-app/.next/standalone && \
+    if [ -d apps/nextjs-app ]; then \
+      mv apps/nextjs-app/* . && rm -rf apps/nextjs-app; \
+    fi
+
 # ====================
 # Stage 3: runner
 # ====================
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# 1) Pull in the standalone server bundle (with its own package.json + node_modules + server.js)
+# Pull in the flattened standalone server bundle (with its own package.json + node_modules + server.js)
 COPY --from=builder \
-     /workspace/apps/nextjs-app/.next/standalone/apps/nextjs-app/ \
+     /workspace/apps/nextjs-app/.next/standalone/ \
      ./
 
-# 2) And its node_modules + package.json
-COPY --from=builder \
-     /workspace/apps/nextjs-app/.next/standalone/node_modules/ \
-     ./node_modules/
-COPY --from=builder \
-     /workspace/apps/nextjs-app/.next/standalone/package.json \
-     ./package.json
-
-# 3) Next’s runtime static assets (_next/static)
+# Next’s runtime static assets (_next/static)
 RUN mkdir -p .next/static
 COPY --from=builder \
      /workspace/apps/nextjs-app/.next/static/ \
      ./.next/static/
 
-# 4) Your public folder (images, icons, etc)
+# Your public folder (images, icons, etc)
 COPY --from=builder \
      /workspace/apps/nextjs-app/public/ \
      ./public/
