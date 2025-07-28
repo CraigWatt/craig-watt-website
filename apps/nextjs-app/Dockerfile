@@ -64,23 +64,30 @@ RUN echo "=== standalone: node_modules snippet ===" \
 FROM node:20-slim AS runner
 WORKDIR /app
 
+# give us jq for json edits
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends jq \
+ && rm -rf /var/lib/apt/lists/*
+
 # copy the standalone server snapshot
 COPY --from=standalone /standalone/server.js    ./
 COPY --from=standalone /standalone/package.json ./
 COPY --from=standalone /standalone/node_modules ./node_modules
 
-# copy the static build output and your public folder
-RUN mkdir -p .next/static
-COPY --from=builder /workspace/apps/nextjs-app/.next/static .next/static
-COPY --from=builder /workspace/apps/nextjs-app/public      public
+# copy the full Next.js build output & your public folder
+COPY --from=builder /workspace/apps/nextjs-app/.next ./.next
+COPY --from=builder /workspace/apps/nextjs-app/public  public
 
-# final sanity check
+# sanity check
 RUN echo "=== runner: final /app tree ===" \
-  && ls -R . | head -n50 \
-  && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
+ && ls -R . | head -n50 \
+ && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
+
+# flag package.json as ES module
+RUN jq '. + {"type":"module"}' package.json > package.tmp.json \
+ && mv package.tmp.json package.json
 
 ENV PORT=3000
 EXPOSE 3000
 
-# this is critical—run the standalone server, not `next start`
 CMD ["node","server.js"]
