@@ -12,8 +12,8 @@ npx nx run nextjs-app:build-storybook   Produces a static Storybook build
 
 docker build \
   --build-arg MAILERSEND_API_KEY=foobar \
-  --build-arg CONTACT_EMAIL_TO=you@example.com \
-  --build-arg CONTACT_EMAIL_FROM=me@example.com \
+  --build-arg CONTACT_EMAIL_TO=<you@example.com> \
+  --build-arg CONTACT_EMAIL_FROM=<me@example.com> \
   --build-arg NEXT_PUBLIC_RECAPTCHA_SITE_KEY=abcd \
   --build-arg RECAPTCHA_SECRET_KEY=secret123 \
   -f apps/nextjs-app/Dockerfile \
@@ -22,7 +22,8 @@ docker build \
 
 docker run --rm -it nextjs-app:local sh
 
-# inside the shell:
+## inside the shell
+
 ls -R .next/standalone
 ls -R .next/static
 ls -R public/images

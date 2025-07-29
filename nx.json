@@ -14,9 +14,7 @@
       "cache": true
     },
     "lint": {
-      // never use a stale/remote-only graph
       "cache": false,
-      // ensure a local build (and thus graph) runs first
       "dependsOn": ["^build"]
     },
     "e2e-ci--**/*": {
