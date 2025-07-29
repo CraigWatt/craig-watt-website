@@ -49,12 +49,19 @@ jobs:
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
           RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
           EOF
-
-      - name: Setup Node.js & Build
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
+          node-version-file: '.nvmrc'
+          check-latest: true
+
+      - name: Upgrade npm to v11
+        run: npm install -g npm@11
+
+      - name: Show Node & npm versions
+        run: |
+          node --version
+          npm  --version
 
       - name: Install Dependencies
         run: npm ci
