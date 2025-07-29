@@ -62,8 +62,7 @@ FROM node:20-slim AS standalone
 WORKDIR /standalone
 
 # copy only what Next’s standalone build needs
-COPY --from=builder /standalone/package.json ./
-COPY --from=builder /standalone/server.js    ./
+COPY --from=builder /standalone/server.js ./
 
 # copy _your_ lockfile+manifest so npm ci will pull in next/react/etc
 COPY --from=deps     /workspace/package.json       ./package.json
