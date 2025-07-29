@@ -40,9 +40,10 @@ Handy commands:
 
 Sat 11 Jan 2025 update:
 
-README.md formatting cheatsheet: https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+README.md formatting cheat sheet: <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet>
 
-## Urgent notes to remain mindfull of:
+## Urgent notes to remain mindfull of
+
 In a typical Nx setup:
 
 Root node_modules is the single source of truth. All dependencies should ideally be installed at the root so that the workspace can manage them efficiently.
