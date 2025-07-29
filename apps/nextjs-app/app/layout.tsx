@@ -5,8 +5,26 @@ import { Navbar } from './components/Navbar';
 import Script from 'next/script';
 
 export const metadata = {
-  title: 'Welcome to nextjs-app',
-  description: '…',
+  title: 'Craig Watt — Observability Engineer',
+  description:
+    'Building scalable monitoring with Grafana, writing about code & tackling hard challenges.',
+  openGraph: {
+    title: 'Craig Watt — Observability Engineer',
+    description:
+      'Building scalable monitoring with Grafana, writing about code & tackling hard challenges.',
+    url: 'https://craigwatt.co.uk',
+    siteName: 'Craig Watt Website',
+    images: [
+      {
+        url: 'https://craigwatt.co.uk/images/avatar.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Craig Watt avatar & code screenshot',
+      },
+    ],
+    locale: 'en_GB',
+    type: 'website',
+  },
 };
 
 export default function RootLayout({
