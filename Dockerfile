@@ -90,6 +90,7 @@ RUN echo "=== standalone: node_modules snippet ===" \
 
 ###############################################################################
 # 4) final runner image (Distroless)
+#https://github.com/GoogleContainerTools/distroless
 ###############################################################################
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
