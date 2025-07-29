@@ -6,8 +6,6 @@ WORKDIR /workspace
 
 # copy root manifests for full dependency install
 COPY package.json        package-lock.json  nx.json  tsconfig.json ./
-# copy only your app’s manifest so npm knows about the workspace
-COPY apps/nextjs-app/package.json    apps/nextjs-app/
 
 RUN npm ci --ignore-scripts
 
