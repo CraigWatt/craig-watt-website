@@ -112,5 +112,7 @@ COPY --from=builder /workspace/apps/nextjs-app/public  public
 ENV PORT=3000
 # EXPOSE 3000
 
-CMD ["node","server.js"]
-
+#slim only
+# CMD ["node","server.js"]
+#distroless
+CMD ["server.js"]
