@@ -60,7 +60,9 @@ RUN echo "=== builder: .next/standalone tree ===" \
 
 # 2.3) Extract the standalone snapshot
 RUN mkdir /standalone \
- && cp -r apps/nextjs-app/.next/standalone/* /standalone
+ && cp -r apps/nextjs-app/.next/standalone/* /standalone \
+ # now also include your app’s own manifest so standalone/package.json exists
+ && cp apps/nextjs-app/package.json /standalone/package.json
 
 # debug: show what landed in /standalone
 RUN echo "=== builder: /standalone before npm ci ===" \
