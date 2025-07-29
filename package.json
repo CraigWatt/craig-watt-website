@@ -51,7 +51,6 @@
     "@nx/storybook": "21.3.9",
     "@nx/vue": "^21.3.9",
     "@nx/web": "^21.3.9",
-    "@nxext/svelte": "21.0.0",
     "@playwright/test": "^1.54.1",
     "@storybook/addon-links": "^9.0.18",
     "@storybook/builder-vite": "^9.0.18",
