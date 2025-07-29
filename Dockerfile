@@ -55,6 +55,13 @@ RUN mkdir /standalone \
 RUN echo "=== builder: /standalone before npm ci ===" \
   && ls -1 /standalone
 
+# Extra safe: clear all secrets from the builder stage's ENV
+ENV MAILERSEND_API_KEY="" \
+    CONTACT_EMAIL_TO="" \
+    CONTACT_EMAIL_FROM="" \
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY="" \
+    RECAPTCHA_SECRET_KEY=""
+
 ###############################################################################
 # 3) standalone stage: pull in *real* runtime deps
 ###############################################################################
