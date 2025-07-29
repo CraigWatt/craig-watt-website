@@ -1,3 +1,17 @@
+# Declare build args (used by docker build --build-arg)
+ARG MAILERSEND_API_KEY
+ARG CONTACT_EMAIL_TO
+ARG CONTACT_EMAIL_FROM
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ARG RECAPTCHA_SECRET_KEY
+
+# Export them as env vars inside the builder stage
+ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
+ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
+ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
+ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+
 ###############################################################################
 # 1) deps stage: install everything for the workspace
 ###############################################################################
