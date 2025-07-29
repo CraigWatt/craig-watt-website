@@ -91,7 +91,7 @@ RUN echo "=== standalone: node_modules snippet ===" \
 ###############################################################################
 # 4) final runner image (Distroless)
 ###############################################################################
-FROM gcr.io/distroless/nodejs:22 AS runner
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
 
 # copy the standalone server snapshot
