@@ -1,25 +1,36 @@
-# 1) Never send node_modules
-/node_modules
-**/node_modules
+# 1) Ignore all by default
+**
 
-# 2) Ignore all build outputs & static folders
-/dist
-/.nx
-/static
+# 2) Whitelist your app’s package manifests & lockfile
+!package.json
+!package-lock.json
+!apps/nextjs-app/package.json
+!apps/nextjs-app/package-lock.json
 
-# 3) Monorepo metadata & reports
-/nx-deps.html
-/audit.json
-/outdated.json
+# 3) Whitelist Node/NX config that your build needs
+!.nvmrc
+!nx.json
+!tsconfig*.json
+!next.config.js
+!apps/nextjs-app/next.config.js
 
-# 4) Git & CI config
+# 4) Whitelist your source
+!apps/nextjs-app/**
+!libs/**                     # if your app depends on libs/
+
+# 5) Now inside your app, strip out build outputs & env files
+apps/nextjs-app/node_modules
+apps/nextjs-app/.next
+apps/nextjs-app/.env*
+apps/nextjs-app/dist
+apps/nextjs-app/.storybook
+apps/nextjs-app/**/*.log
+
+# 6) Repo-level cruft
 /.git
 /.github
-Dockerfile.*            # in case you have extras
+Dockerfile*
 docker-compose*.yml
-
-# 5) Logs, coverage, editor cruft
 *.log
-coverage/
 .vscode/
-.DS_Store
+/.DS_Store

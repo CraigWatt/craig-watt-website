@@ -54,6 +54,7 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           check-latest: true
+          cache: 'npm'
 
       - name: Upgrade npm to v11
         run: npm install -g npm@11
@@ -67,7 +68,7 @@ jobs:
         run: npm ci
 
       - name: Build Next.js
-        run: npx nx build nextjs-app --configuration=production
+        run: npx nx affected --target=build --configuration=production --base=origin/main
 
       - name: Copy Lockfile into Docker Context
         run: cp package-lock.json apps/nextjs-app/package-lock.json
@@ -147,6 +148,8 @@ jobs:
           context: .
           file: apps/nextjs-app/Dockerfile
           push: true
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
           build-args: |
             MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
             CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
