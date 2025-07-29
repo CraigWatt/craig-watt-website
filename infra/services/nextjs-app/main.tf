@@ -26,7 +26,7 @@ resource "aws_ecs_task_definition" "this" {
       image     = var.container_image
       essential = true
 
-      entryPoint = ["node"]
+      entryPoint = ["/usr/local/bin/node"]
       command    = ["server.js"]
 
       portMappings = [
