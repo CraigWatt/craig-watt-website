@@ -1,3 +1,17 @@
+# 0) declare build-time args…
+ARG MAILERSEND_API_KEY
+ARG CONTACT_EMAIL_TO
+ARG CONTACT_EMAIL_FROM
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ARG RECAPTCHA_SECRET_KEY
+
+# …and immediately export them as real ENV vars
+ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
+ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
+ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
+ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+
 ###############################################################################
 # 1) deps stage: install *all* your monorepo deps from the root lockfile
 ###############################################################################
@@ -19,6 +33,20 @@ RUN echo "=== deps: workspace/node_modules snippet ===" \
 ###############################################################################
 FROM deps AS builder
 WORKDIR /workspace
+
+# re-declare build args for this stage
+ARG MAILERSEND_API_KEY
+ARG CONTACT_EMAIL_TO
+ARG CONTACT_EMAIL_FROM
+ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+ARG RECAPTCHA_SECRET_KEY
+
+# export them so Next can read process.env during build
+ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
+ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
+ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
+ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
 
 # 2.1) Bring in *all* your source
 COPY . .
