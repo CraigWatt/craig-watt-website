@@ -5,18 +5,18 @@ ARG CONTACT_EMAIL_FROM
 ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
 ARG RECAPTCHA_SECRET_KEY
 
-# …and immediately export them as real ENV vars
-ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
-ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
-ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
-ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
-
 ###############################################################################
 # 1) deps stage: install *all* your monorepo deps from the root lockfile
 ###############################################################################
 FROM node:20-slim AS deps
 WORKDIR /workspace
+
+# immediately export the build-args inside this stage
+ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
+ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
+ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
+ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
 
 # 1.1) Copy your root manifests (including workspaces)
 COPY package.json package-lock.json nx.json tsconfig.json ./
