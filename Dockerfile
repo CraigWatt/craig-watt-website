@@ -7,8 +7,12 @@ ARG RECAPTCHA_SECRET_KEY
 ###############################################################################
 # 1) deps stage: install everything for the workspace
 ###############################################################################
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /workspace
+
+
+# bump npm to v11 before we install deps
+RUN npm install -g npm@11
 
 # copy root manifests for full dependency install
 COPY package.json        package-lock.json  nx.json  tsconfig.json ./
@@ -65,8 +69,11 @@ ENV MAILERSEND_API_KEY="" \
 ###############################################################################
 # 3) standalone stage: pull in *real* runtime deps
 ###############################################################################
-FROM node:20-slim AS standalone
+FROM node:22-slim AS standalone
 WORKDIR /standalone
+
+# bump npm to v11 before pulling in runtime deps
+RUN npm install -g npm@11
 
 # copy only what Next’s standalone build needs
 COPY --from=builder /standalone/server.js ./
@@ -84,13 +91,8 @@ RUN echo "=== standalone: node_modules snippet ===" \
 ###############################################################################
 # 4) final runner image
 ###############################################################################
-FROM node:20-slim AS runner
+FROM node:22-slim AS runner
 WORKDIR /app
-
-# give us jq for json edits
-RUN apt-get update \
- && apt-get install -y --no-install-recommends jq \
- && rm -rf /var/lib/apt/lists/*
 
 # copy the standalone server snapshot
 COPY --from=standalone /standalone/server.js    ./
@@ -105,10 +107,6 @@ COPY --from=builder /workspace/apps/nextjs-app/public  public
 RUN echo "=== runner: final /app tree ===" \
  && ls -R . | head -n50 \
  && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
-
-# flag package.json as ES module
-RUN jq '. + {"type":"module"}' package.json > package.tmp.json \
- && mv package.tmp.json package.json
 
 ENV PORT=3000
 EXPOSE 3000
