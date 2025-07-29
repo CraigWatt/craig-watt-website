@@ -1,89 +1,60 @@
-# 0) declare build-time args…
-ARG MAILERSEND_API_KEY
-ARG CONTACT_EMAIL_TO
-ARG CONTACT_EMAIL_FROM
-ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-ARG RECAPTCHA_SECRET_KEY
-
 ###############################################################################
-# 1) deps stage: install *all* your monorepo deps from the root lockfile
+# 1) deps stage: install everything for the workspace
 ###############################################################################
 FROM node:20-slim AS deps
 WORKDIR /workspace
 
-# immediately export the build-args inside this stage
-ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
-ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
-ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
-ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
+# copy root manifests for full dependency install
+COPY package.json        package-lock.json  nx.json  tsconfig.json ./
+# copy only your app’s manifest so npm knows about the workspace
+COPY apps/nextjs-app/package.json    apps/nextjs-app/
 
-# 1.1) Copy your root manifests (including workspaces)
-COPY package.json package-lock.json nx.json tsconfig.json ./
-
-# 1.2) Install EVERYTHING (all apps + libs)
 RUN npm ci --ignore-scripts
 
-# debug: list a snippet of your workspace-wide node_modules
+# debug: just to be sure
 RUN echo "=== deps: workspace/node_modules snippet ===" \
   && ls -1R node_modules | head -n50
 
 ###############################################################################
-# 2) builder stage: compile the Next.js app via Nx
+# 2) builder stage: compile the Next.js app
 ###############################################################################
 FROM deps AS builder
 WORKDIR /workspace
 
-# re-declare build args for this stage
-ARG MAILERSEND_API_KEY
-ARG CONTACT_EMAIL_TO
-ARG CONTACT_EMAIL_FROM
-ARG NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-ARG RECAPTCHA_SECRET_KEY
-
-# export them so Next can read process.env during build
-ENV MAILERSEND_API_KEY=${MAILERSEND_API_KEY}
-ENV CONTACT_EMAIL_TO=${CONTACT_EMAIL_TO}
-ENV CONTACT_EMAIL_FROM=${CONTACT_EMAIL_FROM}
-ENV NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-ENV RECAPTCHA_SECRET_KEY=${RECAPTCHA_SECRET_KEY}
-
-# 2.1) Bring in *all* your source
+# bring in your source
 COPY . .
 
-# 2.2) Build only the Next.js app
 RUN npx nx build nextjs-app --configuration=production
 
-# debug: inspect the standalone output directory
+# debug: inspect .next/standalone
 RUN echo "=== builder: .next/standalone tree ===" \
   && ls -R apps/nextjs-app/.next/standalone
 
-# 2.3) Extract the standalone snapshot
+# prepare a flattened /standalone snapshot
 RUN mkdir /standalone \
   && cp -r apps/nextjs-app/.next/standalone/* /standalone
 
-# debug: show what landed in /standalone
+# debug:
 RUN echo "=== builder: /standalone before npm ci ===" \
   && ls -1 /standalone
 
 ###############################################################################
-# 3) standalone stage: install *runtime* deps only
+# 3) standalone stage: pull in *real* runtime deps
 ###############################################################################
 FROM node:20-slim AS standalone
 WORKDIR /standalone
 
-# 3.1) Copy Next’s “standalone” artifacts
+# copy only what Next’s standalone build needs
 COPY --from=builder /standalone/package.json ./
 COPY --from=builder /standalone/server.js    ./
 
-# 3.2) Copy your root lockfile+manifest so npm ci will install next/react/etc
+# copy _your_ lockfile+manifest so npm ci will pull in next/react/etc
 COPY --from=deps     /workspace/package.json       ./package.json
 COPY --from=deps     /workspace/package-lock.json  ./package-lock.json
 
-# 3.3) Install only production deps
 RUN npm ci --omit=dev --no-audit --no-fund
 
-# debug: verify next & React are in node_modules
+# debug: verify next is truly here
 RUN echo "=== standalone: node_modules snippet ===" \
   && ls -1 node_modules | grep -E "^(next|react|react-dom)"
 
@@ -120,3 +91,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 CMD ["node","server.js"]
+
