@@ -1,8 +1,9 @@
+// tsconfig.json (repo root)
 {
   "extends": "./tsconfig.base.json",
-  "ts-node": {
-    "compilerOptions": {
-      "module": "commonjs"
-    }
-  }
+  "files": [],          // no globs here
+  "references": [
+    { "path": "apps/nextjs-app" }
+    // add other workspace projects here as needed
+  ]
 }

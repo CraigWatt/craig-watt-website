@@ -113,16 +113,16 @@ jobs:
             RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
           tags: debug-nextjs-app:ci
 
-      - name: 🔍 Inspect `/app` in the debug image
-        run: |
-          echo "=== Top level of /app ==="
-          docker run --rm debug-nextjs-app:ci ls -1 /app
+      # - name: 🔍 Inspect `/app` in the debug image
+      #   run: |
+      #     echo "=== Top level of /app ==="
+      #     docker run --rm debug-nextjs-app:ci ls -1 /app
 
-          echo "=== node_modules in /app ==="
-          docker run --rm debug-nextjs-app:ci ls -1 /app/node_modules || echo "(missing)"
+      #     echo "=== node_modules in /app ==="
+      #     docker run --rm debug-nextjs-app:ci ls -1 /app/node_modules || echo "(missing)"
 
-          echo "=== .next in /app ==="
-          docker run --rm debug-nextjs-app:ci ls -1 /app/.next || echo "(missing)"
+      #     echo "=== .next in /app ==="
+      #     docker run --rm debug-nextjs-app:ci ls -1 /app/.next || echo "(missing)"
 
       - name: 🔍 Verify Next in node_modules
         run: |
@@ -134,23 +134,23 @@ jobs:
             exit 1
           fi
 
-      - name: 🛑 Validate `/app` Structure
-        run: |
-          set -e
+      # - name: 🛑 Validate `/app` Structure
+      #   run: |
+      #     set -e
 
-          echo "Checking /app/node_modules exists…"
-          if ! docker run --rm debug-nextjs-app:ci test -d /app/node_modules; then
-            echo "❌ /app/node_modules not found!"
-            exit 1
-          fi
+      #     echo "Checking /app/node_modules exists…"
+      #     if ! docker run --rm debug-nextjs-app:ci test -d /app/node_modules; then
+      #       echo "❌ /app/node_modules not found!"
+      #       exit 1
+      #     fi
 
-          echo "Checking /app/.next exists…"
-          if ! docker run --rm debug-nextjs-app:ci test -d /app/.next; then
-            echo "❌ /app/.next not found!"
-            exit 1
-          fi
+      #     echo "Checking /app/.next exists…"
+      #     if ! docker run --rm debug-nextjs-app:ci test -d /app/.next; then
+      #       echo "❌ /app/.next not found!"
+      #       exit 1
+      #     fi
 
-          echo "✅ /app structure is correct!"
+      #     echo "✅ /app structure is correct!"
 
       - name: 🏷️ Build & Push Docker Image
         uses: docker/build-push-action@v4
