@@ -85,3 +85,4 @@ backend.local.tf
 bootstrap/backend.local.tf
 
 /dist
+.vscode/
