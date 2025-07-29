@@ -60,9 +60,7 @@ RUN echo "=== builder: .next/standalone tree ===" \
 
 # 2.3) Extract the standalone snapshot
 RUN mkdir /standalone \
- && cp -r apps/nextjs-app/.next/standalone/* /standalone \
- # now also include your app’s own manifest so standalone/package.json exists
- && cp apps/nextjs-app/package.json /standalone/package.json
+  && cp -r apps/nextjs-app/.next/standalone/* /standalone
 
 # debug: show what landed in /standalone
 RUN echo "=== builder: /standalone before npm ci ===" \
@@ -75,12 +73,12 @@ FROM node:20-slim AS standalone
 WORKDIR /standalone
 
 # 3.1) Copy Next’s “standalone” artifacts
-COPY --from=builder /standalone/package.json   ./package.json
-COPY --from=builder /standalone/server.js      ./server.js
+COPY --from=builder /standalone/package.json ./
+COPY --from=builder /standalone/server.js    ./
 
 # 3.2) Copy your root lockfile+manifest so npm ci will install next/react/etc
-COPY --from=deps /workspace/package.json       ./package.json
-COPY --from=deps /workspace/package-lock.json  ./package-lock.json
+COPY --from=deps     /workspace/package.json       ./package.json
+COPY --from=deps     /workspace/package-lock.json  ./package-lock.json
 
 # 3.3) Install only production deps
 RUN npm ci --omit=dev --no-audit --no-fund
@@ -95,23 +93,30 @@ RUN echo "=== standalone: node_modules snippet ===" \
 FROM node:20-slim AS runner
 WORKDIR /app
 
-# 4.1) Copy the standalone server + runtime deps
-COPY --from=standalone /standalone/server.js      ./
-COPY --from=standalone /standalone/node_modules   ./node_modules
+# give us jq for json edits
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends jq \
+ && rm -rf /var/lib/apt/lists/*
 
-# flag package.json as ESM
-RUN node -e "let p=require('./package.json'); p.type='module'; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2));"
+# copy the standalone server snapshot
+COPY --from=standalone /standalone/server.js    ./
+COPY --from=standalone /standalone/package.json ./
+COPY --from=standalone /standalone/node_modules ./node_modules
 
-# 4.2) Copy built output and public/static assets
-COPY --from=builder /workspace/apps/nextjs-app/.next   ./.next
-COPY --from=builder /workspace/apps/nextjs-app/public ./public
+# copy the full Next.js build output & your public folder
+COPY --from=builder /workspace/apps/nextjs-app/.next ./.next
+COPY --from=builder /workspace/apps/nextjs-app/public  public
 
-# debug: final sanity check
+# sanity check
 RUN echo "=== runner: final /app tree ===" \
-  && ls -R . | head -n50 \
-  && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
+ && ls -R . | head -n50 \
+ && test -d node_modules/next && echo "✅ next present" || (echo "❌ next missing!" && exit 1)
+
+# flag package.json as ES module
+RUN jq '. + {"type":"module"}' package.json > package.tmp.json \
+ && mv package.tmp.json package.json
 
 ENV PORT=3000
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node","server.js"]
