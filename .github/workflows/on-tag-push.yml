@@ -1,4 +1,8 @@
 # .github/workflows/on-tag-push.yml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 name: 🐳 Build, Publish & Deploy
 
 on:
@@ -92,7 +96,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: apps/nextjs-app/Dockerfile
+          file: Dockerfile
           push: false              # don’t push this debug build
           load: true               # load into local Docker
           build-args: |
@@ -146,7 +150,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          file: apps/nextjs-app/Dockerfile
+          file: Dockerfile
           push: true
           cache-from: type=gha
           cache-to:   type=gha,mode=max
