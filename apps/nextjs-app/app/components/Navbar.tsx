@@ -41,7 +41,7 @@ export const Navbar = () => {
 
   // Common classes
   const hoverBgClass = 'hover:bg-default/20 dark:hover:bg-default/30';
-  const itemRounded = 'rounded';
+  const itemRounded = 'rounded-medium';
   const mobileItemPadding = 'px-4 py-3'; // approx 48px height for fat-finger
   const iconBtnSizeClass = 'h-11 w-11'; // ~44px square for icon buttons
 

@@ -1,10 +1,10 @@
 'use client';
 import React from 'react';
-import { NavbarContent, NavbarItem } from '@heroui/react';
+import NextLink from 'next/link';
 import Image from 'next/image';
-import { ThemeSwitcher } from './ThemeSwitcher';
-import { frameworkSwitcher } from '../config/nav.config';
 import {
+  NavbarContent,
+  NavbarItem,
   Button,
   Dropdown,
   DropdownTrigger,
@@ -12,24 +12,27 @@ import {
   DropdownItem,
 } from '@heroui/react';
 import { ChevronDown } from './icons';
+import { ThemeSwitcher } from './ThemeSwitcher';
+import { frameworkSwitcher } from '../config/nav.config';
 
 type ExternalTool = {
   href: string;
-  // one of these three will be present
   src?: string;
   lightSrc?: string;
   darkSrc?: string;
   alt: string;
   ariaLabel: string;
-  size?: number; // <<< allow an optional size
+  size?: number;
+  internal?: boolean;
 };
 
 export const externalTools: ExternalTool[] = [
   {
-    href: 'https://trading212.com',
+    href: '/trading212',
     src: '/icons/trading212.svg',
     alt: 'Trading 212',
-    ariaLabel: 'Trading 212',
+    ariaLabel: 'Trading 212 dashboard',
+    internal: true,
   },
   {
     href: 'https://grafana.com',
@@ -49,54 +52,80 @@ export const externalTools: ExternalTool[] = [
 export function NavbarRightIcons() {
   return (
     <NavbarContent justify="end" className="hidden sm:flex gap-2">
-      {externalTools.map((tool) => (
-        <NavbarItem key={tool.alt}>
-          <Button
-            as="a"
-            href={tool.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="light"
-            isIconOnly
-            className="h-10 w-10 p-0 rounded-medium"
-            aria-label={tool.ariaLabel}
-          >
-            {tool.lightSrc && tool.darkSrc ? (
-              <>
-                <Image
-                  src={tool.lightSrc}
-                  alt={tool.alt}
-                  width={tool.size ?? 24}
-                  height={tool.size ?? 24}
-                  className="block dark:hidden"
-                  priority={false}
-                />
-                <Image
-                  src={tool.darkSrc}
-                  alt={tool.alt}
-                  width={tool.size ?? 24}
-                  height={tool.size ?? 24}
-                  className="hidden dark:block"
-                  priority={false}
-                />
-              </>
-            ) : tool.src ? (
-              <Image
-                src={tool.src}
-                alt={tool.alt}
-                width={tool.size ?? 24}
-                height={tool.size ?? 24}
-                priority={false}
-              />
-            ) : null}
-          </Button>
-        </NavbarItem>
-      ))}
+      {externalTools.map((tool) => {
+        // build the icon markup
+        const Icon = tool.lightSrc && tool.darkSrc ? (
+          <>
+            <Image
+              src={tool.lightSrc}
+              alt={tool.alt}
+              width={tool.size ?? 24}
+              height={tool.size ?? 24}
+              className="block dark:hidden"
+              priority={false}
+            />
+            <Image
+              src={tool.darkSrc}
+              alt={tool.alt}
+              width={tool.size ?? 24}
+              height={tool.size ?? 24}
+              className="hidden dark:block"
+              priority={false}
+            />
+          </>
+        ) : (
+          <Image
+            src={tool.src!}
+            alt={tool.alt}
+            width={tool.size ?? 24}
+            height={tool.size ?? 24}
+            priority={false}
+          />
+        );
 
+        if (tool.internal) {
+          // internal: use NextLink directly on the Button
+          return (
+            <NavbarItem key={tool.alt}>
+              <Button
+                as={NextLink}
+                href={tool.href}
+                variant="light"
+                isIconOnly
+                className="h-10 w-10 p-0 rounded-medium"
+                aria-label={tool.ariaLabel}
+              >
+                {Icon}
+              </Button>
+            </NavbarItem>
+          );
+        } else {
+          // external: normal anchor with new-tab
+          return (
+            <NavbarItem key={tool.alt}>
+              <Button
+                as="a"
+                href={tool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="light"
+                isIconOnly
+                className="h-10 w-10 p-0 rounded-medium"
+                aria-label={tool.ariaLabel}
+              >
+                {Icon}
+              </Button>
+            </NavbarItem>
+          );
+        }
+      })}
+
+      {/* Theme switcher */}
       <NavbarItem className="hidden sm:flex">
         <ThemeSwitcher />
       </NavbarItem>
 
+      {/* Framework dropdown */}
       <Dropdown>
         <NavbarItem>
           <DropdownTrigger>
@@ -113,14 +142,12 @@ export function NavbarRightIcons() {
           {frameworkSwitcher.options.map((option) => (
             <DropdownItem
               key={option.label}
-              // only give href when not disabled
               href={option.disabled ? undefined : option.href}
               target={
                 option.disabled || !option.href.startsWith('http')
                   ? undefined
                   : '_blank'
               }
-              // HeroUI supports a `disabled` prop
               isDisabled={option.disabled}
               className={
                 option.disabled
