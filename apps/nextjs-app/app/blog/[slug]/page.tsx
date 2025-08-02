@@ -2,7 +2,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@heroui/react'
+import { Button, Snippet } from '@heroui/react'
 import { SiteBreadcrumbs } from '../../components/SiteBreadcrumbs'
 import posts from '../../config/posts'
 
@@ -89,6 +89,21 @@ export default async function PostDetail({
       <article className="prose dark:prose-invert max-w-none">
         {renderContent()}
       </article>
+
+      {(() => {
+        const snippets = post.codeSnippets ?? []
+        if (snippets.length === 0) return null
+        return (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold">Code Snippets</h2>
+            {snippets.map((code, i) => (
+              <Snippet key={i} className="rounded-lg">
+                {code}
+              </Snippet>
+            ))}
+          </section>
+        )
+      })()}
     </main>
   )
 }

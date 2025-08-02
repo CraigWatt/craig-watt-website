@@ -2,7 +2,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Button } from '@heroui/react'
+import { Button, Snippet } from '@heroui/react'
 import projects from '../../config/projects'
 import { SiteBreadcrumbs } from '../../components/SiteBreadcrumbs'
 
@@ -13,23 +13,21 @@ export async function generateStaticParams() {
 
 interface Props {
   params: Promise<{ slug: string }>
-  // add this if you actually use incoming query strings:
-  // searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
 export default async function ProjectDetail({
   params,
 }: Props) {
-  // await it here
   const { slug } = await params
-
   const project = projects.find((p) => p.slug === slug)
   if (!project) return notFound()
 
-  const screens = project.screens ?? []
+  // always an array, even if undefined
+  const snippets = project.codeSnippets ?? []
+  const screens  = project.screens ?? []
 
   const crumbs = [
-    { label: 'Home', href: '/' },
+    { label: 'Home',     href: '/' },
     { label: 'Projects', href: '/projects' },
     { label: project.title, current: true },
   ]
@@ -39,14 +37,17 @@ export default async function ProjectDetail({
       <SiteBreadcrumbs items={crumbs} />
 
       <article className="space-y-8">
-        <Link href="/projects">
-          <Button as="span" variant="ghost" size="sm">
-            ← All Projects
-          </Button>
-        </Link>
+        <div className="mb-6">
+          <Link href="/projects">
+            <Button as="span" variant="ghost" size="sm">
+              ← All Projects
+            </Button>
+          </Link>
+        </div>
 
         <h1 className="text-4xl font-bold">{project.title}</h1>
 
+        {/* Hero image */}
         <div className="mx-auto w-full max-w-3xl">
           <div className="relative w-full aspect-[3/1] overflow-hidden rounded-lg">
             <Image
@@ -59,15 +60,32 @@ export default async function ProjectDetail({
           </div>
         </div>
 
+        {/* Description */}
         <p className="text-base leading-relaxed">{project.description}</p>
 
+        {/* ← New Code Snippets Section */}
+        {snippets.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="text-2xl font-semibold">Code Snippets</h2>
+            {snippets.map((code, i) => (
+            <Snippet
+              key={i}
+              classNames={{ base: 'rounded-lg' }}
+            >
+              {code}
+            </Snippet>
+            ))}
+          </section>
+        )}
+
+        {/* Screenshots */}
         {screens.length > 0 && (
           <section className="space-y-8">
-            {screens.map((src, i) => (
+            {screens.map((img, i) => (
               <div key={i} className="mx-auto w-full max-w-3xl">
                 <div className="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
                   <Image
-                    src={src}
+                    src={img.src}
                     alt={`${project.title} screenshot ${i + 1}`}
                     fill
                     sizes="(max-width: 768px) 100vw, 768px"
