@@ -35,7 +35,7 @@ export const externalTools: ExternalTool[] = [
     internal: true,
   },
   {
-    href: 'https://grafana.com',
+    href: 'https://craigwatt.grafana.net/public-dashboards/9f96dfe163484bafbccb7f825a506899',
     src: '/icons/grafana.svg',
     alt: 'Grafana',
     ariaLabel: 'Grafana',

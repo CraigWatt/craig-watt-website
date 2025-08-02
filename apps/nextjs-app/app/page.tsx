@@ -85,7 +85,7 @@ export default function App() {
       </section>
 
       {/* 4) Blog Teaser */}
-      <section className="py-16 px-4 md:px-6 bg-default/5 dark:bg-default/20">
+      <section className="bg-default/5 dark:bg-default/20 py-16 px-4 md:px-6">
         <h2 className="text-3xl font-semibold text-center mb-8">
           From the Blog
         </h2>
@@ -115,7 +115,7 @@ export default function App() {
       {/* 5) Contact Section */}
       <section
         id="contact"
-        className="py-16 px-4 md:px-6 bg-default/10 dark:bg-default/30"
+        className="py-16 px-4 md:px-6"
       >
         <h2 className="text-3xl font-semibold text-center mb-8">Contact Me</h2>
         <div className="max-w-xl mx-auto">
