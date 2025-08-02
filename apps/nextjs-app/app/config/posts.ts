@@ -11,6 +11,7 @@ export interface Post {
   category?: string;
   tags?: string[];
   author?: string;
+  codeSnippets?: string[]
 }
 
 const posts: Post[] = [
@@ -27,6 +28,30 @@ const posts: Post[] = [
     category: 'Tech',
     tags: ['monitoring', 'logging', 'tracing'],
     author: 'Craig Watt',
+    codeSnippets: [
+      `// Example A: Initialize a basic counter metric
+import client from 'prom-client'
+const requestCount = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+})
+requestCount.inc()`,
+      `// Example B: Track histogram of response durations
+const responseTime = new client.Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  buckets: [0.1, 0.5, 1, 2.5, 5, 10],
+})
+responseTime.observe(0.42)`,
+      `// Example C: Expose metrics endpoint
+import express from 'express'
+const app = express()
+app.get('/metrics', async (_req, res) => {
+  res.set('Content-Type', client.register.contentType)
+  res.send(await client.register.metrics())
+})
+app.listen(3000)`,
+    ],
   },
   {
     slug: 'k3s-on-raspberry-pi',
@@ -41,6 +66,12 @@ const posts: Post[] = [
     category: 'Tech',
     tags: ['k3s', 'raspberry-pi', 'self-hosting'],
     author: 'Craig Watt',
+    codeSnippets: [
+      `# Example 1: Install k3s on a single Pi
+curl -sfL https://get.k3s.io | sh -`,
+      `# Example 2: Check cluster status
+sudo k3s kubectl get nodes`,
+    ],
   },
   {
     slug: 'slow-cooker-chili',
@@ -55,6 +86,11 @@ const posts: Post[] = [
     category: 'Cooking',
     tags: ['chili', 'slow-cooker', 'comfort food'],
     author: 'Craig Watt',
+    codeSnippets: [
+      `// Example: Set slow cooker to low and cook for 8 hours
+slowCooker.setTemperature('low')
+slowCooker.setTimer(8 * 60 * 60)`
+    ],
   },
   // …other posts
 ];
