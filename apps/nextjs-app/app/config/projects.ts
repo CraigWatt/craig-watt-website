@@ -51,68 +51,41 @@ const projects: Project[] = [
     og: '/images/projects/project-a/project-a-og.webp',
     ogWidth: 1200,
     ogHeight: 630,
-    codeSnippets: [
-      "Hello World\nconsole.log('Hello, World!');",
-      "Simple addition function\nfunction add(a, b) {\n  return a + b;\n}\nconsole.log(add(2, 3));",
-      "Async fetch call\nasync function fetchData(url) {\n  const res = await fetch(url);\n  return res.json();\n}"
-    ],
+    codeSnippets: [],
   },
   {
-    slug: 'project-b',
-    title: 'Project B',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-    hero: '/images/projects/project-b/project-b-hero.webp',
+    slug: 'vfo',
+    title: 'vfo - Video File Organizer',
+    description: `
+A utility for batch-encoding your video portfolio. Think HandBrake queue but with decision-making built in.
+
+vfo will scan every video file individually and make encoding decisions based on the quality of that particular video.
+
+v0.2.0 spec:
+- 🎥 auto-detect frame-rate
+- 📐 auto-choose bitrate by resolution
+- 📊 report stats to console
+    `.trim(),
+    hero: '/images/projects/vfo/vfo_diagram1-hero.webp',
     heroWidth: 1800,
     heroHeight: 600,
-    thumbLg: '/images/projects/project-b/project-b-thumb-lg.webp',
+    thumbLg: '/images/projects/vfo/vfo_diagram1-thumb-lg.webp',
     thumbLgWidth: 900,
     thumbLgHeight: 600,
-    thumb: '/images/projects/project-b/project-b-thumb.webp',
+    thumb: '/images/projects/vfo/vfo_diagram1-thumb.webp',
     thumbWidth: 640,
     thumbHeight: 360,
     screens: [
       {
-        src: '/images/projects/project-b/project-b-screen-1.webp',
+        src: '/images/projects/vfo/vfo_diagram2-screen-1.webp',
         width: 1200,
         height: 675,
       },
     ],
-    og: '/images/projects/project-b/project-b-og.webp',
+    og: '/images/projects/vfo/vfo_diagram1-og.webp',
     ogWidth: 1200,
     ogHeight: 630,
-    codeSnippets: [
-      "Greeting function\nfunction greet(name) {\n  return `Hello, ${name}!`;\n}\nconsole.log(greet('Alice'));",
-      "Array mapping\nconst nums = [1, 2, 3];\nconst squares = nums.map(n => n * n);\nconsole.log(squares);"
-    ],
-  },
-  {
-    slug: 'project-c',
-    title: 'Project C',
-    description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...',
-    hero: '/images/projects/project-c/project-c-hero.webp',
-    heroWidth: 1800,
-    heroHeight: 600,
-    thumbLg: '/images/projects/project-c/project-c-thumb-lg.webp',
-    thumbLgWidth: 900,
-    thumbLgHeight: 600,
-    thumb: '/images/projects/project-c/project-c-thumb.webp',
-    thumbWidth: 640,
-    thumbHeight: 360,
-    screens: [
-      {
-        src: '/images/projects/project-c/project-c-screen-1.webp',
-        width: 1200,
-        height: 675,
-      },
-    ],
-    og: '/images/projects/project-c/project-c-og.webp',
-    ogWidth: 1200,
-    ogHeight: 630,
-    codeSnippets: [
-      "Arrow function\nconst multiply = (x, y) => x * y;\nconsole.log(multiply(4, 5));"
-    ],
+    codeSnippets: [],
   },
 ];
 
