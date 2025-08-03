@@ -1,9 +1,16 @@
 // apps/nextjs-app/next.config.js
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  // produce a standalone server bundle
-  output: 'standalone',
-};
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/
+})
 
-module.exports = nextConfig;
+/** @type {import('next').NextConfig} */
+module.exports = withMDX({
+  // keep your standalone output
+  output: 'standalone',
+
+  // tell Next to treat .md and .mdx as pages
+  pageExtensions: ['ts', 'tsx', 'js', 'jsx', 'md', 'mdx'],
+
+  // any other custom Next.js config you already have…
+})
