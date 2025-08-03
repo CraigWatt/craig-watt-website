@@ -85,4 +85,9 @@ backend.local.tf
 bootstrap/backend.local.tf
 
 /dist
+
+.content-collections
+
 .vscode/
+
+static/

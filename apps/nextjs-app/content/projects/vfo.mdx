@@ -1,0 +1,122 @@
+---
+slug: "vfo"
+title: "vfo – Video File Organizer"
+summary: "Batch-encode your video portfolio with smart defaults."
+github: "https://github.com/CraigWatt/vfo"
+hero: "/images/projects/vfo/vfo_diagram1-hero.webp"
+heroWidth: 1800
+heroHeight: 600
+thumbLg: "/images/projects/vfo/vfo_diagram1-thumb-lg.webp"
+thumbLgWidth: 900
+thumbLgHeight: 600
+thumb: "/images/projects/vfo/vfo_diagram1-thumb.webp"
+thumbWidth: 640
+thumbHeight: 360
+og: "/images/projects/vfo/vfo_diagram1-og.webp"
+ogWidth: 1200
+ogHeight: 630
+screens:
+  - src: "/images/projects/vfo/vfo_diagram2-screen-1.webp"
+    width: 1200
+    height: 675
+badges:
+  - c
+---
+## What is vfo?
+
+A utility for batch-encoding your video portfolio. Instead of manual queues, vfo analyzes each file’s resolution, codec, and color space, and makes smart decisions.
+
+<ProjectImage
+  src="/images/projects/vfo/vfo_diagram2-screen-1.webp"
+  width={1200}
+  height={675}
+  alt="vfo 0.2.0 flow diagram 1"
+  className="rounded-2xl shadow-lg mx-auto my-8"
+/>
+
+## Installation
+
+## Option 1: macOS Installer (.pkg)
+
+1. Download \`vfo_macOS_installer-v*.pkg\` from the **Assets** section on the GitHub Releases page.
+2. **Shift-click → Open** the installer to bypass Gatekeeper (required until v1.0.0).
+3. Follow the on-screen instructions.
+4. Once installation completes, open Terminal and run:
+   \`\`\`bash
+   vfo -v
+   \`\`\`
+   If you see a version number, vfo was installed successfully.
+
+## Option 2: Static ZIP
+
+1. Download \`static_build.zip\` from the **Assets** section on the GitHub Releases page.
+2. Unzip the archive.
+3. Move **both** the \`vfo\` binary and \`vfo_config.conf\` to a directory in your \`$PATH\` (e.g. \`/usr/local/bin\`):
+   \`\`\`bash
+   sudo cp vfo vfo_config.conf /usr/local/bin/
+   sudo chmod +x /usr/local/bin/vfo
+   \`\`\`
+4. Verify installation:
+   \`\`\`bash
+   vfo -v
+   \`\`\`
+
+
+
+## Linux (Ubuntu and similar)
+
+Support for Linux is coming soon.
+
+You'll be able to install vfo using either a \`.deb\` package or a static binary.
+
+ 
+<Snippet symbol="" classNames={{ base: "mt-4 mb-8", pre: "whitespace-pre-wrap font-mono" }}>
+{`## Contents
+
+- Requirements
+- Installation
+- Usage
+- Description
+- Examples
+- Detailed Options
+
+## Requirements
+
+vfo runs on:
+- macOS (Intel & Arm)
+
+*(Coming soon: Ubuntu/Linux, Windows 10/11)*
+
+## Installation
+
+1. Download the latest release from GitHub.
+2. Place the \`vfo\` binary in your \`$PATH\` (e.g., \`/usr/local/bin\`).
+3. Ensure \`ffmpeg\` is installed and accessible.
+
+## Usage
+
+Run \`vfo --help\` to list all commands and options.
+
+## Description
+
+vfo automates batch video encoding by scanning each file’s metadata and applying tailored \`ffmpeg\` commands based on user-defined aliases and scenarios.
+
+## Examples
+
+- Encode all videos in a folder:
+  \`\`\`bash
+  vfo all_aliases
+  \`\`\`
+- Encode a single alias:
+  \`\`\`bash
+  vfo alias queen
+  \`\`\`
+
+## Detailed Options
+
+Refer to \`vfo_config.conf\` for global settings (paths, tests, strategies) and per-alias scenarios.`}
+</Snippet>
+
+## Why It Matters
+
+Manual encoding of diverse video files is time-consuming and error-prone. vfo automates per-file decisions while giving you full control, saving time and ensuring consistency across your portfolio.  
