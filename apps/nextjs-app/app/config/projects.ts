@@ -28,27 +28,27 @@ export interface Project {
 
 const projects: Project[] = [
   {
-    slug: 'project-a',
-    title: 'Project A',
+    slug: 'craig-watt-website',
+    title: 'craigwatt.co.uk Web App',
     description:
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-    hero: '/images/projects/project-a/project-a-hero.webp',
+      'The Next.js Web App you are viewing right now :)',
+    hero: '/images/projects/craig-watt-website/craig-watt-website1-hero.webp',
     heroWidth: 1800,
     heroHeight: 600,
-    thumbLg: '/images/projects/project-a/project-a-thumb-lg.webp',
+    thumbLg: '/images/projects/craig-watt-website/craig-watt-website1-thumb-lg.webp',
     thumbLgWidth: 900,
     thumbLgHeight: 600,
-    thumb: '/images/projects/project-a/project-a-thumb.webp',
+    thumb: '/images/projects/craig-watt-website/craig-watt-website1-thumb.webp',
     thumbWidth: 640,
     thumbHeight: 360,
     screens: [
       {
-        src: '/images/projects/project-a/project-a-screen-1.webp',
+        src: '/images/projects/craig-watt-website/craig-watt-website2-screen-1.webp',
         width: 1200,
         height: 675,
       },
     ],
-    og: '/images/projects/project-a/project-a-og.webp',
+    og: '/images/projects/craig-watt-website/craig-watt-website-og.webp',
     ogWidth: 1200,
     ogHeight: 630,
     codeSnippets: [],
