@@ -20,7 +20,9 @@
       "@components/*": ["src/components/*"],
       "@config/*": ["src/config/*"],
       "@lib/*": ["src/lib/*"],
-      "@utils/*": ["src/utils/*"]
+      "@utils/*": ["src/utils/*"],
+      "content-collections": ["apps/nextjs-app/.content-collections/generated/index"],
+      "content-collections/generated/*": ["apps/nextjs-app/.content-collections/generated/*"]
     }
   },
   "include": [
@@ -28,7 +30,8 @@
     "apps/**/*.{ts,tsx,js,jsx}",
     "libs/**/*.{ts,tsx,js,jsx}",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".content-collections/generated/**/*.ts",
   ],
   "exclude": ["node_modules"]
 }

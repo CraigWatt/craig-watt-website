@@ -7,7 +7,8 @@ export type ProjectCardProps = {
   title: string;
   href: string;
   description: string;
-  image: string; // thumbnail path, ideally 16:9
+  image: string;        // thumbnail path, ideally 16:9
+  badges?: string[];    // new optional tech‐stack badges
 };
 
 export function ProjectCard({
@@ -15,6 +16,7 @@ export function ProjectCard({
   href,
   description,
   image,
+  badges = [],
 }: ProjectCardProps) {
   return (
     <Link
@@ -34,9 +36,24 @@ export function ProjectCard({
           style={{ objectFit: 'cover' }}
         />
       </div>
-      <div className="p-4">
-        <h3 className="text-2xl font-medium mb-2">{title}</h3>
-        <p className="text-sm mb-4">{description}</p>
+      <div className="p-4 space-y-4">
+        <h3 className="text-2xl font-medium">{title}</h3>
+        <p className="text-sm text-default-700">{description}</p>
+
+        {/* Tech-stack badges (first 3 only) */}
+        {badges.length > 0 && (
+          <div className="flex flex-wrap items-center space-x-2">
+            {badges.slice(0, 3).map((b) => (
+              <img
+                key={b}
+                src={`/icons/${b}.svg`}
+                alt={`${b} logo`}
+                className="h-5 w-5"
+              />
+            ))}
+          </div>
+        )}
+
         <span className="inline-block text-sm font-semibold underline">
           Learn more →
         </span>

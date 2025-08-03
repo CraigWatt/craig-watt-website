@@ -1,0 +1,109 @@
+---
+slug: "craig-watt-website"
+title: "craigwatt.co.uk Web App"
+summary: "My personal site built on Next.js, Tailwind & HeroUI."
+github: "https://github.com/craigwatt/craig-watt-website"
+
+hero: "/images/projects/craig-watt-website/craig-watt-website1-hero.webp"
+heroWidth: 1800
+heroHeight: 600
+
+thumbLg: "/images/projects/craig-watt-website/craig-watt-website1-thumb-lg.webp"
+thumbLgWidth: 900
+thumbLgHeight: 600
+
+thumb: "/images/projects/craig-watt-website/craig-watt-website1-thumb.webp"
+thumbWidth: 640
+thumbHeight: 360
+
+og: "/images/projects/craig-watt-website/craig-watt-website-og.webp"
+ogWidth: 1200
+ogHeight: 630
+
+screens:
+  - src: "/images/projects/craig-watt-website/craig-watt-website2-screen-1.webp"
+    width: 1200
+    height: 675
+badges:
+  - next.js
+  - typescript
+  - terraform
+  - aws
+  - tailwindcss
+  - eslint
+  - jest
+  - playwrite
+  - storybook
+---
+
+craigwatt.co.uk is my personal website, designed and built from the ground up  
+using **Next.js 15**, **Tailwind CSS**, and **HeroUI**.  
+It serves as both a technical portfolio and a demonstration of modern web development practices,  
+showcasing my ability to architect, scale, and deploy responsive frontends using current industry standards.
+
+## Key Features
+
+- **Built with Next.js App Router (v15)** — leveraging React Server Components, dynamic routing, and async/streaming rendering for a fast, modern experience.  
+- **Tailwind CSS + HeroUI** — clean, consistent design system built with utility-first styling and accessible UI primitives.  
+- **MDX-Powered Content** — project and blog content authored in MDX, with embedded `<Snippet />` and `<ProjectImage />`.  
+- **Composable Component Architecture** — reusable components like `ProjectRenderer`, `ProjectClient`, and `SiteBreadcrumbs`.  
+- **Deployed on FluidCloud via Kubernetes** — IaC via Helm & Ansible, CI/CD for zero-downtime deploys.
+
+<ProjectImage
+  src="/images/projects/craig-watt-website/craig-watt-website2-screen-1.webp"
+  width={1200}
+  height={675}
+  alt="Screenshot of homepage"
+  className="rounded-2xl shadow-lg mx-auto my-8"
+/>
+
+## Engineering Highlights
+
+- **Content Collections + Dynamic MDX** — build-time MDX with type-safe frontmatter via [content-collections](https://github.com/content-collections).  
+- **Dynamic Client/Server Segregation** — interactive bits load client-side (via `<ProjectClient />`), the rest stays in RSC for maximum performance.  
+- **Developer Experience** — monorepo (Nx), ESLint, Prettier, TypeScript, plus Storybook, Playwright & Jest for testing.
+
+## MDX & Content Collections Setup
+
+To power MDX with frontmatter and hook into content collections, we extend Next’s config:
+
+<Snippet
+  symbol=""
+  classNames={{ base: "mt-4", pre: "whitespace-pre-wrap" }}
+>
+{`// apps/nextjs-app/next.config.js
+const createMDX = require('@next/mdx');
+const remarkFrontmatter    = require('remark-frontmatter').default || require('remark-frontmatter');
+const remarkMdxFrontmatter = require('remark-mdx-frontmatter').default || require('remark-mdx-frontmatter');
+const { withContentCollections } = require('@content-collections/next');
+
+/** @type {import('next').NextConfig} */
+let nextConfig = {
+  pageExtensions: ['ts','tsx','js','jsx','md','mdx'],
+  output: 'standalone',
+};
+
+const withMDX = createMDX({
+  extension: /\\.mdx?$/,
+  options: {
+    remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter,{name:'frontMatter'}]],
+  },
+});
+
+module.exports = withContentCollections(
+  withMDX(nextConfig)
+);`}
+</Snippet>
+
+This setup does a few things:
+
+- **`createMDX`** integrates MDX into Next, so you can import `.mdx` pages directly.  
+- **`remarkFrontmatter`** + **`remark-mdx-frontmatter`** let you author YAML-style frontmatter that MDX can consume as `frontMatter`.  
+- **`withContentCollections`** wires that frontmatter into your typed content-collections system at build time.  
+- **`pageExtensions`** ensures Next recognizes `.md`, `.mdx` (as well as your TS/JS files) as valid pages.
+
+## Why It Matters
+
+This site isn’t just a static résumé.  
+It’s a living example of how I think, structure codebases, solve problems, and design for maintainability —  
+applying the same principles I ship in production applications.

@@ -26,17 +26,8 @@
     "types": [
       "jest",
       "node"
-    ]
+    ],
   },
-  "include": [
-    "**/*.js",
-    "**/*.jsx",
-    "**/*.ts",
-    "**/*.tsx",
-    "../../dist/apps/nextjs-app/.next/types/**/*.ts",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
-  ],
   "exclude": [
     "node_modules",
     "jest.config.ts",
@@ -44,5 +35,13 @@
     "**/*.test.ts",
     "**/*.stories.ts",
     "**/*.stories.js"
+  ],
+  "include": [
+    "../../next-env.d.ts",
+    "../../apps/**/*.{ts,tsx,js,jsx}",
+    "../../libs/**/*.{ts,tsx,js,jsx}",
+    "../../**/*.ts",
+    "../../**/*.tsx",
+    ".next/types/**/*.ts",
   ]
 }

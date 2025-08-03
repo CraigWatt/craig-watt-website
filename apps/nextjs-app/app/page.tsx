@@ -1,5 +1,6 @@
 // app/page.tsx
-import projects from './config/projects';
+'use client';
+import { allProjects } from 'content-collections';
 import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
@@ -65,15 +66,16 @@ export default function App() {
           Featured Projects
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-         {projects.slice(0, 3).map((p) => (
-           <ProjectCard
-             key={p.slug}
-             title={p.title}
-             href={`/projects/${p.slug}`}
-             description={p.summary}
-             image={p.thumb}
-           />
-         ))}
+        {allProjects.slice(0, 3).map((p) => (
+          <ProjectCard
+            key={p.slug}
+            title={p.title}
+            href={`/projects/${p.slug}`}
+            description={p.summary}
+            image={p.thumb ?? p.thumbLg!}
+            badges={p.badges}
+          />
+        ))}
         </div>
         <div className="text-center mt-10">
           <Link href="/projects">
