@@ -1,37 +1,54 @@
 // app/config/projects.ts
 
 export interface ScreenImage {
-  src: string;
-  width: number;
-  height: number;
+  src: string
+  width: number
+  height: number
 }
 
 export interface Project {
-  slug: string;
-  title: string;
-  description: string;
-  hero: string; // e.g. '/images/projects/project-a/project-a-hero.webp'
-  heroWidth: number; // true pixel width of hero, e.g. 1800
-  heroHeight: number; // true pixel height of hero, e.g. 600
-  thumbLg: string; // e.g. '/images/projects/project-a/project-a-thumb-lg.webp'
-  thumbLgWidth: number; // e.g. 900
-  thumbLgHeight: number; // e.g. 600
-  thumb: string; // e.g. '/images/projects/project-a/project-a-thumb.webp'
-  thumbWidth: number; // e.g. 640
-  thumbHeight: number; // e.g. 360
-  screens?: ScreenImage[]; // optional array of additional screenshots
-  og?: string; // optional '/images/projects/project-a/project-a-og.webp'
-  ogWidth?: number; // e.g. 1200
-  ogHeight?: number; // e.g. 630
-  codeSnippets?: string[]; // optional array of code snippets
+  slug: string
+  title: string
+  /** One‐sentence summary for list views */
+  summary: string
+  /** Full Markdown description for the project detail page */
+  body?: string
+  hero: string
+  heroWidth: number
+  heroHeight: number
+  thumbLg: string
+  thumbLgWidth: number
+  thumbLgHeight: number
+  thumb: string
+  thumbWidth: number
+  thumbHeight: number
+  screens?: ScreenImage[]
+  og?: string
+  ogWidth?: number
+  ogHeight?: number
+  /** Optional code snippets to render in a Snippet component */
+  codeSnippets?: string[]
 }
 
 const projects: Project[] = [
   {
     slug: 'craig-watt-website',
     title: 'craigwatt.co.uk Web App',
-    description:
-      'The Next.js Web App you are viewing right now :)',
+    summary: 'My personal site built on Next.js, Tailwind, and HeroUI.',
+    body: `
+## Overview
+
+This is the very site you’re browsing! It’s built with:
+- **Next.js App Router** for fast page loads  
+- **Tailwind CSS** + HeroUI for styling & components  
+- **Markdown-driven** blog & projects
+
+### Highlights
+
+- Dark-mode toggle that persists in localStorage  
+- Responsive grid layout for projects & posts  
+- Syntax-highlighted code snippets with HeroUI’s \`<Snippet />\`  
+`,
     hero: '/images/projects/craig-watt-website/craig-watt-website1-hero.webp',
     heroWidth: 1800,
     heroHeight: 600,
@@ -51,21 +68,38 @@ const projects: Project[] = [
     og: '/images/projects/craig-watt-website/craig-watt-website-og.webp',
     ogWidth: 1200,
     ogHeight: 630,
-    codeSnippets: [],
+    codeSnippets: [
+      `// Example: Hello World in JS
+console.log('Hello, World!');`,
+      `// NotFound component
+export default function NotFound() {
+  return (
+    <main className=\"min-h-screen flex flex-col items-center justify-center bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white\">
+      <h1 className=\"text-6xl font-bold\">404</h1>
+      <p className=\"mt-4 text-lg\">This page could not be found.</p>
+    </main>
+  )
+}`
+    ],
   },
   {
     slug: 'vfo',
-    title: 'vfo - Video File Organizer',
-    description: `
-A utility for batch-encoding your video portfolio. Think HandBrake queue but with decision-making built in.
+    title: 'vfo – Video File Organizer',
+    summary: 'Batch-encode your video portfolio with smart defaults.',
+    body: `
+## What is vfo?
 
-vfo will scan every video file individually and make encoding decisions based on the quality of that particular video.
+vfo is a CLI tool that:
+1. **PXE-boots** a custom initramfs to attach SSDs  
+2. **Scans** each video’s metadata  
+3. **Applies** frame-rate and bitrate heuristics
 
-v0.2.0 spec:
-- 🎥 auto-detect frame-rate
-- 📐 auto-choose bitrate by resolution
-- 📊 report stats to console
-    `.trim(),
+### v0.2.0 features
+
+- 🎥 Auto-detect frame-rate  
+- 📐 Choose bitrate by resolution  
+- 📊 Report detailed stats to console  
+`,
     hero: '/images/projects/vfo/vfo_diagram1-hero.webp',
     heroWidth: 1800,
     heroHeight: 600,
@@ -85,8 +119,20 @@ v0.2.0 spec:
     og: '/images/projects/vfo/vfo_diagram1-og.webp',
     ogWidth: 1200,
     ogHeight: 630,
-    codeSnippets: [],
+    codeSnippets: [
+      `# Example: Hello World in Bash
+echo "Hello, World!"`,
+      `// NotFound component
+export default function NotFound() {
+  return (
+    <main className=\"min-h-screen flex flex-col items-center justify-center bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white\">
+      <h1 className=\"text-6xl font-bold\">404</h1>
+      <p className=\"mt-4 text-lg\">This page could not be found.</p>
+    </main>
+  )
+}`
+    ],
   },
-];
+]
 
-export default projects;
+export default projects

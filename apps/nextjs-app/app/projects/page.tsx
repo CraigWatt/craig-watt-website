@@ -12,7 +12,7 @@ export default function ProjectsPage() {
             key={p.slug}
             title={p.title}
             href={`/projects/${p.slug}`}
-            description={p.description}
+            description={p.summary}
             image={p.thumb}
           />
         ))}

@@ -3,10 +3,11 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button, Snippet } from '@heroui/react'
+import ReactMarkdown from 'react-markdown'
 import projects from '../../config/projects'
 import { SiteBreadcrumbs } from '../../components/SiteBreadcrumbs'
 
-// same as before
+// generate all the slugs for SSG
 export async function generateStaticParams() {
   return projects.map((p) => ({ slug: p.slug }))
 }
@@ -15,22 +16,19 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
-export default async function ProjectDetail({
-  params,
-}: Props) {
+export default async function ProjectDetail({ params }: Props) {
   const { slug } = await params
   const project = projects.find((p) => p.slug === slug)
   if (!project) return notFound()
-
-  // always an array, even if undefined
-  const snippets = project.codeSnippets ?? []
-  const screens  = project.screens ?? []
 
   const crumbs = [
     { label: 'Home',     href: '/' },
     { label: 'Projects', href: '/projects' },
     { label: project.title, current: true },
   ]
+
+  const snippets = project.codeSnippets ?? []
+  const screens  = project.screens      ?? []
 
   return (
     <main className="py-16 px-4 md:px-6 max-w-3xl mx-auto space-y-12">
@@ -60,21 +58,32 @@ export default async function ProjectDetail({
           </div>
         </div>
 
-        {/* Description */}
-        <p className="text-base leading-relaxed">{project.description}</p>
+        {/* Short summary */}
+        <p className="text-lg font-medium">{project.summary}</p>
 
-        {/* ← New Code Snippets Section */}
+        {/* Full Markdown body */}
+        {project.body && (
+          <div className="prose dark:prose-invert max-w-none">
+            <ReactMarkdown>{project.body}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Code snippets */}
         {snippets.length > 0 && (
           <section className="space-y-4">
             <h2 className="text-2xl font-semibold">Code Snippets</h2>
             {snippets.map((code, i) => (
-            <Snippet
-              key={i}
-              classNames={{ base: 'rounded-lg' }}
-            >
-              {code}
-            </Snippet>
-            ))}
+              <Snippet
+                key={i}
+                classNames={{
+                  base:    'rounded-lg', 
+                  pre:     'whitespace-pre-wrap break-words', 
+                  content: 'overflow-auto',
+                }}
+              >
+                {code}
+              </Snippet>
+      ))}
           </section>
         )}
 
