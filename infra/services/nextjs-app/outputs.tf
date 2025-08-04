@@ -22,3 +22,11 @@ output "service_url" {
   description = "Public URL of the Next.js service (ALB DNS name)"
   value       = aws_lb.this.dns_name
 }
+
+output "alb_dns_name" {
+  value = aws_lb.this.dns_name
+}
+
+output "alb_zone_id" {
+  value = aws_lb.this.zone_id
+}

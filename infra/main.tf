@@ -21,8 +21,11 @@ module "network" {
 }
 
 module "route53" {
-  source = "./modules/route53"
-  domain = var.domain
+  source     = "./modules/route53"
+  domain     = var.domain
+
+  alb_dns_name = module.nextjs_service.alb_dns_name
+  alb_zone_id  = module.nextjs_service.alb_zone_id
 }
 
 # ───────────────────────────────────────────────────────────────────────────────
