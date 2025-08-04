@@ -1,0 +1,107 @@
+---
+title: "PXE Netboot Raspberry Pi with Initramfs"
+date: "2025-04-12"
+summary: "How to PXE netboot a Raspberry Pi using an initramfs for diskless boot."
+excerpt: "Netbooting Raspberry Pi devices using initramfs for stateless and diskless operation."
+author: "Craig Watt"
+category: "Tech"
+readingTime: "5 min read"
+
+thumb: "/images/posts/raspberry-pi-pxe-netboot-initramfs/k3s-on-raspberry-pi-thumb.webp"
+thumbWidth: 640
+thumbHeight: 360
+
+thumbLg: "/images/posts/raspberry-pi-pxe-netboot-initramfs/k3s-on-raspberry-pi-thumb-lg.webp"
+thumbLgWidth: 1280
+thumbLgHeight: 720
+
+hero: "/images/posts/raspberry-pi-pxe-netboot-initramfs/k3s-on-raspberry-pi-hero.webp"
+heroWidth: 1920
+heroHeight: 1080
+
+og: "/images/posts/raspberry-pi-pxe-netboot-initramfs/k3s-on-raspberry-pi-og.webp"
+ogWidth: 1200
+ogHeight: 630
+badges:
+  - raspberrypi
+  - bash
+---
+
+PXE booting a Raspberry Pi (especially the Pi 5) is a powerful way to centralise control and provisioning of your cluster nodes. Rather than baking OS images per device or using SD cards, we leverage an `initramfs` to:
+
+- Fetch device-specific config over DHCP and HTTP  
+- Format and install a full OS onto an attached SSD  
+- `switch_root` into the newly installed system  
+
+The process is stateless, repeatable, and works well for automated lab environments.
+
+## What This Script Does
+
+This provisioning script is embedded in the `initramfs` image and used as `/init`. When a Raspberry Pi PXE boots, this script will:
+
+1. Bring up `/dev`, `/proc`, and `/sys`  
+2. Obtain a DHCP lease on `eth0` and configure networking  
+3. Fetch a per-device config file based on serial number  
+4. Partition, format, and mount the SSD (e.g., `/dev/sda`)  
+5. Download and extract the OS tarball (e.g. Raspberry Pi OS)  
+6. Configure hostname, fstab, keyboard layout, and boot order  
+7. Install default user and SSH keys  
+8. Enable console login and SSH  
+9. Finally, `switch_root` into the SSD’s root filesystem  
+
+## initramfs: `/init` Example
+
+This is the exact init script running inside the initramfs:
+
+<Snippet
+  symbol=""
+  classNames={{ base: "mt-4", pre: "whitespace-pre-wrap" }}
+>
+{String.raw`#!/bin/sh
+set -e
+set -x
+
+mkdir -p /tmp /dev
+mount -t devtmpfs none /dev
+[ ! -c /dev/console ] && mknod /dev/console c 5 1
+exec > /dev/console 2>&1
+
+echo "Starting provisioning for PXE-booted Raspberry Pi…"
+
+# Fetch device serial number
+PI_SERIAL=$(tr -d '\0' </proc/device-tree/serial-number)
+echo "Detected serial: $PI_SERIAL"
+
+# Fetch config over HTTP
+wget -O /tmp/pi.conf "http://192.168.8.100:8000/configs/$PI_SERIAL.conf"
+. /tmp/pi.conf
+
+# Partition and format target disk
+echo o; echo n; echo p; echo 1; echo; echo +512M; echo t; echo c;
+echo n; echo p; echo 2; echo; echo; echo w | fdisk "${'TARGET_DISK'}"
+mkfs.vfat -F32 "${'TARGET_DISK'}1"
+mkfs.ext4 -F "${'TARGET_DISK'}2"
+
+# Mount and extract OS
+mount "${'TARGET_DISK'}2" /mnt
+wget -qO- "$OS_TARBALL_URL" | tar -xzf - -C /mnt
+
+# Set up init and switch_root
+cp /mnt/lib/systemd/systemd /mnt/sbin/init
+exec switch_root /mnt /sbin/init`}
+</Snippet>
+
+## Notes
+
+- `PI_SERIAL` is extracted directly from `/proc/device-tree`
+- The script supports retrying DHCP, pings, and `wget` fetches
+- `mkfs.ext4` comes from e2fsprogs, *not* BusyBox (important!)
+- User accounts, SSH keys, and hostname are all defined in the fetched `.conf` file
+
+## Next Steps
+
+This is ideal for stateless lab devices or bare-metal Pi clusters. You can even modify it to:
+
+- Boot into ephemeral RAM-only environments  
+- Deploy NixOS, Arch, or Alpine tarballs  
+- Combine with a K3s bootstrap for fully-automated Kubernetes clusters  

@@ -1,4 +1,3 @@
-// components/BlogCard.tsx
 'use client';
 
 import Image from 'next/image';
@@ -7,12 +6,13 @@ import Link from 'next/link';
 export type BlogCardProps = {
   title: string;
   href: string;
-  excerpt: string;
-  image: string; // e.g. "/images/blog/intro-to-observability/intro-to-observability-thumb.webp"
+  excerpt?: string;
+  image?: string;
   date?: string; // ISO date string, e.g. '2025-06-01'
   readingTime?: string;
   category?: string;
   tags?: string[];
+  badges: string[];
 };
 
 function getOrdinalSuffix(n: number): string {
@@ -38,21 +38,21 @@ export function BlogCard({
   date,
   readingTime,
   category,
-  tags,
+  badges,
 }: BlogCardProps) {
-  // Format date with ordinal suffix if provided
-  let formattedDate: string | undefined;
-  if (date) {
+  // Simplify date formatting by using a single expression
+  const formattedDate = date ? (() => {
     const dt = new Date(date);
-    if (!isNaN(dt.getTime())) {
-      const day = dt.getDate();
-      const suffix = getOrdinalSuffix(day);
-      // month name
-      const month = dt.toLocaleDateString('en-GB', { month: 'long' }); // e.g. "June"
-      const year = dt.getFullYear();
-      formattedDate = `${day}${suffix} ${month} ${year}`; // e.g. "1st June 2025"
-    }
-  }
+    if (isNaN(dt.getTime())) return undefined;
+
+    const day = dt.getDate();
+    const suffix = getOrdinalSuffix(day);
+    const month = dt.toLocaleDateString('en-GB', { month: 'long' });
+    const year = dt.getFullYear();
+    return `${day}${suffix} ${month} ${year}`;
+  })() : undefined;
+
+  const finalImageSrc = image ?? '/images/default-thumb.jpg';
 
   return (
     <Link
@@ -65,7 +65,7 @@ export function BlogCard({
     >
       <div className="relative w-full aspect-[16/9] bg-zinc-100 dark:bg-zinc-800">
         <Image
-          src={image}
+          src={finalImageSrc}
           alt={`${title} thumbnail`}
           fill
           sizes="(max-width: 640px) 100vw, 33vw"
@@ -82,6 +82,18 @@ export function BlogCard({
         )}
         <h3 className="text-xl font-semibold">{title}</h3>
         <p className="text-sm text-zinc-600 dark:text-zinc-300">{excerpt}</p>
+        {badges?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-3">
+            {badges.map((badge: string) => (
+              <img
+                key={badge}
+                src={`/icons/${badge}.svg`}
+                alt={`${badge} logo`}
+                className="h-5 w-5"
+              />
+            ))}
+          </div>
+        )}
         {readingTime && (
           <p className="text-xs text-zinc-500 dark:text-zinc-400">
             {readingTime}

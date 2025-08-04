@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { Snippet, Button, Card, CardHeader, CardBody } from '@heroui/react';
+import { Snippet, Button, Card } from '@heroui/react';
 import { SiteBreadcrumbs } from './SiteBreadcrumbs';
 
 export function ProjectRenderer({

@@ -5,9 +5,14 @@ import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { User } from '@heroui/user';
-import posts from './config/posts';
 import { BlogCard } from './components/BlogCard';
-import ContactForm from './components/ContactForm'; // we'll create this
+import ContactForm from './components/ContactForm';
+
+import { allPosts } from 'content-collections';
+
+// Type 'Post' is correctly inferred from allPosts.
+// We can use a type guard to filter out posts with a missing thumb.
+const posts = allPosts.filter((p) => p.thumb);
 
 export default function App() {
   const recentPosts = [...posts]
@@ -94,14 +99,15 @@ export default function App() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {recentPosts.map((post) => (
             <BlogCard
-              key={post.slug}
-              title={post.title}
-              href={`/blog/${post.slug}`}
-              excerpt={post.excerpt}
+              key={post.slug ?? 'missing-slug'}
+              title={post.title ?? 'Untitled'}
+              href={`/blog/${post.slug ?? ''}`}
+              excerpt={post.excerpt ?? post.summary ?? ''}
               image={post.thumb}
-              date={post.date}
-              readingTime={post.readingTime}
-              category={post.category}
+              date={post.date ?? '1970-01-01'}
+              readingTime={post.readingTime ?? ''}
+              category={post.category ?? 'Uncategorized'}
+              badges={post.badges ?? []}
             />
           ))}
         </div>

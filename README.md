@@ -42,7 +42,7 @@ Sat 11 Jan 2025 update:
 
 README.md formatting cheat sheet: <https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet>
 
-## Urgent notes to remain mindfull of
+## Urgent notes to remain mindful of
 
 In a typical Nx setup:
 
@@ -70,7 +70,7 @@ Hero UI = beautiful out-of-the-box components.
 
 Stitches = custom, scoped styles where Tailwind is awkward.
 
-Radix UI = rock-solid accessible behaviours you wrap yourself.
+Radix UI = rock-solid accessible behaviors you wrap yourself.
 ----
 
 ## 🚀 Milestones Checklist
@@ -162,9 +162,9 @@ craigwatt.co.uk/
   └─ ...
 ```
 
-## To work on this project, please ensure you are using our Dockerised Development Environment
+## To work on this project, please ensure you are using our Dockerized Development Environment
 
-Using a Dockerised development environment will ensure all developers to this project are ensuring consistency, scalability and ease of onboarding new developers.  By containerizing our environment, we can eliminate "it works on my machine" issues, streamline setup processes, and maintain uniform configurations across all team members' systems.
+Using a Dockerized development environment will ensure all developers to this project are ensuring consistency, scalability and ease of onboarding new developers.  By containerizing our environment, we can eliminate "it works on my machine" issues, streamline setup processes, and maintain uniform configurations across all team members' systems.
 
 ## Foundation Dependencies
 
@@ -247,7 +247,7 @@ Ensure scripts for development, testing, and Storybook are defined:
 
 
 
-## this is a project that prioritises component-driven-development
+## this is a project that priorities component-driven-development
 
 ## Evolving tree explanation
 

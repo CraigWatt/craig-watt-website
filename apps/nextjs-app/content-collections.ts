@@ -21,13 +21,13 @@ const projects = defineCollection({
     heroHeight: z.number(),
 
     // ── NEW FIELDS ─────────────────────────────────────
-    thumbLg:     z.string().optional(),
-    thumbLgWidth:  z.number().optional(),
-    thumbLgHeight: z.number().optional(),
+    thumbLg:     z.string(),
+    thumbLgWidth:  z.number(),
+    thumbLgHeight: z.number(),
 
-    thumb:       z.string().optional(),
-    thumbWidth:  z.number().optional(),
-    thumbHeight: z.number().optional(),
+    thumb:       z.string(),
+    thumbWidth:  z.number(),
+    thumbHeight: z.number(),
 
     screens:     z.array(
                     z.object({
@@ -37,66 +37,57 @@ const projects = defineCollection({
                     })
                   ).optional(),
 
-    og:        z.string().optional(),
-    ogWidth:  z.number().optional(),
-    ogHeight: z.number().optional(),
+    og:        z.string(),
+    ogWidth:  z.number(),
+    ogHeight: z.number(),
 
     badges:   z.array(z.string()).optional(),
     // ───────────────────────────────────────────────────
   }),
-  transform: ({ _meta, ...frontmatter }) => {
-    const mdxContent = createDefaultImport<MDXContent>(
-      `/content/projects/${_meta.filePath}`
-    )
-
-    return {
-      ...frontmatter,
-      slug:     _meta.path,
-      filePath: _meta.filePath,
-      mdxContent,
-    }
-  },
+  transform: ({ _meta, ...frontmatter }) => ({
+    ...frontmatter,
+    slug:     _meta.path,
+    filePath: _meta.filePath, // You already lazy-import this in `ProjectClient`
+  }),
 })
 
 const posts = defineCollection({
   name: 'posts',
-  directory: 'content/blog',
+  directory: 'content/posts',
   include: ['**/*.mdx'],
   parser: 'frontmatter-only',
   schema: z.object({
     title:        z.string(),
-    date:         z.string(),             // or z.date() if you parse dates
+    date:         z.string(), // optionally use z.date() if you want date parsing
     summary:      z.string(),
+    excerpt:      z.string().optional(), // optional override
     github:       z.string().url().optional(),
     tags:         z.array(z.string()).optional(),
+    category:     z.string(),
+    author:       z.string(),
+    readingTime:  z.string(),
 
-    // mirror the same media fields if you need them in posts…
-    hero:         z.string().optional(),
-    heroWidth:    z.number().optional(),
-    heroHeight:   z.number().optional(),
+    hero:         z.string(),
+    heroWidth:    z.number(),
+    heroHeight:   z.number(),
 
-    thumb:        z.string().optional(),
-    thumbWidth:   z.number().optional(),
-    thumbHeight:  z.number().optional(),
+    thumb:        z.string(),
+    thumbLg:      z.string(),
+    thumbWidth:   z.number(),
+    thumbHeight:  z.number(),
 
-    og:           z.string().optional(),
-    ogWidth:      z.number().optional(),
-    ogHeight:     z.number().optional(),
+    og:           z.string(),
+    ogWidth:      z.number(),
+    ogHeight:     z.number(),
+    badges:   z.array(z.string()).optional(),
   }),
-  transform: ({ _meta, ...frontmatter }) => {
-    const mdxContent = createDefaultImport<MDXContent>(
-      `/content/blog/${_meta.filePath}`
-    )
-
-    return {
-      ...frontmatter,
-      slug:     _meta.path,
-      filePath: _meta.filePath,
-      mdxContent,
-    }
-  },
+  transform: ({ _meta, ...frontmatter }) => ({
+    ...frontmatter,
+    slug:     _meta.path,
+    filePath: _meta.filePath, // Will be used in BlogClient to dynamic-import
+  }),
 })
 
 export default defineConfig({
-  collections: [projects, posts],
-})
+  collections: [projects, posts], // <- this must be present and correct
+});
