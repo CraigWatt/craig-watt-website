@@ -95,7 +95,7 @@
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "remark-frontmatter": "^5.0.0",
-    "remark-mdx-frontmatter": "^4.0.0",
+    "remark-mdx-frontmatter": "^5.2.0",
     "storybook": "^9.0.18",
     "stylus": "0.64.0",
     "tailwindcss": "4.1.11",
