@@ -1,9 +1,17 @@
-// tsconfig.json (repo root)
 {
   "extends": "./tsconfig.base.json",
-  "files": [],          // no globs here
-  "references": [
-    { "path": "apps/nextjs-app" }
-    // add other workspace projects here as needed
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false, // This overrides the setting from tsconfig.base.json
+    // Add any other project-specific compiler options here
+  },
+  "include": [
+    // Your project-specific files
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
   ]
 }
