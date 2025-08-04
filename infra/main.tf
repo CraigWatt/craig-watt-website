@@ -20,14 +20,6 @@ module "network" {
   source = "./modules/network"
 }
 
-module "route53" {
-  source     = "./modules/route53"
-  domain     = var.domain
-
-  alb_dns_name = module.nextjs_service.alb_dns_name
-  alb_zone_id  = module.nextjs_service.alb_zone_id
-}
-
 # ───────────────────────────────────────────────────────────────────────────────
 # 2) ECR
 # ───────────────────────────────────────────────────────────────────────────────
@@ -61,4 +53,32 @@ module "nextjs_service" {
   task_role_arn      = var.ecs_task_role_arn
   family_name        = "nextjs-app"
   aws_region         = var.aws_region
+}
+
+# ───────────────────────────────────────────────────────────────────────────────
+# 5) route53
+# ───────────────────────────────────────────────────────────────────────────────
+
+module "route53" {
+  source     = "./modules/route53"
+  domain     = var.domain
+
+  alb_dns_name = module.nextjs_service.alb_dns_name
+  alb_zone_id  = module.nextjs_service.alb_zone_id
+}
+
+
+# ───────────────────────────────────────────────────────────────────────────────
+# 6) acm
+# ───────────────────────────────────────────────────────────────────────────────
+
+module "acm" {
+  source  = "./modules/acm"
+
+  domain  = var.domain
+  zone_id = module.route53.zone_id
+
+  providers = {
+    aws = aws.us_east_1
+  }
 }
