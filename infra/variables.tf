@@ -4,6 +4,11 @@ variable "ecr_repository" {
   default     = "craig-watt-website"
 }
 
+variable "domain" {
+  description = "Root domain to manage in Route 53"
+  type        = string
+}
+
 variable "ecs_cluster_name" {
   description = "Name for the ECS cluster"
   type        = string
