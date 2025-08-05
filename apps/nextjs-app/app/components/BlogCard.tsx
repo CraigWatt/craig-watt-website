@@ -32,8 +32,8 @@ export function BlogCard({
   href,
   excerpt,
   imageSrc = '/images/default-thumb.jpg',
-  imageWidth,
-  imageHeight,
+  imageWidth: _imageWidth,
+  imageHeight: _imageHeight,
   date,
   readingTime,
   category,
@@ -67,7 +67,7 @@ export function BlogCard({
           fill
           sizes="(max-width: 640px) 100vw, 33vw"
           className="object-cover"
-          {...(imageWidth && imageHeight ? { width: imageWidth, height: imageHeight } : {})}
+          // {...(imageWidth && imageHeight ? { width: imageWidth, height: imageHeight } : {})}
         />
       </div>
 
