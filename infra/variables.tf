@@ -41,3 +41,9 @@ variable "aws_region" {
   type        = string
   default     = "eu-west-2"
 }
+
+variable "container_port" {
+  description = "Port your Next.js container listens on"
+  type        = number
+  default     = 3000
+}

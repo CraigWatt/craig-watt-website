@@ -1,17 +1,19 @@
 output "vpc_id" {
-  value = data.aws_vpc.default.id
+  description = "The default VPC ID"
+  value       = data.aws_vpc.default.id
 }
 
 output "subnet_ids" {
-  description = "List of subnet IDs for this VPC"
+  description = "List of subnet IDs in the default VPC"
   value       = data.aws_subnets.default.ids
 }
 
-output "default_sg_id" {
-  description = "The default security-group ID for this VPC"
-  value       = data.aws_security_group.default.id
+output "alb_sg_id" {
+  description = "Security Group ID for the ALB"
+  value       = aws_security_group.alb.id
 }
 
-output "security_group_id" {
-  value = data.aws_security_group.default.id
+output "app_sg_id" {
+  description = "Security Group ID for the ECS tasks"
+  value       = aws_security_group.app.id
 }
