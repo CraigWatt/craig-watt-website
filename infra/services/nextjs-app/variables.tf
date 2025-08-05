@@ -82,3 +82,8 @@ variable "app_sg_id" {
   description = "Security Group ID for the ECS tasks"
   type        = string
 }
+# the four secrets ARNs
+variable "secrets_mailersend_arn" { type = string }
+variable "secrets_recaptcha_arn"  { type = string }
+variable "secrets_t212_arn"       { type = string }
+variable "secrets_fx_arn"         { type = string }

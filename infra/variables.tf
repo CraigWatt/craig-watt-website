@@ -47,3 +47,32 @@ variable "container_port" {
   type        = number
   default     = 3000
 }
+
+variable "mailersend_api_key" {
+  type        = string
+  description = "Mailersend API key (plaintext from CI)"
+  sensitive   = true
+}
+
+variable "recaptcha_secret_key" {
+  type        = string
+  description = "RECAPTCHA secret key (server-side)"
+  sensitive   = true
+}
+
+variable "t212_api_key" {
+  type        = string
+  description = "Trading212 API key"
+  sensitive   = true
+}
+
+variable "fx_api_key" {
+  type        = string
+  description = "FX API key"
+  sensitive   = true
+}
+
+variable "family_name" {
+  description = "The ECS task‐definition family (and service name)"
+  type        = string
+}

@@ -91,3 +91,5 @@ bootstrap/backend.local.tf
 .vscode/
 
 static/
+
+infra/secrets.auto.tfvars
