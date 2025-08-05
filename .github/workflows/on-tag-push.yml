@@ -225,4 +225,6 @@ jobs:
             -var="mailersend_api_key=${{ secrets.MAILERSEND_API_KEY }}" \
             -var="recaptcha_secret_key=${{ secrets.RECAPTCHA_SECRET_KEY }}" \
             -var="t212_api_key=${{ secrets.T212_API_KEY }}" \
-            -var="fx_api_key=${{ secrets.FX_API_KEY }}"
+            -var="fx_api_key=${{ secrets.FX_API_KEY }}" \
+            -var="contact_email_to=${{ secrets.CONTACT_EMAIL_TO }}" \
+            -var="contact_email_from=${{ secrets.CONTACT_EMAIL_FROM }}"
