@@ -28,13 +28,23 @@ module.exports = {
     // disable Next’s “no pages dir” check
     'next/no-html-link-for-pages': 'off',
 
+    // keep no-explicit-any on by default
+    '@typescript-eslint/no-explicit-any': 'error',
+
     // your monorepo boundaries
     '@nx/enforce-module-boundaries': [
       'error',
       {
         enforceBuildableLibDependency: true,
-        allow: ['^.*/eslint\\.config\\.[cm]?js$'],
-        depConstraints: [{ sourceTag: '*', onlyDependOnLibsWithTags: ['*'] }],
+        // allow CJS-style overrides and content-collections imports:
+        allow: [
+          '^.*/eslint\\.config\\.[cm]?js$',
+          'content-collections',        // bare import
+          'content-collections/.*'      // sub-paths
+        ],
+        depConstraints: [
+          { sourceTag: '*', onlyDependOnLibsWithTags: ['*'] }
+        ],
       },
     ],
 
@@ -49,6 +59,13 @@ module.exports = {
   },
 
   overrides: [
+    // turn off `no-explicit-any` in our app/ component and API routes
+    {
+      files: ['apps/nextjs-app/**/*.{ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
     {
       // for plain JS files, drop the TS parserOptions.project requirement entirely
       files: ['*.js', '**/*.js'],

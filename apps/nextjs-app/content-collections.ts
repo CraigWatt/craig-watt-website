@@ -1,10 +1,9 @@
 import {
   defineCollection,
   defineConfig,
-  createDefaultImport,
 } from '@content-collections/core'
 import { z } from 'zod'
-import type { MDXContent } from 'mdx/types'
+// import type { MDXContent } from 'mdx/types'
 
 const projects = defineCollection({
   name: 'projects',
