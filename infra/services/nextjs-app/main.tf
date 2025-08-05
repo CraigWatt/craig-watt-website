@@ -15,8 +15,8 @@ resource "aws_ecs_task_definition" "this" {
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
 
-  cpu              = var.cpu
-  memory           = var.memory
+  cpu                = var.cpu
+  memory             = var.memory
   execution_role_arn = var.execution_role_arn
   task_role_arn      = var.task_role_arn
 
@@ -51,16 +51,16 @@ resource "aws_ecs_task_definition" "this" {
 
 # ECS Service
 resource "aws_ecs_service" "this" {
-  name            = local.family
-  cluster         = var.cluster_arn
-  task_definition = aws_ecs_task_definition.this.arn
-  desired_count   = var.desired_count
-  launch_type     = "FARGATE"
+  name                   = local.family
+  cluster                = var.cluster_arn
+  task_definition        = aws_ecs_task_definition.this.arn
+  desired_count          = var.desired_count
+  launch_type            = "FARGATE"
   enable_execute_command = true
 
   network_configuration {
     subnets          = var.subnets
-    security_groups  = [ var.app_sg_id ]
+    security_groups  = [var.app_sg_id]
     assign_public_ip = true
   }
 

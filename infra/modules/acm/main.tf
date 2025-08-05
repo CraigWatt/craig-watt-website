@@ -8,8 +8,8 @@ terraform {
 }
 
 resource "aws_acm_certificate" "this" {
-  domain_name               = var.domain                    # “craigwatt.co.uk”
-  subject_alternative_names = ["www.${var.domain}"]         # add the “www” name
+  domain_name               = var.domain            # “craigwatt.co.uk”
+  subject_alternative_names = ["www.${var.domain}"] # add the “www” name
   validation_method         = "DNS"
 
   lifecycle {

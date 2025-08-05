@@ -16,7 +16,7 @@ resource "aws_route53_record" "nextjs" {
 
 resource "aws_route53_record" "apex" {
   zone_id = aws_route53_zone.primary.zone_id
-  name    = var.domain    # “craigwatt.co.uk”
+  name    = var.domain # “craigwatt.co.uk”
   type    = "A"
 
   alias {

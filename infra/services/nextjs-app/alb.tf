@@ -7,8 +7,8 @@ resource "aws_lb" "this" {
   name               = "${local.family}-alb"
   internal           = false
   load_balancer_type = "application"
-  subnets            = var.subnets               # your public subnets
-  security_groups    = [ var.alb_sg_id ]         # now locked to HTTP/HTTPS only
+  subnets            = var.subnets     # your public subnets
+  security_groups    = [var.alb_sg_id] # now locked to HTTP/HTTPS only
 }
 
 # ───────────────────────────────────────────────────────────────────────────────
@@ -21,7 +21,7 @@ locals {
 
 resource "aws_lb_target_group" "this" {
   name_prefix = "${local.tg_prefix}-tg-"
-  port        = var.container_port              # 3000
+  port        = var.container_port # 3000
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
 
