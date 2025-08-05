@@ -130,32 +130,53 @@ export function transformForPublic({
     : 0
 
   // ─── 5) Mask & format for public output ────────────────────────────────
+
+  // 5a) Prepare profit/loss display (mask only, no sign):
+  const rawPL     = cash.ppl
+  const fmtPL     = formatGBP(Math.abs(rawPL))  // e.g. "£1,234.56"
+  const maskedPL  = maskValue(fmtPL)           // e.g. "£*,***.**"
+
+  // 5b) Signed pct:
+  const plPct = invested > 0 ? (rawPL / invested) * 100 : 0
+  const signedPct = `${plPct >= 0 ? '+' : ''}${plPct.toFixed(2)}%`
+
   const pubMetrics: PublicMetrics = {
-    totalValue:     maskValue(formatGBP(totalValue)),
-    invested:       maskValue(formatGBP(invested)),
-    freeCash:       maskValue(formatGBP(cash.free)),
-    profitLoss:     maskValue(formatGBP(profitLoss)),
-    profitLossPct:  `${profitLossPct.toFixed(2)}%`,
-    simpleReturnPct:`${simpleReturnPct.toFixed(2)}%`,
+    totalValue:      maskValue(formatGBP(totalValue)),
+    invested:        maskValue(formatGBP(invested)),
+    freeCash:        maskValue(formatGBP(cash.free)),
+    profitLoss:      maskedPL,       // now "£*,***.**"
+    profitLossPct:   signedPct,      // e.g. "+11.34%"
+    simpleReturnPct: `${simpleReturnPct.toFixed(2)}%`,
   }
 
-  const pubPositions: PublicPos[] = mergedPositions.map(p => ({
-    symbol:       p.symbol,
-    marketValue:  p.pct >= 0
+  // 5c) Trim trailing 'l' off any 5-char symbol, then mask/format:
+  const pubPositions: PublicPos[] = mergedPositions.map((p) => {
+    let sym = p.symbol
+    if (sym.length === 5 && sym.endsWith('l')) {
+      sym = sym.slice(0, 4)
+    }
+    const valStr = p.marketValue > 300.01
       ? maskValue(formatGBP(p.marketValue))
-      : formatGBP(p.marketValue),
-    pct:          `${p.pct >= 0 ? '+' : ''}${p.pct.toFixed(2)}%`,
-    purchaseDate: new Date(p.purchaseDate).toLocaleDateString('en-GB', {
-      day:   '2-digit',
-      month: 'short',
-      year:  'numeric',
-    }),
-  }))
+      : p.marketValue < 1
+        ? '£0.00'
+        : formatGBP(p.marketValue)
+    const pctStr = `${p.pct >= 0 ? '+' : ''}${p.pct.toFixed(2)}%`
+    return {
+      symbol:       sym,
+      marketValue:  valStr,
+      pct:          pctStr,
+      purchaseDate: new Date(p.purchaseDate).toLocaleDateString('en-GB', {
+        day:   '2-digit',
+        month: 'short',
+        year:  'numeric',
+      }),
+    }
+  })
 
   return {
     apiStatus: {
       t212: Boolean(cash && portfolio && pies.length),
-      fx:   fxRate != null,
+      fx: typeof fxRate === 'number' && !isNaN(fxRate),
     },
     metrics:   pubMetrics,
     positions: pubPositions,
