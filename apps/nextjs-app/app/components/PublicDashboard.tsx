@@ -63,25 +63,10 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
 
-        {/* <section className="grid grid-cols-2 gap-4">
-          <Card shadow="sm" radius="md" fullWidth>
-            <CardHeader>Trading212 API</CardHeader>
-            <CardBody className={apiStatus.t212 ? 'text-green-600' : 'text-red-600'}>
-              {apiStatus.t212 ? 'Online' : 'Offline'}
-            </CardBody>
-          </Card>
-          <Card shadow="sm" radius="md" fullWidth>
-            <CardHeader>FX API</CardHeader>
-            <CardBody className={apiStatus.fx ? 'text-green-600' : 'text-red-600'}>
-              {apiStatus.fx ? 'Online' : 'Offline'}
-            </CardBody>
-          </Card>
-        </section> */}
-
         <section className="grid grid-cols-2 gap-4">
           <Alert
             color={apiStatus.t212 ? 'success' : 'danger'}
-            title="Trading212 API"
+            title="T212 API"
             description={apiStatus.t212 ? 'Online' : 'Offline'}
           />
           <Alert
