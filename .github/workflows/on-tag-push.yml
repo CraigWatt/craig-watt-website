@@ -220,4 +220,9 @@ jobs:
             -var="domain=craigwatt.co.uk" \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
-            -var="ecs_task_role_arn=${{ secrets.ECS_TASK_ROLE_ARN }}"
+            -var="ecs_task_role_arn=${{ secrets.ECS_TASK_ROLE_ARN }}" \
+            -var="family_name=nextjs-app" \
+            -var="mailersend_api_key=${{ secrets.MAILERSEND_API_KEY }}" \
+            -var="recaptcha_secret_key=${{ secrets.RECAPTCHA_SECRET_KEY }}" \
+            -var="t212_api_key=${{ secrets.T212_API_KEY }}" \
+            -var="fx_api_key=${{ secrets.FX_API_KEY }}"
