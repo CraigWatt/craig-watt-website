@@ -82,8 +82,29 @@ variable "app_sg_id" {
   description = "Security Group ID for the ECS tasks"
   type        = string
 }
-# the four secrets ARNs
-variable "secrets_mailersend_arn" { type = string }
-variable "secrets_recaptcha_arn"  { type = string }
-variable "secrets_t212_arn"       { type = string }
-variable "secrets_fx_arn"         { type = string }
+
+# the six secrets ARNs
+variable "secrets_mailersend_arn" {
+  description = "ARN for the Mailersend API key secret"
+  type        = string
+}
+variable "secrets_recaptcha_arn" {
+  description = "ARN for the reCAPTCHA secret key"
+  type        = string
+}
+variable "secrets_t212_arn" {
+  description = "ARN for the T212 API key secret"
+  type        = string
+}
+variable "secrets_fx_arn" {
+  description = "ARN for the FX API key secret"
+  type        = string
+}
+variable "secrets_contact_to_arn" {
+  description = "ARN for the Contact email TO address secret"
+  type        = string
+}
+variable "secrets_contact_from_arn" {
+  description = "ARN for the Contact email FROM address secret"
+  type        = string
+}

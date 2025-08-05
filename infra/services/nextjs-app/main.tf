@@ -64,6 +64,14 @@ resource "aws_ecs_task_definition" "this" {
           name      = "FX_API_KEY"
           valueFrom = var.secrets_fx_arn
         },
+        {
+          name      = "CONTACT_EMAIL_TO"
+          valueFrom = var.secrets_contact_to_arn
+        },
+        {
+          name      = "CONTACT_EMAIL_FROM"
+          valueFrom = var.secrets_contact_from_arn
+        },
       ]
     }
   ])

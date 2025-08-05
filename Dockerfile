@@ -53,6 +53,11 @@ COPY . .
 
 RUN npx nx build nextjs-app --configuration=production
 
+# make sure cache dirs exist and are world-writable
+RUN mkdir -p apps/nextjs-app/.next/cache/images \
+         apps/nextjs-app/.next/cache/fetch-cache \
+ && chmod -R a+rwX apps/nextjs-app/.next
+
 # debug: inspect .next/standalone
 RUN echo "=== builder: .next/standalone tree ===" \
   && ls -R apps/nextjs-app/.next/standalone
