@@ -11,7 +11,7 @@ import { transformForPublic } from '../../trading212/lib/transform'
 
 let cachedPayload: ReturnType<typeof transformForPublic> | null = null
 let lastFetched = 0
-const TTL = 10 * 60 * 1000 // 10 minutes
+const TTL = 5 * 60 * 1000 // 10 minutes
 
 export async function GET() {
   const now = Date.now()
