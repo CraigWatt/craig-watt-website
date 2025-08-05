@@ -1,6 +1,14 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~>6.0"
+    }
+  }
+}
+
 resource "aws_acm_certificate" "this" {
-  provider          = aws.us_east_1
-  domain_name       = "www.craigwatt.co.uk"
+  domain_name       = "www.${var.domain}"
   validation_method = "DNS"
 
   lifecycle {
@@ -9,15 +17,16 @@ resource "aws_acm_certificate" "this" {
 }
 
 resource "aws_route53_record" "validation" {
+  # domain_validation_options is a set, so use tolist(...)
   name    = tolist(aws_acm_certificate.this.domain_validation_options)[0].resource_record_name
   type    = tolist(aws_acm_certificate.this.domain_validation_options)[0].resource_record_type
-  zone_id = var.zone_id
   records = [tolist(aws_acm_certificate.this.domain_validation_options)[0].resource_record_value]
   ttl     = 60
+
+  zone_id = var.zone_id
 }
 
 resource "aws_acm_certificate_validation" "this" {
-  provider                = aws.us_east_1
   certificate_arn         = aws_acm_certificate.this.arn
   validation_record_fqdns = [aws_route53_record.validation.fqdn]
 }

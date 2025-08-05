@@ -1,5 +1,11 @@
 terraform {
   required_version = ">= 1.4.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
   backend "s3" {
     bucket         = "craig-watt-tfstate"
     key            = "prod/terraform.tfstate"
@@ -9,8 +15,14 @@ terraform {
   }
 }
 
+# Default, eu-west-2
 provider "aws" {
-  region = var.aws_region
+  region = var.aws_region        # eu-west-2
+}
+
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
 # ───────────────────────────────────────────────────────────────────────────────
@@ -54,30 +66,17 @@ module "nextjs_service" {
   family_name        = "nextjs-app"
   aws_region         = var.aws_region
 }
-
-# ───────────────────────────────────────────────────────────────────────────────
-# 5) route53
-# ───────────────────────────────────────────────────────────────────────────────
-
 module "route53" {
-  source     = "./modules/route53"
-  domain     = var.domain
-
+  source      = "./modules/route53"
+  domain      = var.domain
   alb_dns_name = module.nextjs_service.alb_dns_name
   alb_zone_id  = module.nextjs_service.alb_zone_id
 }
 
-
-# ───────────────────────────────────────────────────────────────────────────────
-# 6) acm
-# ───────────────────────────────────────────────────────────────────────────────
-
 module "acm" {
   source  = "./modules/acm"
-
   domain  = var.domain
   zone_id = module.route53.zone_id
-
   providers = {
     aws = aws.us_east_1
   }
