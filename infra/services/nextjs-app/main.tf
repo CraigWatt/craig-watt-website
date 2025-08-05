@@ -36,14 +36,34 @@ resource "aws_ecs_task_definition" "this" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.this.name
-          "awslogs-region"        = var.aws_region
-          "awslogs-stream-prefix" = local.family
+          awslogs-group         = aws_cloudwatch_log_group.this.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = local.family
         }
       }
 
+      # keep NODE_ENV
       environment = [
         { name = "NODE_ENV", value = "production" }
+      ]
+
+      secrets = [
+        {
+          name      = "MAILERSEND_API_KEY"
+          valueFrom = var.secrets_mailersend_arn
+        },
+        {
+          name      = "RECAPTCHA_SECRET_KEY"
+          valueFrom = var.secrets_recaptcha_arn
+        },
+        {
+          name      = "T212_API_KEY"
+          valueFrom = var.secrets_t212_arn
+        },
+        {
+          name      = "FX_API_KEY"
+          valueFrom = var.secrets_fx_arn
+        },
       ]
     }
   ])
