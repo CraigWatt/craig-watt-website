@@ -26,3 +26,13 @@ variable "fx_api_key" {
   description = "FX API key"
   sensitive   = true
 }
+
+variable "contact_email_to" {
+  description = "The recipient address for contact form submissions"
+  type        = string
+}
+
+variable "contact_email_from" {
+  description = "The sender address for contact form submissions"
+  type        = string
+}

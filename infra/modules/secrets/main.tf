@@ -37,3 +37,18 @@ resource "aws_secretsmanager_secret_version" "fx" {
   secret_id     = aws_secretsmanager_secret.fx.id
   secret_string = var.fx_api_key
 }
+resource "aws_secretsmanager_secret" "contact_to" {
+  name = "${var.domain}-contact-email-to"
+}
+resource "aws_secretsmanager_secret_version" "contact_to" {
+  secret_id     = aws_secretsmanager_secret.contact_to.id
+  secret_string = var.contact_email_to
+}
+
+resource "aws_secretsmanager_secret" "contact_from" {
+  name = "${var.domain}-contact-email-from"
+}
+resource "aws_secretsmanager_secret_version" "contact_from" {
+  secret_id     = aws_secretsmanager_secret.contact_from.id
+  secret_string = var.contact_email_from
+}
