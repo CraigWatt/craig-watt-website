@@ -11,15 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Ping the Trading212 cache endpoint
-        # We call our own https://craigwatt.co.uk/api/trading212 endpoint.
-        # • On the very first run after a deploy or cache expiry (10 min), this
-        #   will populate Next.js’s cache by fetching fresh data (including all
-        #   pie-details, rate‐limited at 1 call/5 s and 1 call/30 s).
-        # • After caching, Next.js returns the cached JSON for up to 10 minutes,
-        #   so these subsequent 10-minute pings never actually hit Trading212
-        #   and can’t trigger any 429s.
-        # • When the 10 min cache window expires, the *next* scheduled ping will
-        #   again refresh the cache (at safe, rate-limited speed) and then go
-        #   back to serving the cached copy.
-        run: curl -s https://craigwatt.co.uk/api/trading212 > /dev/null
+      - name: Warm T212 API cache
+        run: |
+          echo "Warming https://craigwatt.co.uk/api/trading212"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://craigwatt.co.uk/api/trading212)
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Cache warm failed with status $STATUS"
+            exit 1
+          fi
