@@ -123,22 +123,14 @@ export function transformForPublic({
   // ─── 4) Compute portfolio-level metrics ─────────────────────────────────
   const totalValue      = cash.total
   const invested        = cash.invested || 1
-  const profitLoss      = cash.ppl
-  const profitLossPct   = (profitLoss / invested) * 100
   const simpleReturnPct = invested > 0
     ? ((totalValue - invested) / invested) * 100
     : 0
 
-  // ─── 5) Mask & format for public output ────────────────────────────────
-
-  // 5a) Prepare profit/loss display (mask only, no sign):
-  const rawPL     = cash.ppl
-  const fmtPL     = formatGBP(Math.abs(rawPL))  // e.g. "£1,234.56"
-  const maskedPL  = maskValue(fmtPL)           // e.g. "£*,***.**"
-
-  // 5b) Signed pct:
-  const plPct = invested > 0 ? (rawPL / invested) * 100 : 0
-  const signedPct = `${plPct >= 0 ? '+' : ''}${plPct.toFixed(2)}%`
+  const profitLoss = cash.ppl
+  const profitLossPct = invested > 0 ? (profitLoss / invested) * 100 : 0
+  const maskedPL = maskValue(formatGBP(Math.abs(profitLoss)))
+  const signedPct = `${profitLossPct >= 0 ? '+' : ''}${profitLossPct.toFixed(2)}%`
 
   const pubMetrics: PublicMetrics = {
     totalValue:      maskValue(formatGBP(totalValue)),
