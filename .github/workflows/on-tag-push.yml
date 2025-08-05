@@ -52,6 +52,8 @@ jobs:
           CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
           NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
           RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+          T212_API_KEY=${{ secrets.T212_API_KEY }}
+          FX_API_KEY=${{ secrets.FX_API_KEY }}
           EOF
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -111,6 +113,8 @@ jobs:
             CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
             NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
             RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+            T212_API_KEY=${{ secrets.T212_API_KEY }}
+            FX_API_KEY=${{ secrets.FX_API_KEY }}            
           tags: debug-nextjs-app:ci
 
       # - name: 🔍 Inspect `/app` in the debug image
@@ -167,6 +171,8 @@ jobs:
             CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
             NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
             RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+            212_API_KEY=${{ secrets.T212_API_KEY }}
+            FX_API_KEY=${{ secrets.FX_API_KEY }}
           tags: |
             ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
             ghcr.io/craigwatt/craig-watt-website:latest
