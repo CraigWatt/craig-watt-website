@@ -63,7 +63,7 @@ export function BlogRenderer({
           <Card shadow="sm" radius="md" fullWidth={false}>
             <div className="flex flex-row flex-wrap items-center space-x-2 p-2">
               {post.badges.map((badge: string) => (
-                <img
+                <Image
                   key={badge}
                   src={`/icons/${badge}.svg`}
                   alt={`${badge} logo`}
@@ -99,7 +99,7 @@ export function BlogRenderer({
               const { href = '#', ...rest } = props;
               return <Link href={href} {...rest} className="underline" />;
             },
-            img: (props: any) => {
+            Image: (props: any) => {
               const src =
                 typeof props.src === 'string' && !props.src.startsWith('/')
                   ? `/${props.src}`

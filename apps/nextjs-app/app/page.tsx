@@ -1,6 +1,6 @@
 // app/page.tsx
 'use client';
-import { allProjects } from 'content-collections';
+import { allProjects, allPosts } from 'content-collections';
 import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
@@ -8,11 +8,8 @@ import { User } from '@heroui/user';
 import { BlogCard } from './components/BlogCard';
 import ContactForm from './components/ContactForm';
 
-import { allPosts } from 'content-collections';
-
-// Type 'Post' is correctly inferred from allPosts.
-// We can use a type guard to filter out posts with a missing thumb.
-const posts = allPosts.filter((p) => p.thumb);
+const projects = allProjects ?? [];
+const posts = allPosts?.filter((p) => p.thumb) ?? [];
 
 export default function App() {
   const recentPosts = [...posts]
@@ -71,7 +68,7 @@ export default function App() {
           Featured Projects
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {allProjects.slice(0, 3).map((p) => (
+        {projects.slice(0, 3).map((p) => (
           <ProjectCard
             key={p.slug}
             title={p.title}

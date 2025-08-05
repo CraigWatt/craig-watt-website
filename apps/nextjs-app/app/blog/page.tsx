@@ -16,7 +16,7 @@ import { allPosts } from 'content-collections';
 
 // Type 'Post' is correctly inferred from allPosts.
 // We can use a type guard to filter out posts with a missing thumb.
-const posts = allPosts.filter((p) => p.thumb);
+const posts = allPosts?.filter((p) => p.thumb) ?? [];
 
 export const dynamic = 'force-dynamic';
 

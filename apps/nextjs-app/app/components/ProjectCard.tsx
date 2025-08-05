@@ -44,7 +44,7 @@ export function ProjectCard({
         {badges.length > 0 && (
           <div className="flex flex-wrap items-center space-x-2">
             {badges.slice(0, 3).map((b) => (
-              <img
+              <Image
                 key={b}
                 src={`/icons/${b}.svg`}
                 alt={`${b} logo`}

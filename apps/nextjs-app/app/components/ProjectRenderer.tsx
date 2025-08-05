@@ -51,7 +51,7 @@ export function ProjectRenderer({
               {/* force a row layout here */}
               <div className="flex flex-row flex-wrap items-center space-x-2 p-2">
                 {project.badges.map((badge: string) => (
-                  <img
+                  <Image
                     key={badge}
                     src={`/icons/${badge}.svg`}
                     alt={`${badge} logo`}
@@ -97,7 +97,7 @@ export function ProjectRenderer({
                 const { href = '#', ...rest } = props;
                 return <Link href={href} {...rest} className="underline" />;
               },
-              img: (props: any) => {
+              Image: (props: any) => {
                 const src =
                   typeof props.src === 'string' && !props.src.startsWith('/')
                     ? `/${props.src}`

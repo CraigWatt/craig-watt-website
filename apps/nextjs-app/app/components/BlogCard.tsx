@@ -85,7 +85,7 @@ export function BlogCard({
         {badges?.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-3">
             {badges.map((badge: string) => (
-              <img
+              <Image
                 key={badge}
                 src={`/icons/${badge}.svg`}
                 alt={`${badge} logo`}
