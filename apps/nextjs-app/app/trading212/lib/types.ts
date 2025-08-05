@@ -1,38 +1,82 @@
-// app/trading212/lib/types.ts
+// apps/nextjs-app/app/trading212/lib/types.ts
 
+// ─── raw T212 API shapes ──────────────────────────────────────────────────────
+export interface Cash {
+  blocked: number
+  free: number
+  invested: number
+  pieCash: number
+  ppl: number
+  result: number
+  total: number
+}
+
+export interface PortfolioItem {
+  ticker: string
+  quantity: number
+  averagePrice: number
+  currentPrice: number
+  pieQuantity: number
+  ppl: number
+  fxPpl: number | null
+  initialFillDate: string
+}
+
+export interface PieSummary {
+  id: number
+  cash: number
+  dividendDetails: { gained: number; reinvested: number; inCash: number }
+  result: {
+    priceAvgInvestedValue: number
+    priceAvgValue: number
+    priceAvgResult: number
+    priceAvgResultCoef: number
+  }
+  progress: number
+  status: string | null
+}
+
+export interface PieDetail {
+  instruments: Array<{
+    ticker: string
+    ownedQuantity: number
+    result: {
+      priceAvgValue: number
+      priceAvgInvestedValue: number
+      priceAvgResult: number
+    }
+  }>
+  settings: { name: string; id: number }
+}
+
+// ─── the shape of your combined JSON endpoint ────────────────────────────────
+export interface ApiResponse {
+  cash: Cash
+  portfolio: PortfolioItem[]
+  pies: PieSummary[]
+  pieDetails: PieDetail[]
+  fx?: number
+}
+
+// ─── the shapes your Dashboard actually **consumes** ───────────────────────────
 export interface ApiStatus {
-  t212: boolean    // Trading212 API connectivity
-  fx:   boolean    // FX API connectivity
+  t212: boolean    // Trading212 connectivity
+  fx:   boolean    // FX lookup connectivity
 }
 
-/** 
- * A snapshot of your portfolio totals and ROR% for each period
- */
 export interface PortfolioMetrics {
-  totalValue:      number  // today’s total (cash + positions)
-  invested:        number  // total cash you’ve put in
-  freeCash:        number  // uninvested cash on hand
-  profitLoss:      number  // absolute P/L
-  profitLossPct:   number  // P/L ÷ invested * 100
-  simpleReturnPct: number  // (totalValue – invested) ÷ invested * 100
+  totalValue:      number
+  invested:        number
+  freeCash:        number
+  profitLoss:      number
+  profitLossPct:   number
+  simpleReturnPct: number
 }
 
-/**
- * A single date + ROR percentage data point, used in the chart
- */
-export interface RorPoint {
-  date:   string  // “YYYY-MM-DD”
-  rorPct: number
-}
-
-/**
- * Your individual holding, for the list at the bottom
- */
 export interface Position {
   symbol:       string
   marketValue:  number
-  avgPrice:     number
-  ppl:          number    // absolute P/L in GBP
-  pct:          number    // P/L percent (e.g. 23.48)
-  purchaseDate: string    // initialFillDate from the API
+  pct:          number
+  ppl:          number
+  purchaseDate: string
 }

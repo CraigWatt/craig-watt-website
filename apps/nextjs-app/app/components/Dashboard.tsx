@@ -71,8 +71,6 @@ export default function Dashboard({ data }: DashboardProps) {
 
   return (
     <div className="space-y-8">
-
-
       {/* ─── TOP 5 METRICS ───────────────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {[
