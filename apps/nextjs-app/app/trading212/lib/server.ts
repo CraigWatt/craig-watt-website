@@ -5,39 +5,46 @@ import pLimit from 'p-limit'
 export const revalidate = 60
 
 const BASE    = 'https://live.trading212.com/api/v0'
-const limit   = pLimit(1)    // max 5 concurrent
+const limitCash      = pLimit(1)
+const limitPortfolio = pLimit(1)
+const limitPies      = pLimit(1)
+const limitPieDetail = pLimit(1)
 const RETRIES = 2             // retry 2× on 429
 
-async function fetchT212Safe<T>(path: string): Promise<{ ok: boolean; data: T | null }> {
-  // run this whole block under the limiter
-  return limit(async () => {
-    for (let attempt = 0; attempt <= RETRIES; attempt++) {
-      const res = await fetch(`${BASE}${path}`, {
-        headers: { Authorization: process.env.T212_API_KEY! },
-        cache: 'force-cache',        // ← throttle at the HTTP-cache layer
-        next: { revalidate: 60 },    // ← ISR at the Next.js layer
-      })
-
-      if (res.ok) {
-        const json = (await res.json()) as T
-        return { ok: true, data: json }
-      }
-
-      // if we get throttled, back off a bit and retry
-      if (res.status === 429 && attempt < RETRIES) {
-        await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
-        continue
-      }
-
-      console.warn(`T212 ${path} returned status ${res.status}`)
-      return { ok: false, data: null }
-    }
-    return { ok: false, data: null }
-  })
+function delay(ms: number, jitter = 250) {
+  const j = Math.floor(Math.random() * jitter)
+  return new Promise(res => setTimeout(res, ms + j))
 }
 
-export function getAccountCashSafe() {
-  return fetchT212Safe<{
+async function fetchT212Safe<T>(path: string): Promise<{ ok: boolean; data: T | null }> {
+  for (let attempt = 0; attempt <= RETRIES; attempt++) {
+    const res = await fetch(`${BASE}${path}`, {
+      headers: { Authorization: process.env.T212_API_KEY! },
+      cache: 'force-cache',
+      next: { revalidate: 60 },
+    })
+
+    if (res.ok) {
+      const json = (await res.json()) as T
+      return { ok: true, data: json }
+    }
+
+    if (res.status === 429 && attempt < RETRIES) {
+      console.warn(`T212 ${path} hit rate limit — retrying [${attempt + 1}/${RETRIES}]`)
+      await new Promise(r => setTimeout(r, 1000 * (attempt + 1)))
+      continue
+    }
+
+    console.warn(`T212 ${path} returned status ${res.status}`)
+    return { ok: false, data: null }
+  }
+
+  return { ok: false, data: null }
+}
+
+export async function getAccountCashSafe() {
+  await delay(2000)
+  return limitCash(() => fetchT212Safe<{
     blocked: number
     free: number
     invested: number
@@ -45,11 +52,12 @@ export function getAccountCashSafe() {
     ppl: number
     result: number
     total: number
-  }>('/equity/account/cash')
+  }>('/equity/account/cash'))
 }
 
-export function getPortfolioSafe() {
-  return fetchT212Safe<Array<{
+export async function getPortfolioSafe() {
+  await delay(5000)
+  return limitPortfolio(() => fetchT212Safe<Array<{
     ticker: string
     quantity: number
     averagePrice: number
@@ -58,11 +66,12 @@ export function getPortfolioSafe() {
     ppl: number
     fxPpl: number | null
     initialFillDate: string
-  }>>('/equity/portfolio')
+  }>>('/equity/portfolio'))
 }
 
-export function getPiesSafe() {
-  return fetchT212Safe<Array<{
+export async function getPiesSafe() {
+  await delay(30000)
+  return limitPies(() => fetchT212Safe<Array<{
     id: number
     cash: number
     dividendDetails: { gained: number; reinvested: number; inCash: number }
@@ -74,11 +83,12 @@ export function getPiesSafe() {
     }
     progress: number
     status: string | null
-  }>>('/equity/pies')
+  }>>('/equity/pies'))
 }
 
-export function getPieDetailSafe(id: number) {
-  return fetchT212Safe<{
+export async function getPieDetailSafe(id: number) {
+  await delay(5000)
+  return limitPieDetail(() => fetchT212Safe<{
     instruments: Array<{
       ticker: string
       ownedQuantity: number
@@ -89,7 +99,7 @@ export function getPieDetailSafe(id: number) {
       }
     }>
     settings: { name: string; id: number }
-  }>(`/equity/pies/${id}`)
+  }>(`/equity/pies/${id}`))
 }
 
 export async function getUsdGbpRateSafe(): Promise<{ ok: boolean; data: number }> {
