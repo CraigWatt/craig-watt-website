@@ -55,6 +55,6 @@ resource "aws_security_group" "app" {
     from_port       = var.container_port
     to_port         = var.container_port
     protocol        = "tcp"
-    security_groups = [ aws_security_group.alb.id ]
+    security_groups = [aws_security_group.alb.id]
   }
 }

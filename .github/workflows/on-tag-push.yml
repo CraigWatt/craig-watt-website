@@ -214,7 +214,9 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="dynamodb_table=craig-watt-lock-table"
 
-          terraform apply -auto-approve -input=false \
+          terraform apply -auto-approve \
+            -input=false \
+            -lock-timeout=5m \
             -var="domain=craigwatt.co.uk" \
             -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
             -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \

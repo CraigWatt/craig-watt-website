@@ -17,14 +17,14 @@ terraform {
 
 # Default, eu-west-2
 provider "aws" {
-  region = var.aws_region        # eu-west-2
+  region = var.aws_region # eu-west-2
 }
 
 # ───────────────────────────────────────────────────────────────────────────────
 # 1) Network: discover or create VPC & subnets
 # ───────────────────────────────────────────────────────────────────────────────
 module "network" {
-  source = "./modules/network"
+  source         = "./modules/network"
   container_port = var.container_port
 }
 
@@ -52,21 +52,21 @@ module "nextjs_service" {
   cluster_arn     = module.ecs_cluster.cluster_arn
   container_image = "${module.ecr.repository_url}:${var.image_tag}"
 
-  subnets         = module.network.subnet_ids
-  alb_sg_id       = module.network.alb_sg_id
-  app_sg_id       = module.network.app_sg_id
-  vpc_id          = module.network.vpc_id
+  subnets   = module.network.subnet_ids
+  alb_sg_id = module.network.alb_sg_id
+  app_sg_id = module.network.app_sg_id
+  vpc_id    = module.network.vpc_id
 
   desired_count      = var.desired_count
   execution_role_arn = var.ecs_execution_role_arn
   task_role_arn      = var.ecs_task_role_arn
   family_name        = "nextjs-app"
   aws_region         = var.aws_region
-  certificate_arn = module.acm.certificate_arn
+  certificate_arn    = module.acm.certificate_arn
 }
 module "route53" {
-  source      = "./modules/route53"
-  domain      = var.domain
+  source       = "./modules/route53"
+  domain       = var.domain
   alb_dns_name = module.nextjs_service.alb_dns_name
   alb_zone_id  = module.nextjs_service.alb_zone_id
 }
