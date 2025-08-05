@@ -11,6 +11,7 @@ import {
   DropdownMenu,
   DropdownItem,
   Button,
+  Alert
 } from '@heroui/react'
 import { ChevronDown } from 'lucide-react'
 import type { PublicMetrics, PublicPos } from '../trading212/lib/transform'
@@ -62,7 +63,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
 
-        <section className="grid grid-cols-2 gap-4">
+        {/* <section className="grid grid-cols-2 gap-4">
           <Card shadow="sm" radius="md" fullWidth>
             <CardHeader>Trading212 API</CardHeader>
             <CardBody className={apiStatus.t212 ? 'text-green-600' : 'text-red-600'}>
@@ -75,6 +76,19 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
               {apiStatus.fx ? 'Online' : 'Offline'}
             </CardBody>
           </Card>
+        </section> */}
+
+        <section className="grid grid-cols-2 gap-4">
+          <Alert
+            color={apiStatus.t212 ? 'success' : 'danger'}
+            title="Trading212 API"
+            description={apiStatus.t212 ? 'Online' : 'Offline'}
+          />
+          <Alert
+            color={apiStatus.fx ? 'success' : 'danger'}
+            title="FX API"
+            description={apiStatus.fx ? 'Online' : 'Offline'}
+          />
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
