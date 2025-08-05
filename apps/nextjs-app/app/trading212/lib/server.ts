@@ -1,28 +1,41 @@
 // app/trading212/lib/server.ts
-export const dynamic = 'force-dynamic'
-const BASE = 'https://live.trading212.com/api/v0'
+import pLimit from 'p-limit'
 
-// 1) new wrapper that returns an { ok, data } object
+// tell Next to cache this page for 60s
+export const revalidate = 60
+
+const BASE    = 'https://live.trading212.com/api/v0'
+const limit   = pLimit(5)    // max 5 concurrent
+const RETRIES = 2             // retry 2× on 429
+
 async function fetchT212Safe<T>(path: string): Promise<{ ok: boolean; data: T | null }> {
-  try {
-    const res = await fetch(`${BASE}${path}`, {
-      headers: { Authorization: process.env.T212_API_KEY! },
-      cache: 'force-cache',
-      next: { revalidate: 60 },
-    })
-    if (!res.ok) {
+  // run this whole block under the limiter
+  return limit(async () => {
+    for (let attempt = 0; attempt <= RETRIES; attempt++) {
+      const res = await fetch(`${BASE}${path}`, {
+        headers: { Authorization: process.env.T212_API_KEY! },
+        // we still want ISR at the page level
+        next: { revalidate: 60 },
+      })
+
+      if (res.ok) {
+        const json = (await res.json()) as T
+        return { ok: true, data: json }
+      }
+
+      // if we get throttled, back off a bit and retry
+      if (res.status === 429 && attempt < RETRIES) {
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)))
+        continue
+      }
+
       console.warn(`T212 ${path} returned status ${res.status}`)
       return { ok: false, data: null }
     }
-    const json = (await res.json()) as T
-    return { ok: true, data: json }
-  } catch (e) {
-    console.error(`T212 ${path} failed:`, e)
     return { ok: false, data: null }
-  }
+  })
 }
 
-// 2) and now all of your getters simply forward that wrapper:
 export function getAccountCashSafe() {
   return fetchT212Safe<{
     blocked: number
@@ -79,7 +92,6 @@ export function getPieDetailSafe(id: number) {
   }>(`/equity/pies/${id}`)
 }
 
-// 3) do the same for your FX call
 export async function getUsdGbpRateSafe(): Promise<{ ok: boolean; data: number }> {
   const key = process.env.FX_API_KEY
   if (!key) {
@@ -89,10 +101,7 @@ export async function getUsdGbpRateSafe(): Promise<{ ok: boolean; data: number }
   try {
     const res = await fetch(
       `https://api.freecurrencyapi.com/v1/latest?apikey=${key}&currencies=GBP`,
-      { cache: 'force-cache',
-        next: { revalidate: 60 }
-      }
-      
+      { next: { revalidate: 60 } }
     )
     if (!res.ok) {
       console.warn(`FX lookup failed: ${res.status}`)
