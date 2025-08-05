@@ -13,3 +13,15 @@ resource "aws_route53_record" "nextjs" {
     evaluate_target_health = true
   }
 }
+
+resource "aws_route53_record" "apex" {
+  zone_id = aws_route53_zone.primary.zone_id
+  name    = var.domain    # “craigwatt.co.uk”
+  type    = "A"
+
+  alias {
+    name                   = var.alb_dns_name
+    zone_id                = var.alb_zone_id
+    evaluate_target_health = true
+  }
+}
