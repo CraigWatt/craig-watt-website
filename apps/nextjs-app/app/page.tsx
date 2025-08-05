@@ -74,7 +74,9 @@ export default function App() {
             title={p.title}
             href={`/projects/${p.slug}`}
             description={p.summary}
-            image={p.thumb ?? p.thumbLg!}
+            imageSrc={p.thumb ?? p.thumbLg!}
+            imageWidth={p.thumbWidth  ?? p.thumbLgWidth!}
+            imageHeight={p.thumbHeight ?? p.thumbLgHeight!}
             badges={p.badges}
           />
         ))}
@@ -95,17 +97,19 @@ export default function App() {
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {recentPosts.map((post) => (
-            <BlogCard
-              key={post.slug ?? 'missing-slug'}
-              title={post.title ?? 'Untitled'}
-              href={`/blog/${post.slug ?? ''}`}
-              excerpt={post.excerpt ?? post.summary ?? ''}
-              image={post.thumb}
-              date={post.date ?? '1970-01-01'}
-              readingTime={post.readingTime ?? ''}
-              category={post.category ?? 'Uncategorized'}
-              badges={post.badges ?? []}
-            />
+          <BlogCard
+            key={post.slug ?? 'missing-slug'}
+            title={post.title ?? 'Untitled'}
+            href={`/blog/${post.slug ?? ''}`}
+            excerpt={post.excerpt ?? post.summary ?? ''}
+            imageSrc={post.thumb}
+            imageWidth={post.thumbWidth!}
+            imageHeight={post.thumbHeight!}
+            date={post.date ?? '1970-01-01'}
+            readingTime={post.readingTime ?? ''}
+            category={post.category ?? 'Uncategorized'}
+            badges={post.badges ?? []}
+          />
           ))}
         </div>
         <div className="text-center mt-10">

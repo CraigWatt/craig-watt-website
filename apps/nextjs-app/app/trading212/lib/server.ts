@@ -5,7 +5,7 @@ import pLimit from 'p-limit'
 export const revalidate = 60
 
 const BASE    = 'https://live.trading212.com/api/v0'
-const limit   = pLimit(5)    // max 5 concurrent
+const limit   = pLimit(1)    // max 5 concurrent
 const RETRIES = 2             // retry 2× on 429
 
 async function fetchT212Safe<T>(path: string): Promise<{ ok: boolean; data: T | null }> {
@@ -14,8 +14,8 @@ async function fetchT212Safe<T>(path: string): Promise<{ ok: boolean; data: T | 
     for (let attempt = 0; attempt <= RETRIES; attempt++) {
       const res = await fetch(`${BASE}${path}`, {
         headers: { Authorization: process.env.T212_API_KEY! },
-        // we still want ISR at the page level
-        next: { revalidate: 60 },
+        cache: 'force-cache',        // ← throttle at the HTTP-cache layer
+        next: { revalidate: 60 },    // ← ISR at the Next.js layer
       })
 
       if (res.ok) {

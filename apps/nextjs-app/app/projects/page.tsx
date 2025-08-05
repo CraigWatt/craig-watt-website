@@ -14,7 +14,9 @@ export default function ProjectsPage() {
             title={p.title}
             href={`/projects/${p.slug}`}
             description={p.summary}
-            image={p.thumb ?? p.thumbLg!}
+            imageSrc={p.thumb ?? p.thumbLg!}
+            imageWidth={p.thumbWidth  ?? p.thumbLgWidth!}
+            imageHeight={p.thumbHeight ?? p.thumbLgHeight!}
             badges={p.badges}
           />
         ))}

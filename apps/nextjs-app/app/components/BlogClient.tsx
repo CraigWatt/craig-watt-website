@@ -1,16 +1,31 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// BlogClient.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
+import allPosts from 'content-collections/generated/allPosts';
 import { BlogRenderer } from './BlogRenderer';
 
-export function BlogClient({ post }: { post: any }) {
-  const [MDXBody, setMDXBody] = useState<any>(null);
+// derive the “Post” type from your generated array
+type Post = typeof allPosts[number];
+
+type MDXModule = { default: React.ComponentType<{ components: any }> };
+
+interface BlogClientProps {
+  post: Post;
+}
+
+export function BlogClient({ post }: BlogClientProps) {
+  const [MDXBody, setMDXBody] =
+    useState<React.ComponentType<{ components: any }> | null>(null);
 
   useEffect(() => {
-    const load = async () => {
-      const mod = await import(`../../content/posts/${post.filePath}`);
+    async function load() {
+      const mod = (await import(
+        `../../content/posts/${post.filePath}`
+      )) as MDXModule;
       setMDXBody(() => mod.default);
-    };
+    }
     load();
   }, [post.filePath]);
 

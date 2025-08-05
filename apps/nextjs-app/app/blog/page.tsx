@@ -157,7 +157,7 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
           title={post.title ?? 'Untitled'}
           href={`/blog/${post.slug ?? ''}`}
           excerpt={post.excerpt ?? post.summary ?? ''}
-          image={post.thumb}
+          imageSrc={post.thumb}
           date={post.date ?? '1970-01-01'}
           readingTime={post.readingTime ?? ''}
           category={post.category ?? 'Uncategorized'}
