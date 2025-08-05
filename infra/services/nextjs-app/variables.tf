@@ -13,11 +13,6 @@ variable "subnets" {
   type        = list(string)
 }
 
-variable "security_groups" {
-  description = "List of security group IDs"
-  type        = list(string)
-}
-
 variable "desired_count" {
   description = "Number of tasks to run"
   type        = number
@@ -70,5 +65,20 @@ variable "family_name" {
 
 variable "vpc_id" {
   description = "The VPC ID where the ALB and TG will live"
+  type        = string
+}
+
+variable "certificate_arn" {
+  description = "ARN of the ACM certificate for TLS"
+  type        = string
+}
+
+variable "alb_sg_id" {
+  description = "Security Group ID for the ALB"
+  type        = string
+}
+
+variable "app_sg_id" {
+  description = "Security Group ID for the ECS tasks"
   type        = string
 }

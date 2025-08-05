@@ -30,6 +30,7 @@ provider "aws" {
 # ───────────────────────────────────────────────────────────────────────────────
 module "network" {
   source = "./modules/network"
+  container_port = var.container_port
 }
 
 # ───────────────────────────────────────────────────────────────────────────────
@@ -57,7 +58,8 @@ module "nextjs_service" {
   container_image = "${module.ecr.repository_url}:${var.image_tag}"
 
   subnets         = module.network.subnet_ids
-  security_groups = [ module.network.default_sg_id ]
+  alb_sg_id       = module.network.alb_sg_id
+  app_sg_id       = module.network.app_sg_id
   vpc_id          = module.network.vpc_id
 
   desired_count      = var.desired_count
@@ -65,6 +67,7 @@ module "nextjs_service" {
   task_role_arn      = var.ecs_task_role_arn
   family_name        = "nextjs-app"
   aws_region         = var.aws_region
+  certificate_arn = module.acm.certificate_arn
 }
 module "route53" {
   source      = "./modules/route53"
