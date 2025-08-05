@@ -9,7 +9,8 @@
     // Your project-specific files
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    "apps/nextjs-app/.content-collections/generated/**/*.js"
   ],
   "exclude": [
     "node_modules"

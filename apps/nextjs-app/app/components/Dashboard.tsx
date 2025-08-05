@@ -33,7 +33,7 @@ function maskValue(formatted: string) {
 }
 
 export default function Dashboard({ data }: DashboardProps) {
-  const { metrics, positions, apiStatus } = data
+  const { metrics, positions } = data
 
   const gbp = new Intl.NumberFormat('en-GB', {
     style: 'currency',

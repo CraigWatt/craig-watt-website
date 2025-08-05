@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import { ProjectClient } from "../../components/ProjectClient";
 
 export async function generateStaticParams() {
