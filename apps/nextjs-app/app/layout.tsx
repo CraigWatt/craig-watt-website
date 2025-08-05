@@ -4,13 +4,6 @@ import { Providers } from './providers';
 import { Navbar } from './components/Navbar';
 import Script from 'next/script';
 
-// 🔥 Boot-time warm cache
-if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {
-  import('./trading212/lib/cacheWarmer').then((mod) => {
-    mod.startCacheWarmer();
-  });
-}
-
 export const metadata = {
   title: 'Craig Watt — Observability Engineer',
   description:
