@@ -20,11 +20,6 @@ provider "aws" {
   region = var.aws_region        # eu-west-2
 }
 
-provider "aws" {
-  alias  = "us_east_1"
-  region = "us-east-1"
-}
-
 # ───────────────────────────────────────────────────────────────────────────────
 # 1) Network: discover or create VPC & subnets
 # ───────────────────────────────────────────────────────────────────────────────
@@ -80,7 +75,4 @@ module "acm" {
   source  = "./modules/acm"
   domain  = var.domain
   zone_id = module.route53.zone_id
-  providers = {
-    aws = aws.us_east_1
-  }
 }
