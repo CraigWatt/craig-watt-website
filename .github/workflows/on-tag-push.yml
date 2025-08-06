@@ -100,22 +100,22 @@ jobs:
           driver: docker-container
           buildkitd-flags: --debug
 
-      - name: 🐳 Build & Load Debug Image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          push: false              # don’t push this debug build
-          load: true               # load into local Docker
-          build-args: |
-            MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
-            CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
-            CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
-            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-            RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-            T212_API_KEY=${{ secrets.T212_API_KEY }}
-            FX_API_KEY=${{ secrets.FX_API_KEY }}            
-          tags: debug-nextjs-app:ci
+      # - name: 🐳 Build & Load Debug Image
+      #   uses: docker/build-push-action@v4
+      #   with:
+      #     context: .
+      #     file: Dockerfile
+      #     push: false              # don’t push this debug build
+      #     load: true               # load into local Docker
+      #     build-args: |
+      #       MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
+      #       CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
+      #       CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
+      #       NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+      #       RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
+      #       T212_API_KEY=${{ secrets.T212_API_KEY }}
+      #       FX_API_KEY=${{ secrets.FX_API_KEY }}            
+      #     tags: debug-nextjs-app:ci
 
       # - name: 🔍 Inspect `/app` in the debug image
       #   run: |
