@@ -19,10 +19,11 @@ import { transformForPublic } from '../../trading212/lib/transform';
 import { performance } from 'perf_hooks';
 
 let cachedPayload: ReturnType<typeof transformForPublic> | null = null;
+let lastSuccessfulPayload: ReturnType<typeof transformForPublic> | null = null;
 let lastFetched = 0;
-const TTL = 7 * 60 * 1000; // 7 minutes
-const STALE_TTL = 30 * 60 * 1000; // 30 minutes
-const INFLIGHT_TIMEOUT = 90_000; // 90 seconds
+const TTL = 7 * 60 * 1000;
+const STALE_TTL = 30 * 60 * 1000;
+const INFLIGHT_TIMEOUT = 90_000;
 
 let inFlight: Promise<NextResponse> | null = null;
 let inFlightStart = 0;
@@ -41,25 +42,23 @@ export async function GET() {
     });
   }
 
-  // === Await In-Flight Fetch if in Progress ===
+  // === Await In-Flight Fetch ===
   if (inFlight && now - inFlightStart < INFLIGHT_TIMEOUT) {
     inFlightCount = Math.min(inFlightCount + 1, 999);
     console.log(`[T212] Awaiting in-flight fetch (${inFlightCount}) at ${new Date().toISOString()}`);
 
-    const STALE_TTL = 30 * 60 * 1000;
-    if (cachedPayload && now - lastFetched < STALE_TTL) {
+    if (lastSuccessfulPayload && now - lastFetched < STALE_TTL) {
       const age = ((now - lastFetched) / 1000).toFixed(1);
       console.warn(`[T212] Serving stale cache (${age}s old) while fresh fetch is in-flight`);
       return NextResponse.json(
-        { ...cachedPayload, _meta: { stale: true } },
+        { ...lastSuccessfulPayload, _meta: { stale: true } },
         { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
       );
     }
 
     try {
       const res = await inFlight;
-      const json = await res.json();
-      return NextResponse.json(json, res);
+      return res;
     } catch (err) {
       console.warn('[T212] In-flight fetch errored:', err);
       inFlight = null;
@@ -79,8 +78,7 @@ export async function GET() {
       const measure = async <T>(label: string, fn: () => Promise<T>): Promise<T> => {
         const start = performance.now();
         const result = await fn();
-        const end = performance.now();
-        timers[label] = end - start;
+        timers[label] = performance.now() - start;
         return result;
       };
 
@@ -93,36 +91,19 @@ export async function GET() {
 
       if (!cashRes.ok || !portRes.ok || !piesRes.ok || !fxRes.ok) {
         console.warn('[T212] One or more upstream fetches failed');
-        if (cachedPayload && now - lastFetched < STALE_TTL) {
+        if (lastSuccessfulPayload && now - lastFetched < STALE_TTL) {
           const age = ((now - lastFetched) / 1000).toFixed(1);
           console.warn(`[T212] Serving stale cache (${age}s old) due to upstream fetch failure`);
           return NextResponse.json(
-            {
-              ...cachedPayload,
-              _meta: { stale: true },
-            },
-            {
-              headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
-            }
+            { ...lastSuccessfulPayload, _meta: { stale: true } },
+            { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
           );
         }
 
         return NextResponse.json({ error: 'Upstream fetch failed' }, { status: 503 });
       }
 
-      const pieDetails: Array<{
-        instruments: Array<{
-          ticker: string;
-          ownedQuantity: number;
-          result: {
-            priceAvgValue: number;
-            priceAvgInvestedValue: number;
-            priceAvgResult: number;
-          };
-        }>;
-        settings: { name: string; id: number };
-      }> = [];
-
+      const pieDetails = [];
       for (const p of piesRes.data ?? []) {
         const pieStart = performance.now();
         const r = await getPieDetailSafe(p.id);
@@ -130,7 +111,6 @@ export async function GET() {
         timers[`pie:${p.id}`] = performance.now() - pieStart;
       }
 
-      const transformStart = performance.now();
       const raw = {
         cash: cashRes.data!,
         portfolio: portRes.data!,
@@ -139,10 +119,12 @@ export async function GET() {
         fxRate: fxRes.data!,
       };
 
+      const transformStart = performance.now();
       const publicPayload = transformForPublic(raw);
       timers.transform = performance.now() - transformStart;
 
       cachedPayload = publicPayload;
+      lastSuccessfulPayload = publicPayload;
       lastFetched = Date.now();
 
       const totalTime = performance.now() - requestStart;
@@ -166,13 +148,8 @@ export async function GET() {
           : {};
 
       return NextResponse.json(
-        {
-          ...publicPayload,
-          ...devMeta,
-        },
-        {
-          headers: { 'Cache-Control': 'public, max-age=600' },
-        }
+        { ...publicPayload, ...devMeta },
+        { headers: { 'Cache-Control': 'public, max-age=600' } }
       );
     } finally {
       inFlight = null;
@@ -181,6 +158,20 @@ export async function GET() {
   })();
 
   const res = await inFlight;
-  const json = await res.json();
-  return NextResponse.json(json, res);
+
+  if (!(res instanceof NextResponse)) {
+    throw new Error('[T212] In-flight result is not a NextResponse');
+  }
+
+  // === Fallback: rare race where payload wasn't set yet
+  if (!cachedPayload && lastSuccessfulPayload && now - lastFetched < STALE_TTL) {
+    const age = ((now - lastFetched) / 1000).toFixed(1);
+    console.warn(`[T212] Late fallback — serving stale cache (${age}s old)`);
+    return NextResponse.json(
+      { ...lastSuccessfulPayload, _meta: { stale: true, lateFallback: true } },
+      { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
+    );
+  }
+
+  return res;
 }
