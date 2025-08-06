@@ -1,9 +1,15 @@
 let intervalHandle: NodeJS.Timeout | null = null;
 
 export function startCacheWarmer() {
-  if (intervalHandle) return; // Prevent duplicate warmers
+  console.log('[WARM] startCacheWarmer() invoked');
+
+  if (intervalHandle) {
+    console.log('[WARM] Warmer already running, skipping setup');
+    return;
+  }
 
   const warm = async () => {
+    console.log('[WARM] Executing warm() request...');
     try {
       const res = await fetch('https://craigwatt.co.uk/api/trading212', {
         method: 'GET',
@@ -25,19 +31,4 @@ export function startCacheWarmer() {
 
   void warm(); // fire-and-forget boot warm
   intervalHandle = setInterval(warm, intervalMs);
-}
-
-// app/api/trading212/route.ts
-
-if (
-  typeof window === 'undefined' &&
-  process.env.NODE_ENV === 'production'
-) {
-  import('../../trading212/lib/cacheWarmer')
-    .then((mod) => {
-      mod.startCacheWarmer();
-    })
-    .catch((err) => {
-      console.error('[WARM] Failed to import cache warmer', err);
-    });
 }

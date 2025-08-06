@@ -1,4 +1,12 @@
 // app/api/trading212/route.ts
+
+import { startCacheWarmer } from '../../trading212/lib/cacheWarmer';
+
+if (process.env.NODE_ENV === 'production') {
+  console.log('[WARM] Triggering cache warmer on boot...');
+  startCacheWarmer();
+}
+
 import { NextResponse } from 'next/server';
 import {
   getAccountCashSafe,
@@ -9,6 +17,8 @@ import {
 } from '../../trading212/lib/server';
 import { transformForPublic } from '../../trading212/lib/transform';
 import { performance } from 'perf_hooks';
+
+
 
 let cachedPayload: ReturnType<typeof transformForPublic> | null = null;
 let lastFetched = 0;
