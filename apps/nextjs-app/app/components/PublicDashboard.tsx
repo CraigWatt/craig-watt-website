@@ -15,6 +15,7 @@ import {
 } from '@heroui/react'
 import { ChevronDown } from 'lucide-react'
 import type { PublicMetrics, PublicPos } from '../trading212/lib/transform'
+import { RefreshArrow } from './icons/RefreshArrow'
 
 // mirror the same ApiStatus shape
 interface ApiStatus {
@@ -29,6 +30,7 @@ interface PublicDashboardProps {
     apiStatus: ApiStatus
     _meta?: {
       stale?:boolean
+      cold?:boolean
     }
   }
 }
@@ -66,13 +68,33 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
 
+        {data._meta?.cold && (
+          <Alert
+            color="default"
+            title="Loading from scratch"
+            description="First-time load — please wait while data is fetched..."
+          />
+        )}
+
         {data._meta?.stale && (
           <section className="grid grid-cols-1 gap-4">
-            <Alert
-              color="warning"
-              title="Stale Data"
-              description="Showing cached data — live update in progress..."
-            />
+            <Alert color="warning">
+              <div className="w-full flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-small font-medium">Stale Data</span>
+                  <span>Showing cached data — live update in progress…</span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  onPress={() => location.reload()}
+                  className="shrink-0"
+                  radius="full"
+                >
+                  <RefreshArrow className="w-4 h-4" />
+                </Button>
+              </div>
+            </Alert>
           </section>
         )}
 
