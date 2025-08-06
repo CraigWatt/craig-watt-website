@@ -10,25 +10,38 @@ export function startCacheWarmer() {
 
   const warm = async () => {
     console.log('[WARM] Executing warm() request...');
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 90_000); // 90s timeout
+
     try {
       const res = await fetch('https://craigwatt.co.uk/api/trading212', {
         method: 'GET',
         headers: { 'User-Agent': 'CacheWarmer/1.0' },
+        signal: controller.signal,
       });
 
+      clearTimeout(timeout);
       const status = res.status;
       if (status === 200) {
         console.log(`[WARM] Cache warmed successfully at ${new Date().toISOString()}`);
       } else {
         console.warn(`[WARM] Cache warm failed with HTTP ${status}`);
       }
-    } catch (err) {
-      console.warn(`[WARM] Cache warm request failed:`, err);
+    } catch (err: unknown) {
+      clearTimeout(timeout);
+
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.warn('[WARM] Cache warm request timed out');
+      } else {
+        console.warn('[WARM] Cache warm request failed:', err);
+      }
     }
   };
 
-  const intervalMs = 3 * 60 * 1000;
-
   void warm(); // fire-and-forget boot warm
-  intervalHandle = setInterval(warm, intervalMs);
+
+  const baseInterval = 3 * 60 * 1000;
+  const jitter = Math.floor(Math.random() * 20_000); // up to 20s jitter
+  intervalHandle = setInterval(warm, baseInterval + jitter);
 }
