@@ -172,7 +172,7 @@ export async function GET() {
     const age = ((now - lastFetched) / 1000).toFixed(1);
     console.warn(`[T212] Late fallback — serving stale cache (${age}s old)`);
     return NextResponse.json(
-      { ...lastSuccessfulPayload, _meta: { stale: true, lateFallback: true } },
+      { ...lastSuccessfulPayload, _meta: { stale: true, cold: true, lateFallback: true } },
       { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
     );
   }
