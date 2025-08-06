@@ -45,25 +45,23 @@ export async function GET() {
   if (inFlight && now - inFlightStart < INFLIGHT_TIMEOUT) {
     inFlightCount = Math.min(inFlightCount + 1, 999);
     console.log(`[T212] Awaiting in-flight fetch (${inFlightCount}) at ${new Date().toISOString()}`);
+
+    const STALE_TTL = 30 * 60 * 1000;
+    if (cachedPayload && now - lastFetched < STALE_TTL) {
+      const age = ((now - lastFetched) / 1000).toFixed(1);
+      console.warn(`[T212] Serving stale cache (${age}s old) while fresh fetch is in-flight`);
+      return NextResponse.json(
+        { ...cachedPayload, _meta: { stale: true } },
+        { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
+      );
+    }
+
     try {
-      return await inFlight;
+      const res = await inFlight;
+      const json = await res.json();
+      return NextResponse.json(json, res);
     } catch (err) {
       console.warn('[T212] In-flight fetch errored:', err);
-      // If stale cache is still valid, serve it
-      if (cachedPayload && now - lastFetched < STALE_TTL) {
-        const age = ((now - lastFetched) / 1000).toFixed(1);
-        console.warn(`[T212] Serving stale cache (${age}s old) after in-flight failure`);
-        return NextResponse.json(
-          {
-            ...cachedPayload,
-            _meta: { stale: true },
-          },
-          {
-            headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
-          }
-        );
-      }
-
       inFlight = null;
       inFlightCount = 0;
       throw err;
@@ -182,5 +180,7 @@ export async function GET() {
     }
   })();
 
-  return await inFlight;
+  const res = await inFlight;
+  const json = await res.json();
+  return NextResponse.json(json, res);
 }
