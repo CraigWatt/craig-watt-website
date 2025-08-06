@@ -37,9 +37,11 @@ export async function GET() {
   if (cachedPayload && now - lastFetched < TTL) {
     const age = ((now - lastFetched) / 1000).toFixed(1);
     console.log(`[T212] Cache HIT at ${new Date().toISOString()} (age: ${age}s)`);
-    return NextResponse.json(cachedPayload, {
-      headers: { 'Cache-Control': 'public, max-age=600' },
-    });
+
+    return NextResponse.json(
+      { ...cachedPayload, _meta: { stale: false, cold: false } },
+      { headers: { 'Cache-Control': 'public, max-age=600' } }
+    );
   }
 
   // === Await In-Flight Fetch ===
@@ -99,8 +101,10 @@ export async function GET() {
             { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
           );
         }
-
-        return NextResponse.json({ error: 'Upstream fetch failed' }, { status: 503 });
+        return NextResponse.json(
+          { error: 'Upstream fetch failed', _meta: { cold: true } },
+          { status: 503 }
+        );
       }
 
       const pieDetails = [];
