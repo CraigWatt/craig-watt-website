@@ -27,7 +27,7 @@ export function startCacheWarmer() {
     }
   };
 
-  const intervalMs = 4 * 60 * 1000;
+  const intervalMs = 3 * 60 * 1000;
 
   void warm(); // fire-and-forget boot warm
   intervalHandle = setInterval(warm, intervalMs);
