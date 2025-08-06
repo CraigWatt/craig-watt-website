@@ -18,42 +18,59 @@ import {
 import { transformForPublic } from '../../trading212/lib/transform';
 import { performance } from 'perf_hooks';
 
-
-
 let cachedPayload: ReturnType<typeof transformForPublic> | null = null;
 let lastFetched = 0;
-const TTL = 5 * 60 * 1000; // 5 minutes
+const TTL = 7 * 60 * 1000; // 7 minutes
+const STALE_TTL = 30 * 60 * 1000; // 30 minutes
+const INFLIGHT_TIMEOUT = 90_000; // 90 seconds
 
 let inFlight: Promise<NextResponse> | null = null;
 let inFlightStart = 0;
 let inFlightCount = 0;
-const INFLIGHT_TIMEOUT = 90_000; // 90 seconds
 
 export async function GET() {
   const requestStart = performance.now();
   const now = Date.now();
 
+  // === Serve Fresh Cache ===
   if (cachedPayload && now - lastFetched < TTL) {
-    console.log(`[T212] Cache HIT at ${new Date().toISOString()}`);
+    const age = ((now - lastFetched) / 1000).toFixed(1);
+    console.log(`[T212] Cache HIT at ${new Date().toISOString()} (age: ${age}s)`);
     return NextResponse.json(cachedPayload, {
       headers: { 'Cache-Control': 'public, max-age=600' },
     });
   }
 
-  // If another request is in-flight and not timed out, await it
+  // === Await In-Flight Fetch if in Progress ===
   if (inFlight && now - inFlightStart < INFLIGHT_TIMEOUT) {
-    inFlightCount = Math.min(inFlightCount + 1, 999); // Prevent runaway count
+    inFlightCount = Math.min(inFlightCount + 1, 999);
     console.log(`[T212] Awaiting in-flight fetch (${inFlightCount}) at ${new Date().toISOString()}`);
     try {
       return await inFlight;
     } catch (err) {
       console.warn('[T212] In-flight fetch errored:', err);
+      // If stale cache is still valid, serve it
+      if (cachedPayload && now - lastFetched < STALE_TTL) {
+        const age = ((now - lastFetched) / 1000).toFixed(1);
+        console.warn(`[T212] Serving stale cache (${age}s old) after in-flight failure`);
+        return NextResponse.json(
+          {
+            ...cachedPayload,
+            _meta: { stale: true },
+          },
+          {
+            headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
+          }
+        );
+      }
+
       inFlight = null;
       inFlightCount = 0;
       throw err;
     }
   }
 
+  // === Initiate New Fetch ===
   console.log(`[T212] Cache MISS at ${new Date().toISOString()}`);
   inFlightStart = now;
   inFlightCount = 1;
@@ -78,16 +95,20 @@ export async function GET() {
 
       if (!cashRes.ok || !portRes.ok || !piesRes.ok || !fxRes.ok) {
         console.warn('[T212] One or more upstream fetches failed');
-        inFlight = null;
-        inFlightCount = 0;
-        const STALE_TTL = 30 * 60 * 1000; // 30 minutes
         if (cachedPayload && now - lastFetched < STALE_TTL) {
           const age = ((now - lastFetched) / 1000).toFixed(1);
           console.warn(`[T212] Serving stale cache (${age}s old) due to upstream fetch failure`);
-          return NextResponse.json(cachedPayload, {
-            headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
-          });
+          return NextResponse.json(
+            {
+              ...cachedPayload,
+              _meta: { stale: true },
+            },
+            {
+              headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' },
+            }
+          );
         }
+
         return NextResponse.json({ error: 'Upstream fetch failed' }, { status: 503 });
       }
 

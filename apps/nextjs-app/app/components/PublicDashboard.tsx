@@ -27,6 +27,9 @@ interface PublicDashboardProps {
     metrics:   PublicMetrics
     positions: PublicPos[]
     apiStatus: ApiStatus
+    _meta?: {
+      stale?:boolean
+    }
   }
 }
 
@@ -62,6 +65,16 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
     <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
+
+        {data._meta?.stale && (
+          <section className="grid grid-cols-1 gap-4">
+            <Alert
+              color="warning"
+              title="Stale Data"
+              description="Showing cached data — live update in progress..."
+            />
+          </section>
+        )}
 
         <section className="grid grid-cols-2 gap-4">
           <Alert
