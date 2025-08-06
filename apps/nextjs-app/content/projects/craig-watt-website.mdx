@@ -36,7 +36,6 @@ badges:
   - storybook
   - npm
 ---
-
 craigwatt.co.uk is my personal website, designed and built from the ground up  
 using **Next.js 15**, **Tailwind CSS**, and **HeroUI**.  
 It serves as both a technical portfolio and a demonstration of modern web development practices,  
@@ -48,7 +47,7 @@ showcasing my ability to architect, scale, and deploy responsive frontends using
 - **Tailwind CSS + HeroUI** — clean, consistent design system built with utility-first styling and accessible UI primitives.  
 - **MDX-Powered Content** — project and blog content authored in MDX, with embedded `<Snippet />` and `<ProjectImage />`.  
 - **Composable Component Architecture** — reusable components like `ProjectRenderer`, `ProjectClient`, and `SiteBreadcrumbs`.  
-- **Deployed on FluidCloud via Kubernetes** — IaC via Helm & Ansible, CI/CD for zero-downtime deploys.
+- **Fully Containerised + CI/CD** — Dockerised build process deployed via GitHub Actions with zero-downtime rollouts.
 
 <ProjectImage
   src="/images/projects/craig-watt-website/craig-watt-website2-screen-1.webp"
@@ -103,7 +102,40 @@ This setup does a few things:
 - **`withContentCollections`** wires that frontmatter into your typed content-collections system at build time.  
 - **`pageExtensions`** ensures Next recognizes `.md`, `.mdx` (as well as your TS/JS files) as valid pages.
 
-## Why It Matters
+## Trading212 Public Dashboard
+
+The `/trading212` dashboard displays a live snapshot of my Trading212 investment account, including total value, free cash, individual holdings, and FX status. It’s powered by a robust backend fetch strategy designed to **avoid cold starts**, handle **API outages**, and **streamline client experience** — even during deployments or heavy usage.
+
+### Caching Strategy
+
+At the heart of the system is a hand-rolled **edge-compatible in-memory cache** exposed via the `/api/trading212` route:
+
+- ✅ **Hot Cache**: If the data is fresh (within `TTL`), it’s served immediately.
+- 🕗 **In-Flight Deduplication**: Only one fetch is ever in-flight; concurrent requests share the same promise.
+- ♻️ **Stale-but-Usable**: If a previous payload exists and is within `STALE_TTL`, it will be returned with `_meta.stale = true` while a fresh request is in flight.
+- 🚨 **Cold Start Detection**: If all attempts to fetch fail and no prior payload exists, the API returns `_meta.cold = true`, allowing the UI to display a distinct loading message.
+- 🧠 **Boot-time Warming**: A cache warmer (`startCacheWarmer`) is triggered on production boot to pre-warm the data layer before any user hits the page.
+
+### Dashboard Behaviour
+
+The HeroUI-based dashboard is aware of `_meta` flags embedded in the API response:
+
+- 🔁 **`stale: true`** — Displays a soft warning banner and a `Refresh` button via `HeroUI.Alert`, letting the user know data may be slightly outdated.
+- ❄️ **`cold: true`** — Indicates that no prior cache existed (e.g. boot-time cold start or API outage); shows a special "First-time load" message.
+- ✅ **Neither** — Indicates live, fresh data is being shown.
+
+### Why It Matters
+
+This layered approach ensures that:
+
+- The frontend **never hangs** due to upstream slowness.
+- All users get **consistent fallback behaviour**, regardless of deployment timing.
+- Live fetches are **efficiently batched**, reducing API load and improving UX.
+- You can **observe cache behaviour** via server logs (`Cache HIT`, `MISS`, `stale fallback`, `in-flight`, etc).
+
+Together, these systems showcase a **resilient, production-grade fetch & render flow** — one that handles real-world edge cases while providing clear user feedback and a polished UI experience.
+
+## Developer Philosophy
 
 This site isn’t just a static résumé.  
 It’s a living example of how I think, structure codebases, solve problems, and design for maintainability —  
