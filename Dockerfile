@@ -25,7 +25,7 @@ RUN npm ci --ignore-scripts || (sleep 10 && npm ci --ignore-scripts)
 FROM deps AS builder
 WORKDIR /workspace
 
-# Build-time env (NEXT_PUBLIC_* may be needed at build; prefer passing private secrets at runtime)
+# Build-time env (NEXT_PUBLIC_* may be needed at build; pass private secrets at runtime)
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -46,7 +46,7 @@ ENV FX_API_KEY="${FX_API_KEY}"
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# flatten Next standalone to /standalone (contains pruned node_modules + package.json + server.*)
+# flatten Next standalone to /standalone (pruned node_modules + package.json + server.*)
 RUN mkdir /standalone \
  && cp -r apps/nextjs-app/.next/standalone/* /standalone
 
@@ -88,13 +88,12 @@ ENV MAILERSEND_API_KEY="" \
     FX_API_KEY=""
 
 ###############################################################################
-# 3) final runner (node:22-slim for now; you can switch back to distroless later)
+# 3) final runner (distroless, nonroot)
 ###############################################################################
-# FROM node:22-slim AS runner
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
 
-# Copy ONLY what runtime needs
+# Copy ONLY what runtime needs:
 # - standalone runtime (pruned node_modules + server entry + launch.cjs)
 COPY --from=builder /standalone ./
 # - Next static assets + BUILD_ID (do NOT copy entire .next)
@@ -103,8 +102,14 @@ COPY --from=builder /workspace/apps/nextjs-app/.next/BUILD_ID ./.next/BUILD_ID
 # - Public assets
 COPY --from=builder /workspace/apps/nextjs-app/public ./public
 
+# Writable caches for Next/Image (fixes "received null" + EACCES on .next/cache)
+ENV NEXT_CACHE_DIR=/tmp/next/cache
+ENV NEXT_IMAGE_CACHE_DIR=/tmp/next/image-cache
+
 ENV NODE_ENV=production
 ENV PORT=3000
-EXPOSE 3000
-# CMD ["node","launch.cjs"]
+# EXPOSE is optional for ECS
+# EXPOSE 3000
+
+# Distroless already provides "node" entrypoint
 CMD ["launch.cjs"]
