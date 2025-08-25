@@ -34,3 +34,11 @@ docker-compose*.yml
 *.log
 .vscode/
 /.DS_Store
+
+# VCS & os junk
+.git
+*.DS_Store
+
+# build outputs
+**/.next/cache
+**/dist
