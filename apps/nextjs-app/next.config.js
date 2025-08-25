@@ -5,38 +5,39 @@ const path = require("path");
 const nextConfig = {
   pageExtensions: ["ts", "tsx", "js", "jsx", "md", "mdx"],
   output: "standalone",
-  experimental: {
-    outputFileTracingRoot: path.join(__dirname, "../.."),
-    outputFileTracingExcludes: {
-      "*": [
-        // dev/test/tooling
-        "**/@types/**",
-        "**/eslint*/**",
-        "**/jest*/**",
-        "**/typescript/**",
-        "**/ts-node/**",
-        "**/@storybook/**",
-        "**/storybook/**",
-        "**/@playwright/**",
-        "**/playwright*/**",
-        "**/@nx/**",
 
-        // build-only SWC / bundlers (KEEP @swc/helpers!)
-        "**/@swc/core/**",
-        "**/@swc/cli/**",
-        "**/@swc/wasm*/**",
-        "**/swc*/**",          // generic swc binaries, not helpers
-        "**/@rspack/**",
+  // ✅ moved out of `experimental`
+  outputFileTracingRoot: path.join(__dirname, "../.."),
+  outputFileTracingExcludes: {
+    "*": [
+      // dev/test/tooling
+      "**/@types/**",
+      "**/eslint*/**",
+      "**/jest*/**",
+      "**/typescript/**",
+      "**/ts-node/**",
+      "**/@storybook/**",
+      "**/storybook/**",
+      "**/@playwright/**",
+      "**/playwright*/**",
+      "**/@nx/**",
 
-        // optional: if not used at runtime
-        "**/puppeteer*/**",
-        "**/chrome-aws-lambda*/**",
-      ],
-    },
+      // build-only SWC / bundlers (KEEP @swc/helpers!)
+      "**/@swc/core/**",
+      "**/@swc/cli/**",
+      "**/@swc/wasm*/**",
+      "**/swc*/**",          // generic swc binaries, not helpers
+      "**/@rspack/**",
+
+      // optional: if not used at runtime
+      "**/puppeteer*/**",
+      "**/chrome-aws-lambda*/**",
+    ],
   },
 };
 
 module.exports = (async () => {
+  // ESM-only modules via dynamic import
   const [
     { default: remarkFrontmatter },
     { default: remarkMdxFrontmatter },
@@ -49,8 +50,7 @@ module.exports = (async () => {
     import("@content-collections/next"),
   ]);
 
-  const createMDX =
-    mdxMod.default || mdxMod;
+  const createMDX = mdxMod.default || mdxMod;
   const withContentCollections =
     ccMod.withContentCollections || ccMod.default?.withContentCollections;
 
