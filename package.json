@@ -47,7 +47,7 @@
     "@babel/core": "^7.28.0",
     "@chromatic-com/storybook": "^4.0.1",
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.32.0",
+    "@eslint/js": "^9.34.0",
     "@mdx-js/react": "^3.1.0",
     "@nx/devkit": "^21.3.11",
     "@nx/eslint-plugin": "^21.3.7",
