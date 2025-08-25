@@ -91,6 +91,7 @@ ENV MAILERSEND_API_KEY="" \
 # 3) final runner (distroless, nonroot)
 ###############################################################################
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+# FROM node:22-slim AS runner
 WORKDIR /app
 
 # Copy ONLY what runtime needs:
