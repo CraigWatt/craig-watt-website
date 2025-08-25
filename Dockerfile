@@ -19,7 +19,7 @@ RUN npm install -g npm@11
 # copy root manifests for full dependency install
 COPY package.json        package-lock.json  nx.json  tsconfig.json ./
 
-RUN npm ci --ignore-scripts
+RUN npm ci --ignore-scripts || (sleep 10 && npm ci --ignore-scripts)
 
 # debug: just to be sure
 RUN echo "=== deps: workspace/node_modules snippet ===" \
