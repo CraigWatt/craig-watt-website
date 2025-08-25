@@ -2,7 +2,9 @@
 import './global.css';
 import { Providers } from './providers';
 import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
 import Script from 'next/script';
+
 
 export const metadata = {
   title: 'Craig Watt — Observability Engineer',
@@ -72,6 +74,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           {children}
+          <Footer />
         </Providers>
       </body>
     </html>

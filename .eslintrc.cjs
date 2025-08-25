@@ -5,6 +5,7 @@ module.exports = {
     '**/.next/**',
     '**/dist/**',
     'apps/nextjs-app/scripts/**/*.js',
+    '**/next-env.d.ts',
   ],
 
   parser: '@typescript-eslint/parser',
