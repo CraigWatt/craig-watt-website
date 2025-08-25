@@ -90,27 +90,27 @@ ENV MAILERSEND_API_KEY="" \
 ###############################################################################
 # 3) final runner (distroless, nonroot)
 ###############################################################################
-FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 # FROM node:22-slim AS runner
+# FROM node:22-bullseye AS runner
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
 WORKDIR /app
 
-# Copy ONLY what runtime needs:
-# - standalone runtime (pruned node_modules + server entry + launch.cjs)
+# 1) standalone runtime (server + pruned node_modules + launcher)
 COPY --from=builder /standalone ./
-# - Next static assets + BUILD_ID (do NOT copy entire .next)
-COPY --from=builder /workspace/apps/nextjs-app/.next/static ./.next/static
+
+# 2) Next static assets + BUILD_ID (these power CSS/JS)
+#    COPY will create .next for you; no RUN/mkdir needed.
 COPY --from=builder /workspace/apps/nextjs-app/.next/BUILD_ID ./.next/BUILD_ID
-# - Public assets
+COPY --from=builder /workspace/apps/nextjs-app/.next/static   ./.next/static
+
+# 3) public assets
 COPY --from=builder /workspace/apps/nextjs-app/public ./public
 
-# Writable caches for Next/Image (fixes "received null" + EACCES on .next/cache)
+# Writable caches for Next/Image when running as nonroot on distroless
 ENV NEXT_CACHE_DIR=/tmp/next/cache
 ENV NEXT_IMAGE_CACHE_DIR=/tmp/next/image-cache
-
 ENV NODE_ENV=production
 ENV PORT=3000
-# EXPOSE is optional for ECS
-# EXPOSE 3000
+ENV HOST=0.0.0.0
 
-# Distroless already provides "node" entrypoint
 CMD ["launch.cjs"]
