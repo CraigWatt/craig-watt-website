@@ -171,7 +171,7 @@ jobs:
             CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
             NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
             RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-            212_API_KEY=${{ secrets.T212_API_KEY }}
+            T212_API_KEY=${{ secrets.T212_API_KEY }}
             FX_API_KEY=${{ secrets.FX_API_KEY }}
           tags: |
             ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
