@@ -8,24 +8,22 @@ ARG RECAPTCHA_SECRET_KEY
 ARG T212_API_KEY
 ARG FX_API_KEY
 
-###############################################################################
-# 1) deps stage: install workspace deps
-###############################################################################
+############################
+# deps
+############################
 FROM node:22-slim AS deps
 WORKDIR /workspace
 RUN npm install -g npm@11
-
-# Cache-friendly install
 COPY package.json package-lock.json nx.json tsconfig.json ./
 RUN npm ci --ignore-scripts || (sleep 10 && npm ci --ignore-scripts)
 
-###############################################################################
-# 2) builder stage: build Next.js
-###############################################################################
+############################
+# builder
+############################
 FROM deps AS builder
 WORKDIR /workspace
 
-# Build-time env (only what's needed at build)
+# build-time env (only NEXT_PUBLIC_* matters for client)
 ARG MAILERSEND_API_KEY
 ARG CONTACT_EMAIL_TO
 ARG CONTACT_EMAIL_FROM
@@ -42,16 +40,14 @@ ENV RECAPTCHA_SECRET_KEY="${RECAPTCHA_SECRET_KEY}"
 ENV T212_API_KEY="${T212_API_KEY}"
 ENV FX_API_KEY="${FX_API_KEY}"
 
-# Source -> build
 COPY . .
 RUN npx nx build nextjs-app --configuration=production
 
-# (Optional harden) ensure cache dirs exist & writable in the built output
-RUN mkdir -p apps/nextjs-app/.next/cache/images \
-           apps/nextjs-app/.next/cache/fetch-cache \
+# (optional) make build caches writable if you ever run the builder image
+RUN mkdir -p apps/nextjs-app/.next/cache/images apps/nextjs-app/.next/cache/fetch-cache \
  && chmod -R a+rwX apps/nextjs-app/.next
 
-# Purge secrets from this layer
+# scrub secrets from later layers
 ENV MAILERSEND_API_KEY="" \
     CONTACT_EMAIL_TO="" \
     CONTACT_EMAIL_FROM="" \
@@ -60,40 +56,35 @@ ENV MAILERSEND_API_KEY="" \
     T212_API_KEY="" \
     FX_API_KEY=""
 
-###############################################################################
-# 3) final runner (distroless, nonroot)
-#    🚨 IMPORTANT: launch the **root** standalone server ONLY.
-#    We copy *exactly* what Next's standalone expects:
-#      - server.js, package.json, node_modules  (from .next/standalone root)
-#      - .next/static and .next/BUILD_ID       (asset map)
-#      - public/                               (your images, etc.)
-###############################################################################
-# FROM node:22-bullseye AS runner
+############################
+# runner  (distroless node)
+############################
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runner
+# FROM node:22-bullseye AS runner
+
+# IMPORTANT: Next standalone expects a specific layout
+# Copy the ENTIRE standalone tree to /app
 WORKDIR /app
+COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/ ./
 
-# --- standalone server runtime (root-level) ---
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/server.js ./server.js
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/package.json ./package.json
-COPY --from=builder /workspace/apps/nextjs-app/.next/standalone/node_modules ./node_modules
+# Now place the build artefacts where the nested server will read them:
+# they belong under ./apps/nextjs-app/.next/
+COPY --from=builder /workspace/apps/nextjs-app/.next/BUILD_ID ./apps/nextjs-app/.next/BUILD_ID
+COPY --from=builder /workspace/apps/nextjs-app/.next/static   ./apps/nextjs-app/.next/static
 
-# --- Next static assets + BUILD_ID (power CSS/JS) ---
-COPY --from=builder /workspace/apps/nextjs-app/.next/BUILD_ID ./.next/BUILD_ID
-COPY --from=builder /workspace/apps/nextjs-app/.next/static   ./.next/static
-
-# --- Public assets (served at /) ---
-COPY --from=builder /workspace/apps/nextjs-app/public ./public
-
-# Writable caches for next/image when running as nonroot
-ENV NEXT_CACHE_DIR=/tmp/next/cache
-ENV NEXT_IMAGE_CACHE_DIR=/tmp/next/image-cache
+# Public assets alongside the app
+COPY --from=builder /workspace/apps/nextjs-app/public ./apps/nextjs-app/public
 
 # Runtime env
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOST=0.0.0.0
-# Optional: disable telemetry in containers
-# ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production \
+    HOST=0.0.0.0 \
+    PORT=3000 \
+    NEXT_CACHE_DIR=/tmp/next/cache \
+    NEXT_IMAGE_CACHE_DIR=/tmp/next/image-cache \
+    NEXT_TELEMETRY_DISABLED=1
 
-# Distroless entrypoint: run the root server directly
+# CRITICAL: run from the nested app dir so relative lookups resolve
+WORKDIR /app/apps/nextjs-app
+
+# Distroless node image uses 'node' as entrypoint; give it the script
 CMD ["server.js"]
