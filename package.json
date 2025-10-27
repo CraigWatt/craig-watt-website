@@ -43,7 +43,7 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
+    "@babel/core": "^7.28.5",
     "@chromatic-com/storybook": "^4.0.1",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
