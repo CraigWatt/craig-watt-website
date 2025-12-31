@@ -66,6 +66,13 @@ variable "t212_api_key" {
   sensitive   = true
 }
 
+variable "t212_api_secret" {
+  type        = string
+  description = "Trading212 API secret"
+  sensitive   = true
+}
+
+
 variable "fx_api_key" {
   type        = string
   description = "FX API key"

@@ -53,6 +53,7 @@ module "secrets" {
   mailersend_api_key   = var.mailersend_api_key
   recaptcha_secret_key = var.recaptcha_secret_key
   t212_api_key         = var.t212_api_key
+  t212_api_secret = var.t212_api_secret
   fx_api_key           = var.fx_api_key
   contact_email_to     = var.contact_email_to
   contact_email_from   = var.contact_email_from
@@ -80,6 +81,7 @@ module "nextjs_service" {
   secrets_mailersend_arn = module.secrets.mailersend_secret_arn
   secrets_recaptcha_arn  = module.secrets.recaptcha_secret_arn
   secrets_t212_arn       = module.secrets.t212_secret_arn
+  secrets_t212_api_secret_arn = module.secrets.t212_api_secret_arn
   secrets_fx_arn         = module.secrets.fx_secret_arn
   secrets_contact_to_arn   = module.secrets.contact_to_secret_arn
   secrets_contact_from_arn = module.secrets.contact_from_secret_arn

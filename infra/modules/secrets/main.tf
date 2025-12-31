@@ -28,6 +28,16 @@ resource "aws_secretsmanager_secret_version" "t212" {
   secret_string = var.t212_api_key
 }
 
+resource "aws_secretsmanager_secret" "t212_secret" {
+  name                    = "${var.domain}-t212-api-secret"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "t212_secret" {
+  secret_id     = aws_secretsmanager_secret.t212_secret.id
+  secret_string = var.t212_api_secret
+}
+
 resource "aws_secretsmanager_secret" "fx" {
   name = "${var.domain}-fx-api-key"
   recovery_window_in_days = 0

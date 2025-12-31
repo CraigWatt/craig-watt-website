@@ -10,6 +10,10 @@ output "t212_secret_arn" {
   value = aws_secretsmanager_secret.t212.arn
 }
 
+output "t212_api_secret_arn" {
+  value = aws_secretsmanager_secret.t212_secret.arn
+}
+
 output "fx_secret_arn" {
   value = aws_secretsmanager_secret.fx.arn
 }
