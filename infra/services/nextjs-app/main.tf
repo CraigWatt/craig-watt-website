@@ -61,6 +61,10 @@ resource "aws_ecs_task_definition" "this" {
           valueFrom = var.secrets_t212_arn
         },
         {
+          name      = "T212_API_SECRET"
+          valueFrom = var.secrets_t212_api_secret_arn
+        },
+        {
           name      = "FX_API_KEY"
           valueFrom = var.secrets_fx_arn
         },
