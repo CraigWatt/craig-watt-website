@@ -17,7 +17,6 @@ import type { Position, PortfolioMetrics } from '../trading212/lib/types'
 
 interface ApiStatus {
   t212: boolean
-  fx:   boolean
 }
 
 interface DashboardProps {
