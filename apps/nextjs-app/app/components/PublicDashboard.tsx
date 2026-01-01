@@ -14,8 +14,17 @@ import {
   Alert
 } from '@heroui/react'
 import { ChevronDown } from 'lucide-react'
-import type { PublicMetrics, PublicPos } from '../trading212/lib/transform'
+import type { PublicApiStatus, PublicMetrics, PublicPos } from '../trading212/lib/transform'
 import { RefreshArrow } from './icons/RefreshArrow'
+
+interface PublicDashboardProps {
+  data: {
+    metrics: PublicMetrics
+    positions: PublicPos[]
+    apiStatus: PublicApiStatus
+    _meta?: { stale?: boolean; cold?: boolean }
+  }
+}
 
 // mirror the same ApiStatus shape
 interface ApiStatus {
