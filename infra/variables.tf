@@ -72,13 +72,6 @@ variable "t212_api_secret" {
   sensitive   = true
 }
 
-
-variable "fx_api_key" {
-  type        = string
-  description = "FX API key"
-  sensitive   = true
-}
-
 variable "family_name" {
   description = "The ECS task‐definition family (and service name)"
   type        = string
