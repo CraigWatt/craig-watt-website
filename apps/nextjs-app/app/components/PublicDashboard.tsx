@@ -104,11 +104,6 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
             title="T212 API"
             description={apiStatus.t212 ? 'Online' : 'Offline'}
           />
-          <Alert
-            color={apiStatus.fx ? 'success' : 'danger'}
-            title="FX API"
-            description={apiStatus.fx ? 'Online' : 'Offline'}
-          />
         </section>
 
         <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">

@@ -18,7 +18,6 @@ export interface PortfolioItem {
   currentPrice: number
   pieQuantity: number
   ppl: number
-  fxPpl: number | null
   initialFillDate: string
 }
 
@@ -55,13 +54,11 @@ export interface ApiResponse {
   portfolio: PortfolioItem[]
   pies: PieSummary[]
   pieDetails: PieDetail[]
-  fx?: number
 }
 
 // ─── the shapes your Dashboard actually **consumes** ───────────────────────────
 export interface ApiStatus {
   t212: boolean    // Trading212 connectivity
-  fx:   boolean    // FX lookup connectivity
 }
 
 export interface PortfolioMetrics {
