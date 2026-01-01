@@ -1,0 +1,75 @@
+---
+slug: "stream-craigwatt-win"
+title: "stream.craigwatt.win"
+summary: "A self-hosted video streaming platform on a Raspberry Pi k3s cluster, automated with Ansible."
+github: "TBA"
+
+hero: "/images/projects/stream-craigwatt-win/stream-craigwatt-win-hero.webp"
+heroWidth: 1800
+heroHeight: 600
+
+thumbLg: "/images/projects/stream-craigwatt-win/stream-craigwatt-win-thumb-lg.webp"
+thumbLgWidth: 900
+thumbLgHeight: 600
+
+thumb: "/images/projects/stream-craigwatt-win/stream-craigwatt-win-thumb.webp"
+thumbWidth: 640
+thumbHeight: 360
+
+og: "/images/projects/stream-craigwatt-win/stream-craigwatt-win-og.webp"
+ogWidth: 1200
+ogHeight: 630
+
+screens:
+  - src: "/images/projects/stream-craigwatt-win/stream-craigwatt-win-screen-1.webp"
+    width: 1200
+    height: 675
+
+badges:
+  - jellyfin
+  - kubernetes
+  - k3s
+  - raspberry-pi
+  - ansible
+  - helm
+  - traefik
+  - longhorn
+---
+
+stream.craigwatt.win is my self-hosted video streaming platform, built to run reliably on a Raspberry Pi Kubernetes (k3s) cluster.
+
+It’s designed as a practical, production-style home-lab deployment: automated, repeatable, observable, and resilient — with a focus on real-world streaming performance (direct play where possible, predictable networking, and clean storage workflows).
+
+## What I Built
+
+- **Raspberry Pi k3s cluster** — multi-node Kubernetes cluster as the compute foundation.
+- **Jellyfin on Kubernetes** — containerised media server deployment with persistent storage.
+- **MetalLB** — stable, LAN-friendly load balancing so services get proper IPs on the local network.
+- **Ingress / routing** — ingress setup (e.g. Traefik) to expose services cleanly and consistently.
+- **Persistent storage layer** — storage provisioned and managed for media libraries (e.g. Longhorn-backed PVCs where appropriate).
+- **Automation-first** — Ansible playbooks/roles to bootstrap nodes, apply configs, and keep deployments reproducible.
+- **Operational guard rails** — deployments and upgrades designed to avoid foot-guns (idempotency, safe defaults, clear separation of concerns).
+
+<ProjectImage
+  src="/images/projects/stream-craigwatt-win/stream-craigwatt-win-screen-1.webp"
+  width={1200}
+  height={675}
+  alt="stream.craigwatt.win screenshot"
+  className="rounded-2xl shadow-lg mx-auto my-8"
+/>
+
+## Engineering Highlights
+
+- **Reproducible cluster build** — new nodes can be provisioned consistently via automation rather than manual steps.
+- **Clean separation of concerns** — cluster bootstrap, platform services, and app workloads are managed independently.
+- **Networking that behaves** — MetalLB avoids “random NodePort” mess and makes LAN access predictable.
+- **Storage decisions made deliberately** — media libraries and config are handled as first-class persistent concerns.
+
+## Why It Matters
+
+This project is a realistic demonstration of how I build and run systems:
+
+- Infrastructure as code (repeatable builds, not “hand-crafted” servers)
+- Kubernetes fundamentals applied pragmatically
+- Operational reliability and upgradeability as design goals
+- A home-lab that behaves like a small production environment
