@@ -20,7 +20,6 @@ import { RefreshArrow } from './icons/RefreshArrow'
 // mirror the same ApiStatus shape
 interface ApiStatus {
   t212: boolean
-  fx:   boolean
 }
 
 interface PublicDashboardProps {
