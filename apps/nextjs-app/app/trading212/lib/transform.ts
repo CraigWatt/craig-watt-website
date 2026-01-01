@@ -10,7 +10,6 @@ interface Raw {
   portfolio:  PortfolioItem[]
   pies:       unknown[]
   pieDetails: PieDetail[]
-  fxRate:     number
 }
 
 export interface PublicPos {
@@ -31,7 +30,6 @@ export interface PublicMetrics {
 
 export interface PublicApiStatus {
   t212: boolean
-  fx:   boolean
 }
 
 export function transformForPublic({
@@ -39,9 +37,8 @@ export function transformForPublic({
   portfolio,
   pies,
   pieDetails,
-  fxRate,
 }: Raw): {
-  apiStatus: { t212: boolean; fx: boolean }
+  apiStatus: { t212: boolean; }
   metrics:   PublicMetrics
   positions: PublicPos[]
 } {
@@ -66,7 +63,6 @@ export function transformForPublic({
   const rawPositions: RawPos[] = portfolio.flatMap(p => {
     const symbol = p.ticker.split('_')[0]
     const isUsd  = p.ticker.endsWith('_US_EQ')
-    const fxMult = isUsd ? fxRate : 1
 
     // absolute P/L in GBP and base percent
     const totalPplGBP = (p.ppl ?? 0) * fxMult
@@ -168,7 +164,6 @@ export function transformForPublic({
   return {
     apiStatus: {
       t212: Boolean(cash && portfolio && pies.length),
-      fx: typeof fxRate === 'number' && !isNaN(fxRate),
     },
     metrics:   pubMetrics,
     positions: pubPositions,

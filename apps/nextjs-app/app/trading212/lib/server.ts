@@ -146,25 +146,3 @@ export async function getPieDetailSafe(id: number) {
   )
 }
 
-export async function getUsdGbpRateSafe(): Promise<{ ok: boolean; data: number }> {
-  const key = process.env.FX_API_KEY
-  if (!key) {
-    console.warn('No FX_API_KEY in env, defaulting to 1')
-    return { ok: false, data: 1 }
-  }
-  try {
-    const res = await fetch(
-      `https://api.freecurrencyapi.com/v1/latest?apikey=${key}&currencies=GBP`,
-      { next: { revalidate: 60 } }
-    )
-    if (!res.ok) {
-      console.warn(`FX lookup failed: ${res.status}`)
-      return { ok: false, data: 1 }
-    }
-    const json = (await res.json()) as { data?: { GBP?: number } }
-    return { ok: true, data: json.data?.GBP ?? 1 }
-  } catch (err) {
-    console.error('FX lookup error', err)
-    return { ok: false, data: 1 }
-  }
-}
