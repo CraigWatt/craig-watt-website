@@ -27,12 +27,6 @@ variable "t212_api_secret" {
   sensitive   = true
 }
 
-variable "fx_api_key" {
-  type        = string
-  description = "FX API key"
-  sensitive   = true
-}
-
 variable "contact_email_to" {
   description = "The recipient address for contact form submissions"
   type        = string

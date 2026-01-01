@@ -43,10 +43,6 @@ resource "aws_secretsmanager_secret" "fx" {
   recovery_window_in_days = 0
 }
 
-resource "aws_secretsmanager_secret_version" "fx" {
-  secret_id     = aws_secretsmanager_secret.fx.id
-  secret_string = var.fx_api_key
-}
 resource "aws_secretsmanager_secret" "contact_to" {
   name = "${var.domain}-contact-email-to"
 }
