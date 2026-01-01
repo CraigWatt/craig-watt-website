@@ -38,11 +38,6 @@ resource "aws_secretsmanager_secret_version" "t212_secret" {
   secret_string = var.t212_api_secret
 }
 
-resource "aws_secretsmanager_secret" "fx" {
-  name = "${var.domain}-fx-api-key"
-  recovery_window_in_days = 0
-}
-
 resource "aws_secretsmanager_secret" "contact_to" {
   name = "${var.domain}-contact-email-to"
 }

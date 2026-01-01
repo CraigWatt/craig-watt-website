@@ -100,11 +100,6 @@ variable "secrets_t212_api_secret_arn" {
   description = "ARN for the Trading212 API secret"
   type        = string
 }
-
-variable "secrets_fx_arn" {
-  description = "ARN for the FX API key secret"
-  type        = string
-}
 variable "secrets_contact_to_arn" {
   description = "ARN for the Contact email TO address secret"
   type        = string
