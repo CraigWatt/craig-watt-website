@@ -98,7 +98,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
           </section>
         )}
 
-        <section className="grid grid-cols-2 gap-4">
+        <section className="grid grid-cols-1 gap-4">
           <Alert
             color={apiStatus.t212 ? 'success' : 'danger'}
             title="T212 API"
