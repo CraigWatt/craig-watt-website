@@ -21,14 +21,15 @@
       "@config/*": ["src/config/*"],
       "@lib/*": ["src/lib/*"],
       "@utils/*": ["src/utils/*"],
-      "content-collections": ["apps/nextjs-app/.content-collections/generated/index"],
-      "content-collections/generated/*": ["apps/nextjs-app/.content-collections/generated/*"]
+      "@platform/*": ["platform/*"],
+      "content-collections": ["services/website/.content-collections/generated/index"],
+      "content-collections/generated/*": ["services/website/.content-collections/generated/*"]
     }
   },
   "include": [
     "next-env.d.ts",
-    "apps/**/*.{ts,tsx,js,jsx}",
-    "libs/**/*.{ts,tsx,js,jsx}",
+    "services/**/*.{ts,tsx,js,jsx,mjs}",
+    "platform/**/*.{ts,tsx,js,jsx,mjs}",
     "**/*.ts",
     "**/*.tsx",
     ".content-collections/generated/**/*.ts",

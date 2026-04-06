@@ -1,86 +1,62 @@
-variable "ecr_repository" {
-  description = "Name of the ECR repository"
-  type        = string
-  default     = "craig-watt-website"
-}
-
 variable "domain" {
-  description = "Root domain to manage in Route 53"
-  type        = string
-}
-
-variable "ecs_cluster_name" {
-  description = "Name for the ECS cluster"
-  type        = string
-  default     = "craig-watt-cluster"
-}
-
-variable "image_tag" {
-  description = "Docker image tag to deploy (must match build)"
-  type        = string
-}
-
-variable "desired_count" {
-  description = "Number of ECS tasks to run"
-  type        = number
-  default     = 1
-}
-
-variable "ecs_execution_role_arn" {
-  description = "IAM role ARN for ECS task execution (e.g. ecsTaskExecutionRole)"
-  type        = string
-}
-
-variable "ecs_task_role_arn" {
-  description = "IAM role ARN for your ECS tasks (e.g. ecsTaskRole)"
+  description = "Primary domain name for the public website"
   type        = string
 }
 
 variable "aws_region" {
-  description = "AWS region to deploy into"
+  description = "AWS region for Lambda, S3 and API Gateway resources"
   type        = string
   default     = "eu-west-2"
 }
 
-variable "container_port" {
-  description = "Port your Next.js container listens on"
-  type        = number
-  default     = 3000
+variable "site_build_dir" {
+  description = "Path to the static website build output"
+  type        = string
+  default     = "../services/website/out"
+}
+
+variable "contact_lambda_dir" {
+  description = "Path to the bundled contact Lambda artifact directory"
+  type        = string
+  default     = "../dist/services/contact-api"
+}
+
+variable "trading212_lambda_dir" {
+  description = "Path to the bundled Trading212 Lambda artifact directory"
+  type        = string
+  default     = "../dist/services/trading212-api"
 }
 
 variable "mailersend_api_key" {
+  description = "MailerSend API key for the contact Lambda"
   type        = string
-  description = "Mailersend API key (plaintext from CI)"
   sensitive   = true
 }
 
 variable "recaptcha_secret_key" {
+  description = "reCAPTCHA secret key used for server-side verification"
   type        = string
-  description = "RECAPTCHA secret key (server-side)"
   sensitive   = true
 }
 
 variable "t212_api_key" {
-  type        = string
   description = "Trading212 API key"
+  type        = string
   sensitive   = true
 }
 
 variable "t212_api_secret" {
-  type        = string
   description = "Trading212 API secret"
+  type        = string
   sensitive   = true
 }
 
-variable "family_name" {
-  description = "The ECS task‐definition family (and service name)"
-  type        = string
-}
 variable "contact_email_to" {
-  description = "Contact form 'to' address (will be stored in Secrets Manager)"
+  description = "Contact form destination email address"
   type        = string
 }
+
 variable "contact_email_from" {
-  description = "Contact form 'from' address (will be stored in Secrets Manager)"
+  description = "Contact form sender email address"
   type        = string
 }

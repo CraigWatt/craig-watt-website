@@ -1,9 +1,8 @@
-# .github/workflows/on-tag-push.yml
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-name: 🐳 Build, Publish & Deploy
+name: Deploy Static Website
 
 on:
   push:
@@ -12,49 +11,29 @@ on:
 
 permissions:
   contents: read
-  packages: write
+  id-token: write
 
 env:
   AWS_REGION: eu-west-2
-  ECR_REGISTRY: 275578070934.dkr.ecr.eu-west-2.amazonaws.com
-  ECR_REPOSITORY: craig-watt-website
 
 jobs:
-  build-and-push:
-    name: Build & Push Docker Image
+  deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # expose $ACTIONS_ID_TOKEN_*
-      contents: read
-      packages: write
-
-    outputs:
-      image_tag: ${{ github.ref_name }}
 
     steps:
-      - name: 🔄 Checkout repo
+      - name: Checkout repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Configure AWS Credentials (OIDC)
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
-      - name: Write .env.production
-        run: |
-          cat > apps/nextjs-app/.env.production <<EOF
-          MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
-          CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
-          CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
-          NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-          RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-          T212_API_KEY=${{ secrets.T212_API_KEY }}
-          T212_API_SECRET=${{ secrets.T212_API_SECRET }}
-          EOF
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -62,150 +41,36 @@ jobs:
           check-latest: true
           cache: 'npm'
 
-      - name: Upgrade npm to v11
+      - name: Upgrade npm
         run: npm install -g npm@11
 
-      - name: Show Node & npm versions
-        run: |
-          node --version
-          npm  --version
-
-      - name: Install Dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js
-        run: npx nx affected --target=build --configuration=production --base=origin/main
-
-      - name: Copy Lockfile into Docker Context
-        run: cp package-lock.json apps/nextjs-app/package-lock.json
-
-      - name: 🔑 Log in to GHCR
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🔑 Log in to Amazon ECR
+      - name: Write website env
         run: |
-          aws ecr get-login-password \
-            --region ${{ env.AWS_REGION }} \
-          | docker login \
-            --username AWS \
-            --password-stdin ${{ env.ECR_REGISTRY }}
+          cat > services/website/.env.production <<EOF
+          NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
+          EOF
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          driver: docker-container
-          buildkitd-flags: --debug
+      - name: Lint website
+        run: npx nx run website:lint
 
-      # - name: 🐳 Build & Load Debug Image
-      #   uses: docker/build-push-action@v4
-      #   with:
-      #     context: .
-      #     file: Dockerfile
-      #     push: false              # don’t push this debug build
-      #     load: true               # load into local Docker
-      #     build-args: |
-      #       MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
-      #       CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
-      #       CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
-      #       NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-      #       RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-      #       T212_API_KEY=${{ secrets.T212_API_KEY }}
-      #       FX_API_KEY=${{ secrets.FX_API_KEY }}            
-      #     tags: debug-nextjs-app:ci
+      - name: Test website
+        run: npx nx run website:test
 
-      # - name: 🔍 Inspect `/app` in the debug image
-      #   run: |
-      #     echo "=== Top level of /app ==="
-      #     docker run --rm debug-nextjs-app:ci ls -1 /app
+      - name: Build static website
+        run: npx nx run website:build
 
-      #     echo "=== node_modules in /app ==="
-      #     docker run --rm debug-nextjs-app:ci ls -1 /app/node_modules || echo "(missing)"
-
-      #     echo "=== .next in /app ==="
-      #     docker run --rm debug-nextjs-app:ci ls -1 /app/.next || echo "(missing)"
-
-      # - name: 🔍 Verify Next in node_modules
-      #   run: |
-      #     echo "=== Checking that next is installed ==="
-      #     if docker run --rm debug-nextjs-app:ci test -d /app/node_modules/next; then
-      #       echo "✅ next found in node_modules"
-      #     else
-      #       echo "❌ next NOT found in node_modules!"
-      #       exit 1
-      #     fi
-
-      # - name: 🛑 Validate `/app` Structure
-      #   run: |
-      #     set -e
-
-      #     echo "Checking /app/node_modules exists…"
-      #     if ! docker run --rm debug-nextjs-app:ci test -d /app/node_modules; then
-      #       echo "❌ /app/node_modules not found!"
-      #       exit 1
-      #     fi
-
-      #     echo "Checking /app/.next exists…"
-      #     if ! docker run --rm debug-nextjs-app:ci test -d /app/.next; then
-      #       echo "❌ /app/.next not found!"
-      #       exit 1
-      #     fi
-
-      #     echo "✅ /app structure is correct!"
-
-      - name: 🏷️ Build & Push Docker Image
-        uses: docker/build-push-action@v4
-        with:
-          platforms: linux/amd64
-          context: .
-          file: Dockerfile
-          push: true
-          cache-from: type=gha
-          cache-to:   type=gha,mode=max
-          build-args: |
-            MAILERSEND_API_KEY=${{ secrets.MAILERSEND_API_KEY }}
-            CONTACT_EMAIL_TO=${{ secrets.CONTACT_EMAIL_TO }}
-            CONTACT_EMAIL_FROM=${{ secrets.CONTACT_EMAIL_FROM }}
-            NEXT_PUBLIC_RECAPTCHA_SITE_KEY=${{ secrets.NEXT_PUBLIC_RECAPTCHA_SITE_KEY }}
-            RECAPTCHA_SECRET_KEY=${{ secrets.RECAPTCHA_SECRET_KEY }}
-            T212_API_KEY=${{ secrets.T212_API_KEY }}
-            T212_API_SECRET=${{ secrets.T212_API_SECRET }}
-          tags: |
-            ghcr.io/craigwatt/craig-watt-website:${{ github.ref_name }}
-            ghcr.io/craigwatt/craig-watt-website:latest
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ github.ref_name }}
-            ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
-
-  deploy-infra:
-    name: Deploy Infra via Terraform
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: 🔄 Checkout infra code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-          audience: sts.amazonaws.com
+      - name: Build Lambda handlers
+        run: npm run build:functions
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: 1.5.7
 
-      - name: Terraform Init & Apply
+      - name: Terraform init
         working-directory: infra
         run: |
           terraform init --reconfigure \
@@ -214,14 +79,13 @@ jobs:
             -backend-config="region=${{ env.AWS_REGION }}" \
             -backend-config="dynamodb_table=craig-watt-lock-table"
 
+      - name: Terraform apply
+        working-directory: infra
+        run: |
           terraform apply -auto-approve \
             -input=false \
             -lock-timeout=5m \
             -var="domain=craigwatt.co.uk" \
-            -var="image_tag=${{ needs.build-and-push.outputs.image_tag }}" \
-            -var="ecs_execution_role_arn=${{ secrets.ECS_EXECUTION_ROLE_ARN }}" \
-            -var="ecs_task_role_arn=${{ secrets.ECS_TASK_ROLE_ARN }}" \
-            -var="family_name=nextjs-app" \
             -var="mailersend_api_key=${{ secrets.MAILERSEND_API_KEY }}" \
             -var="recaptcha_secret_key=${{ secrets.RECAPTCHA_SECRET_KEY }}" \
             -var="t212_api_key=${{ secrets.T212_API_KEY }}" \

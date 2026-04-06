@@ -3,12 +3,20 @@ variable "domain" {
   type        = string
 }
 
-variable "alb_dns_name" {
-  description = "DNS name of the ALB"
+variable "zone_id" {
+  description = "Existing hosted zone ID. Leave null to create the zone in this module."
   type        = string
+  default     = null
 }
 
-variable "alb_zone_id" {
-  description = "Zone ID of the ALB"
+variable "target_domain_name" {
+  description = "DNS name of the alias target, such as a CloudFront distribution"
   type        = string
+  default     = null
+}
+
+variable "target_zone_id" {
+  description = "Hosted zone ID of the alias target"
+  type        = string
+  default     = null
 }

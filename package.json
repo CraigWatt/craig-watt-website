@@ -3,21 +3,22 @@
   "version": "1.0.1",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "libs/*"
+    "services/*",
+    "platform/*"
   ],
   "engines": {
     "node": ">=22.x",
     "npm": ">=11.x"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "storybook": "nx serve:storybook -p 6006",
-    "build-storybook": "nx build:storybook",
-    "test": "jest",
+    "dev": "nx run website:serve",
+    "build": "nx run website:build",
+    "start": "nx run website:start",
+    "lint": "nx run website:lint",
+    "storybook": "nx run website:storybook",
+    "build-storybook": "nx run website:build-storybook",
+    "test": "nx run website:test",
+    "build:functions": "node ./tools/build-functions.mjs",
     "tailwind:init": "node ./node_modules/tailwindcss/dist/lib.js init -p"
   },
   "dependencies": {
