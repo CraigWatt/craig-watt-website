@@ -385,9 +385,7 @@ resource "aws_s3_object" "site" {
   source       = "${var.site_build_dir}/${each.value}"
   etag         = filemd5("${var.site_build_dir}/${each.value}")
   content_type = lookup(local.mime_types, lower(element(reverse(split(".", each.value)), 0)), null)
-  cache_control = startswith(each.value, "_next/") ?
-    "public, max-age=31536000, immutable" :
-    (endswith(each.value, ".html") ? "public, max-age=0, must-revalidate" : "public, max-age=86400")
+  cache_control = startswith(each.value, "_next/") ? "public, max-age=31536000, immutable" : (endswith(each.value, ".html") ? "public, max-age=0, must-revalidate" : "public, max-age=86400")
 
   depends_on = [
     aws_s3_bucket_ownership_controls.site,
