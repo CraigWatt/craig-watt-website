@@ -1,7 +1,7 @@
 output "zone_id" {
-  value = aws_route53_zone.primary.zone_id
+  value = local.effective_zone_id
 }
 
 output "name_servers" {
-  value = aws_route53_zone.primary.name_servers
+  value = var.zone_id != null ? [] : aws_route53_zone.primary[0].name_servers
 }

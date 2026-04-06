@@ -2,6 +2,7 @@
 
 # Local environment variables
 .env.local
+.env.production
 
 # dependencies
 /node_modules
@@ -82,7 +83,7 @@ backend.local.tf
 **/*.tfstate.*
 **/*.tfvars
 **/backend.local.tf
-bootstrap/backend.local.tf
+infra/bootstrap/backend.local.tf
 
 /dist
 

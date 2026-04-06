@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # 1) Dev server (next dev)
-echo -e "\n→ npx nx serve nextjs-app"
-npx nx serve nextjs-app
+echo -e "\n→ npx nx serve website"
+npx nx serve website
 
 echo -e "\n✅ serve concluded."
