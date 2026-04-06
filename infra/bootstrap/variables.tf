@@ -5,11 +5,6 @@ variable "state_bucket_name" {
   type        = string
 }
 
-variable "lock_table_name" {
-  description = "Name of the DynamoDB table for Terraform state locking"
-  type        = string
-}
-
 variable "github_oidc_provider_url" {
   description = "URL of the GitHub Actions OIDC provider"
   type        = string
@@ -21,5 +16,10 @@ variable "github_repo" {
 }
 
 variable "aws_region" {
-    type = string
+  type = string
+}
+
+variable "domain" {
+  description = "Primary website domain used to derive resource names"
+  type        = string
 }
