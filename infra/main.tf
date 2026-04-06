@@ -12,7 +12,7 @@ terraform {
     bucket         = "craig-watt-tfstate"
     key            = "prod/terraform.tfstate"
     region         = "eu-west-2"
-    dynamodb_table = "craig-watt-lock-table"
+    use_lockfile   = true
     encrypt        = true
   }
 }
