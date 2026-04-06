@@ -20,3 +20,9 @@ variable "target_zone_id" {
   type        = string
   default     = null
 }
+
+variable "create_records" {
+  description = "Whether to create alias records for the target domain"
+  type        = bool
+  default     = false
+}

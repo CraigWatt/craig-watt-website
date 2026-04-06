@@ -63,6 +63,7 @@ module "dns_records" {
 
   domain             = var.domain
   zone_id            = module.route53.zone_id
+  create_records     = true
   target_domain_name = module.website.distribution_domain_name
   target_zone_id     = module.website.distribution_hosted_zone_id
 }
