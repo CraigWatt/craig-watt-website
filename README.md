@@ -58,4 +58,6 @@ terraform init
 terraform apply
 ```
 
+Terraform state locking now uses S3 lockfiles, so there is no separate DynamoDB lock table.
+
 Bootstrap resources for the GitHub Actions deployment role live under [infra/bootstrap](/Users/craigwatt/localProjects/craig-watt-website/infra/bootstrap).
