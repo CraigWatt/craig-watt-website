@@ -8,7 +8,7 @@ locals {
 }
 
 resource "aws_route53_record" "www" {
-  count   = var.target_domain_name != null && var.target_zone_id != null ? 1 : 0
+  count   = var.create_records ? 1 : 0
   zone_id = local.effective_zone_id
   name    = "www"
   type    = "A"
@@ -21,7 +21,7 @@ resource "aws_route53_record" "www" {
 }
 
 resource "aws_route53_record" "apex" {
-  count   = var.target_domain_name != null && var.target_zone_id != null ? 1 : 0
+  count   = var.create_records ? 1 : 0
   zone_id = local.effective_zone_id
   name    = var.domain
   type    = "A"
