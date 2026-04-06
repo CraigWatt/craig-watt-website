@@ -3,13 +3,18 @@ provider "aws" {
 }
 
 locals {
-  repo_short  = replace(var.github_repo, "/", "-")
-  provider_id = replace(var.github_oidc_provider_url, "https://", "")
+  repo_short   = replace(var.github_repo, "/", "-")
+  provider_id  = replace(var.github_oidc_provider_url, "https://", "")
+  domain_slug  = replace(var.domain, ".", "-")
+  site_bucket  = "${local.domain_slug}-site"
+  state_bucket = var.state_bucket_name
 }
 
 data "aws_iam_openid_connect_provider" "github" {
   url = var.github_oidc_provider_url
 }
+
+data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "state" {
   bucket = var.state_bucket_name
@@ -36,17 +41,6 @@ resource "aws_s3_bucket_public_access_block" "state" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
-}
-
-resource "aws_dynamodb_table" "lock" {
-  name         = var.lock_table_name
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "LockID"
-
-  attribute {
-    name = "LockID"
-    type = "S"
-  }
 }
 
 resource "aws_iam_role" "github_actions" {
@@ -77,47 +71,170 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "lambda" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLambda_FullAccess"
-}
+resource "aws_iam_role_policy" "github_actions" {
+  name = "${local.repo_short}-gha-inline"
+  role = aws_iam_role.github_actions.id
 
-resource "aws_iam_role_policy_attachment" "apigateway" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonAPIGatewayAdministrator"
-}
-
-resource "aws_iam_role_policy_attachment" "cloudfront" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudFrontFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "route53" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonRoute53FullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "acm" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "s3" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "dynamodb" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "iam_readonly" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/IAMReadOnlyAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "cw_logs_readonly" {
-  role       = aws_iam_role.github_actions.name
-  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsReadOnlyAccess"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "TerraformStateAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:ListBucket",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::${local.state_bucket}",
+          "arn:aws:s3:::${local.state_bucket}/*"
+        ]
+      },
+      {
+        Sid    = "StaticSiteBucketCreate"
+        Effect = "Allow"
+        Action = ["s3:CreateBucket"]
+        Resource = "*"
+      },
+      {
+        Sid    = "StaticSiteBucketManage"
+        Effect = "Allow"
+        Action = [
+          "s3:DeleteBucket",
+          "s3:GetBucketLocation",
+          "s3:ListBucket",
+          "s3:GetBucketPolicy",
+          "s3:PutBucketPolicy",
+          "s3:DeleteBucketPolicy",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:GetBucketOwnershipControls",
+          "s3:PutBucketOwnershipControls",
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::${local.site_bucket}",
+          "arn:aws:s3:::${local.site_bucket}/*"
+        ]
+      },
+      {
+        Sid    = "CloudFrontDeploy"
+        Effect = "Allow"
+        Action = [
+          "cloudfront:CreateDistribution",
+          "cloudfront:UpdateDistribution",
+          "cloudfront:DeleteDistribution",
+          "cloudfront:GetDistribution",
+          "cloudfront:GetDistributionConfig",
+          "cloudfront:ListDistributions",
+          "cloudfront:CreateOriginAccessControl",
+          "cloudfront:DeleteOriginAccessControl",
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:ListOriginAccessControls",
+          "cloudfront:CreateCachePolicy",
+          "cloudfront:UpdateCachePolicy",
+          "cloudfront:DeleteCachePolicy",
+          "cloudfront:GetCachePolicy",
+          "cloudfront:ListCachePolicies",
+          "cloudfront:CreateFunction",
+          "cloudfront:UpdateFunction",
+          "cloudfront:DeleteFunction",
+          "cloudfront:DescribeFunction",
+          "cloudfront:PublishFunction",
+          "cloudfront:ListFunctions",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource",
+          "cloudfront:ListTagsForResource",
+          "cloudfront:CreateInvalidation"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "LambdaDeploy"
+        Effect = "Allow"
+        Action = [
+          "lambda:CreateFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:GetPolicy",
+          "lambda:PublishVersion",
+          "lambda:ListVersionsByFunction",
+          "lambda:AddPermission",
+          "lambda:RemovePermission",
+          "lambda:TagResource",
+          "lambda:UntagResource"
+        ]
+        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${local.domain_slug}-*"
+      },
+      {
+        Sid    = "LambdaExecutionRoleManage"
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:GetRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:ListRolePolicies",
+          "iam:GetRolePolicy",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:PassRole"
+        ]
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${local.domain_slug}-website-lambda-role"
+      },
+      {
+        Sid    = "ApiGatewayDeploy"
+        Effect = "Allow"
+        Action = [
+          "apigateway:POST",
+          "apigateway:GET",
+          "apigateway:PATCH",
+          "apigateway:PUT",
+          "apigateway:DELETE"
+        ]
+        Resource = "arn:aws:apigateway:${var.aws_region}::/apis*"
+      },
+      {
+        Sid    = "CertificateAndHostedZoneManagement"
+        Effect = "Allow"
+        Action = [
+          "acm:RequestCertificate",
+          "acm:DeleteCertificate",
+          "acm:DescribeCertificate",
+          "acm:ListCertificates",
+          "acm:AddTagsToCertificate",
+          "acm:RemoveTagsFromCertificate",
+          "route53:CreateHostedZone",
+          "route53:DeleteHostedZone",
+          "route53:ListHostedZones",
+          "route53:ListHostedZonesByName"
+        ]
+        Resource = "*"
+      },
+      {
+        Sid    = "Route53RecordChanges"
+        Effect = "Allow"
+        Action = [
+          "route53:GetHostedZone",
+          "route53:ListResourceRecordSets",
+          "route53:ChangeResourceRecordSets",
+          "route53:GetChange",
+          "route53:ListTagsForResource",
+          "route53:ChangeTagsForResource"
+        ]
+        Resource = "arn:aws:route53:::hostedzone/*"
+      }
+    ]
+  })
 }

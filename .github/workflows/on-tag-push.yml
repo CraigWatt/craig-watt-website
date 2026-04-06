@@ -76,8 +76,7 @@ jobs:
           terraform init --reconfigure \
             -backend-config="bucket=craig-watt-tfstate" \
             -backend-config="key=prod/terraform.tfstate" \
-            -backend-config="region=${{ env.AWS_REGION }}" \
-            -backend-config="dynamodb_table=craig-watt-lock-table"
+            -backend-config="region=${{ env.AWS_REGION }}"
 
       - name: Terraform apply
         working-directory: infra
