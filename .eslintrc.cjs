@@ -4,7 +4,7 @@ module.exports = {
   ignorePatterns: [
     '**/.next/**',
     '**/dist/**',
-    'apps/nextjs-app/scripts/**/*.js',
+    'services/website/scripts/**/*.js',
     '**/next-env.d.ts',
   ],
 
@@ -30,6 +30,7 @@ module.exports = {
         enforceBuildableLibDependency: true,
         allow: [
           '^.*/eslint\\.config\\.[cm]?js$',
+          '@platform/.*',
           'content-collections',
           'content-collections/.*',
         ],

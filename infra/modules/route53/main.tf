@@ -1,27 +1,34 @@
 resource "aws_route53_zone" "primary" {
-  name = var.domain
+  count = var.zone_id == null ? 1 : 0
+  name  = var.domain
 }
 
-resource "aws_route53_record" "nextjs" {
-  zone_id = aws_route53_zone.primary.zone_id
+locals {
+  effective_zone_id = var.zone_id != null ? var.zone_id : aws_route53_zone.primary[0].zone_id
+}
+
+resource "aws_route53_record" "www" {
+  count   = var.target_domain_name != null && var.target_zone_id != null ? 1 : 0
+  zone_id = local.effective_zone_id
   name    = "www"
   type    = "A"
 
   alias {
-    name                   = var.alb_dns_name
-    zone_id                = var.alb_zone_id
-    evaluate_target_health = true
+    name                   = var.target_domain_name
+    zone_id                = var.target_zone_id
+    evaluate_target_health = false
   }
 }
 
 resource "aws_route53_record" "apex" {
-  zone_id = aws_route53_zone.primary.zone_id
-  name    = var.domain # “craigwatt.co.uk”
+  count   = var.target_domain_name != null && var.target_zone_id != null ? 1 : 0
+  zone_id = local.effective_zone_id
+  name    = var.domain
   type    = "A"
 
   alias {
-    name                   = var.alb_dns_name
-    zone_id                = var.alb_zone_id
-    evaluate_target_health = true
+    name                   = var.target_domain_name
+    zone_id                = var.target_zone_id
+    evaluate_target_health = false
   }
 }

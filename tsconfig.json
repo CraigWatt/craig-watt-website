@@ -6,11 +6,10 @@
     // Add any other project-specific compiler options here
   },
   "include": [
-    // Your project-specific files
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "apps/nextjs-app/.content-collections/generated/**/*.js"
+    "services/website/.content-collections/generated/**/*.js"
   ],
   "exclude": [
     "node_modules"
