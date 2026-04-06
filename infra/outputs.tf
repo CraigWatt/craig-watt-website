@@ -7,15 +7,13 @@ output "zone_id" {
 }
 
 output "certificate_arn" {
-  value = module.acm.certificate_arn
+  value = module.certificate.certificate_arn
 }
 
-output "alb_sg_id" {
-  description = "Security Group ID for the ALB (only 80/443)"
-  value       = module.network.alb_sg_id
+output "distribution_domain_name" {
+  value = module.website.distribution_domain_name
 }
 
-output "app_sg_id" {
-  description = "Security Group ID for the ECS tasks"
-  value       = module.network.app_sg_id
+output "api_endpoint" {
+  value = module.website.api_endpoint
 }

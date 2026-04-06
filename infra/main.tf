@@ -1,11 +1,13 @@
 terraform {
-  required_version = ">= 1.4.0"
+  required_version = ">= 1.5.0"
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 6.0"
     }
   }
+
   backend "s3" {
     bucket         = "craig-watt-tfstate"
     key            = "prod/terraform.tfstate"
@@ -19,68 +21,48 @@ provider "aws" {
   region = var.aws_region
 }
 
-module "network" {
-  source         = "./modules/network"
-  container_port = var.container_port
+provider "aws" {
+  alias  = "us_east_1"
+  region = "us-east-1"
 }
 
-module "ecr" {
-  source          = "./modules/ecr"
-  repository_name = var.ecr_repository
+module "route53" {
+  source = "./modules/route53"
+  domain = var.domain
 }
 
-module "ecs_cluster" {
-  source       = "./modules/ecs-cluster"
-  cluster_name = var.ecs_cluster_name
-}
+module "certificate" {
+  source = "./modules/acm"
 
-module "acm" {
-  source  = "./modules/acm"
+  providers = {
+    aws = aws.us_east_1
+  }
+
   domain  = var.domain
   zone_id = module.route53.zone_id
 }
 
-module "route53" {
-  source       = "./modules/route53"
-  domain       = var.domain
-  alb_dns_name = module.nextjs_service.alb_dns_name
-  alb_zone_id  = module.nextjs_service.alb_zone_id
+module "website" {
+  source = "./services/website"
+
+  domain                = var.domain
+  certificate_arn       = module.certificate.certificate_arn
+  site_build_dir        = var.site_build_dir
+  contact_lambda_dir    = var.contact_lambda_dir
+  trading212_lambda_dir = var.trading212_lambda_dir
+  mailersend_api_key    = var.mailersend_api_key
+  recaptcha_secret_key  = var.recaptcha_secret_key
+  t212_api_key          = var.t212_api_key
+  t212_api_secret       = var.t212_api_secret
+  contact_email_to      = var.contact_email_to
+  contact_email_from    = var.contact_email_from
 }
 
-module "secrets" {
-  source = "./modules/secrets"
-  domain               = var.domain
-  mailersend_api_key   = var.mailersend_api_key
-  recaptcha_secret_key = var.recaptcha_secret_key
-  t212_api_key         = var.t212_api_key
-  t212_api_secret = var.t212_api_secret
-  contact_email_to     = var.contact_email_to
-  contact_email_from   = var.contact_email_from
-}
+module "dns_records" {
+  source = "./modules/route53"
 
-module "nextjs_service" {
-  source = "./services/nextjs-app"
-
-  # core infra inputs
-  family_name        = var.family_name
-  cluster_arn        = module.ecs_cluster.cluster_arn
-  vpc_id             = module.network.vpc_id
-  subnets            = module.network.subnet_ids
-  alb_sg_id          = module.network.alb_sg_id
-  app_sg_id          = module.network.app_sg_id
-  certificate_arn    = module.acm.certificate_arn
-  execution_role_arn = var.ecs_execution_role_arn
-  task_role_arn      = var.ecs_task_role_arn
-  aws_region         = var.aws_region
-  container_image    = "${module.ecr.repository_url}:${var.image_tag}"
-  container_port     = var.container_port
-  desired_count      = var.desired_count
-
-  # secrets ARNs (use the outputs defined in modules/secrets/outputs.tf)
-  secrets_mailersend_arn = module.secrets.mailersend_secret_arn
-  secrets_recaptcha_arn  = module.secrets.recaptcha_secret_arn
-  secrets_t212_arn       = module.secrets.t212_secret_arn
-  secrets_t212_api_secret_arn = module.secrets.t212_api_secret_arn
-  secrets_contact_to_arn   = module.secrets.contact_to_secret_arn
-  secrets_contact_from_arn = module.secrets.contact_from_secret_arn
+  domain             = var.domain
+  zone_id            = module.route53.zone_id
+  target_domain_name = module.website.distribution_domain_name
+  target_zone_id     = module.website.distribution_hosted_zone_id
 }
