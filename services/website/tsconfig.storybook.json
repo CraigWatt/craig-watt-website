@@ -5,13 +5,13 @@
     "experimentalDecorators": true,
     "noEmit": false
   },
-  "exclude": ["components/**/*.spec.ts", "components/**/*.test.ts"],
+  "exclude": ["app/**/*.spec.ts", "app/**/*.test.ts"],
   "include": [
-    "components/**/*.stories.ts",
-    "components/**/*.stories.js",
-    "components/**/*.stories.jsx",
-    "components/**/*.stories.tsx",
-    "components/**/*.stories.mdx",
+    "app/**/*.stories.ts",
+    "app/**/*.stories.js",
+    "app/**/*.stories.jsx",
+    "app/**/*.stories.tsx",
+    "app/**/*.stories.mdx",
     ".storybook/*.js",
     ".storybook/*.ts",
     ".storybook/main.tsx"
