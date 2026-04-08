@@ -49,8 +49,8 @@ module "website" {
   certificate_arn       = module.certificate.certificate_arn
   site_build_dir        = var.site_build_dir
   contact_lambda_dir    = var.contact_lambda_dir
+  zone_id               = module.route53.zone_id
   trading212_lambda_dir = var.trading212_lambda_dir
-  mailersend_api_key    = var.mailersend_api_key
   recaptcha_secret_key  = var.recaptcha_secret_key
   t212_api_key          = var.t212_api_key
   t212_api_secret       = var.t212_api_secret

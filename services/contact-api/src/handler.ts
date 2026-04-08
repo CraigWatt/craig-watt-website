@@ -1,3 +1,5 @@
+import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
+
 type HttpEvent = {
   body?: string | null;
   headers?: Record<string, string | undefined>;
@@ -102,56 +104,43 @@ async function verifyRecaptcha(secret: string, token: string): Promise<{ ok: boo
 }
 
 async function sendEmail(payload: {
-  apiKey: string;
   to: string;
   from: string;
   name: string;
   email: string;
   message: string;
 }) {
-  const response = await fetch('https://api.mailersend.com/v1/email', {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${payload.apiKey}`,
-      'content-type': 'application/json',
+  const client = new SESClient({});
+
+  await client.send(new SendEmailCommand({
+    Source: payload.from,
+    Destination: {
+      ToAddresses: [payload.to],
     },
-    body: JSON.stringify({
-      from: {
-        email: payload.from,
-        name: 'Website Contact Form',
+    ReplyToAddresses: [payload.email],
+    Message: {
+      Subject: {
+        Data: `New contact from ${payload.name}`,
+        Charset: 'UTF-8',
       },
-      to: [
-        {
-          email: payload.to,
-          name: 'Craig Watt',
+      Body: {
+        Text: {
+          Data: `New contact:\nName: ${payload.name}\nEmail: ${payload.email}\nMessage:\n${payload.message}`,
+          Charset: 'UTF-8',
         },
-      ],
-      reply_to: {
-        email: payload.email,
-        name: payload.name,
+        Html: {
+          Data: `
+            <p>New contact form submission:</p>
+            <p><strong>Name:</strong> ${escapeHtml(payload.name)}</p>
+            <p><strong>Email:</strong> ${escapeHtml(payload.email)}</p>
+            <p><strong>Message:</strong></p>
+            <p>${escapeHtml(payload.message).replace(/\n/g, '<br/>')}</p>
+          `,
+          Charset: 'UTF-8',
+        },
       },
-      subject: `New contact from ${payload.name}`,
-      text: `New contact:\nName: ${payload.name}\nEmail: ${payload.email}\nMessage:\n${payload.message}`,
-      html: `
-        <p>New contact form submission:</p>
-        <p><strong>Name:</strong> ${escapeHtml(payload.name)}</p>
-        <p><strong>Email:</strong> ${escapeHtml(payload.email)}</p>
-        <p><strong>Message:</strong></p>
-        <p>${escapeHtml(payload.message).replace(/\n/g, '<br/>')}</p>
-      `,
-    }),
+    },
   });
-
-  if (response.ok || response.status === 202) {
-    return;
-  }
-
-  const errorText = await response.text();
-  if (response.status === 401) {
-    throw new Error(`MailerSend authentication failed with HTTP 401: ${errorText}`);
-  }
-
-  throw new Error(`MailerSend request failed with HTTP ${response.status}: ${errorText}`);
 }
 
 export async function handler(event: HttpEvent): Promise<HttpResponse> {
@@ -208,7 +197,6 @@ export async function handler(event: HttpEvent): Promise<HttpResponse> {
     }
 
     await sendEmail({
-      apiKey: getTrimmedEnv('MAILERSEND_API_KEY'),
       to: getTrimmedEnv('CONTACT_EMAIL_TO'),
       from: getTrimmedEnv('CONTACT_EMAIL_FROM'),
       name: safeName,
