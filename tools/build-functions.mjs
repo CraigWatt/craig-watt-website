@@ -30,6 +30,7 @@ for (const build of builds) {
       '--platform=node',
       '--target=node20',
       '--format=cjs',
+      '--external:@aws-sdk/client-ses',
       '--outfile=' + path.join(build.outdir, 'index.js'),
     ],
     {
