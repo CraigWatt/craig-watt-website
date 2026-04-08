@@ -113,11 +113,28 @@ resource "aws_cloudfront_cache_policy" "api" {
     }
 
     query_strings_config {
-      query_string_behavior = "all"
+      query_string_behavior = "none"
     }
 
     enable_accept_encoding_brotli = true
     enable_accept_encoding_gzip   = true
+  }
+}
+
+resource "aws_cloudfront_origin_request_policy" "api" {
+  name    = "${replace(var.domain, ".", "-")}-api-origin-request"
+  comment = "Forward API request details to the origin"
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+
+  headers_config {
+    header_behavior = "none"
+  }
+
+  query_strings_config {
+    query_string_behavior = "all"
   }
 }
 
@@ -325,6 +342,7 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods         = ["GET", "HEAD", "OPTIONS"]
     compress               = true
     cache_policy_id        = aws_cloudfront_cache_policy.api.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.api.id
   }
 
   custom_error_response {
