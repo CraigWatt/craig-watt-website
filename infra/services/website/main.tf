@@ -43,6 +43,36 @@ data "archive_file" "trading212_lambda" {
   output_path = "${path.root}/.terraform/trading212-api.zip"
 }
 
+resource "aws_ses_domain_identity" "contact" {
+  domain = var.domain
+}
+
+resource "aws_route53_record" "ses_verification" {
+  zone_id = var.zone_id
+  name    = "_amazonses.${var.domain}"
+  type    = "TXT"
+  ttl     = 300
+  records = [aws_ses_domain_identity.contact.verification_token]
+}
+
+resource "aws_ses_domain_identity_verification" "contact" {
+  domain     = aws_ses_domain_identity.contact.id
+  depends_on = [aws_route53_record.ses_verification]
+}
+
+resource "aws_ses_domain_dkim" "contact" {
+  domain = aws_ses_domain_identity.contact.domain
+}
+
+resource "aws_route53_record" "ses_dkim" {
+  count   = 3
+  zone_id = var.zone_id
+  name    = "${aws_ses_domain_dkim.contact.dkim_tokens[count.index]}._domainkey.${var.domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${aws_ses_domain_dkim.contact.dkim_tokens[count.index]}.dkim.amazonses.com"]
+}
+
 resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
 }
@@ -168,7 +198,6 @@ resource "aws_lambda_function" "contact" {
     variables = {
       CONTACT_EMAIL_FROM   = var.contact_email_from
       CONTACT_EMAIL_TO     = var.contact_email_to
-      MAILERSEND_API_KEY   = var.mailersend_api_key
       RECAPTCHA_SECRET_KEY = var.recaptcha_secret_key
     }
   }

@@ -160,6 +160,19 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = "*"
       },
       {
+        Sid    = "SesIdentityManagement"
+        Effect = "Allow"
+        Action = [
+          "ses:VerifyDomainIdentity",
+          "ses:VerifyDomainDkim",
+          "ses:DeleteIdentity",
+          "ses:GetIdentityVerificationAttributes",
+          "ses:GetIdentityDkimAttributes",
+          "ses:ListIdentities"
+        ]
+        Resource = "*"
+      },
+      {
         Sid    = "LambdaDeploy"
         Effect = "Allow"
         Action = [

@@ -18,15 +18,14 @@ variable "contact_lambda_dir" {
   type        = string
 }
 
-variable "trading212_lambda_dir" {
-  description = "Directory containing the bundled Trading212 Lambda artifact"
+variable "zone_id" {
+  description = "Route53 hosted zone ID for the primary domain"
   type        = string
 }
 
-variable "mailersend_api_key" {
-  description = "MailerSend API key"
+variable "trading212_lambda_dir" {
+  description = "Directory containing the bundled Trading212 Lambda artifact"
   type        = string
-  sensitive   = true
 }
 
 variable "recaptcha_secret_key" {
