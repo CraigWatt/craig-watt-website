@@ -8,6 +8,11 @@ variable "certificate_arn" {
   type        = string
 }
 
+variable "aws_region" {
+  description = "AWS region for Lambda, SES and API Gateway resources"
+  type        = string
+}
+
 variable "site_build_dir" {
   description = "Directory containing the exported static website"
   type        = string

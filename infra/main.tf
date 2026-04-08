@@ -47,6 +47,7 @@ module "website" {
 
   domain                = var.domain
   certificate_arn       = module.certificate.certificate_arn
+  aws_region            = var.aws_region
   site_build_dir        = var.site_build_dir
   contact_lambda_dir    = var.contact_lambda_dir
   zone_id               = module.route53.zone_id

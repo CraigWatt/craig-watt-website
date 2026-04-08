@@ -31,6 +31,8 @@ locals {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 data "archive_file" "contact_lambda" {
   type        = "zip"
   source_dir  = var.contact_lambda_dir
@@ -182,6 +184,25 @@ resource "aws_iam_role" "lambda" {
 resource "aws_iam_role_policy_attachment" "lambda_basic" {
   role       = aws_iam_role.lambda.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "lambda_ses_send" {
+  name = "${replace(var.domain, ".", "-")}-website-lambda-ses-send"
+  role = aws_iam_role.lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowSesSendFromVerifiedIdentity"
+        Effect = "Allow"
+        Action = [
+          "ses:SendEmail"
+        ]
+        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.contact_email_from}"
+      }
+    ]
+  })
 }
 
 resource "aws_lambda_function" "contact" {
