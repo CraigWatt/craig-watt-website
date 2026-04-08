@@ -43,6 +43,10 @@ function getEnv(name: string): string {
   return value;
 }
 
+function getTrimmedEnv(name: string): string {
+  return getEnv(name).trim();
+}
+
 function parseBody(event: HttpEvent): ContactPayload {
   const rawBody = event.body ?? '{}';
   const decoded = event.isBase64Encoded
@@ -143,6 +147,10 @@ async function sendEmail(payload: {
   }
 
   const errorText = await response.text();
+  if (response.status === 401) {
+    throw new Error(`MailerSend authentication failed with HTTP 401: ${errorText}`);
+  }
+
   throw new Error(`MailerSend request failed with HTTP ${response.status}: ${errorText}`);
 }
 
@@ -200,9 +208,9 @@ export async function handler(event: HttpEvent): Promise<HttpResponse> {
     }
 
     await sendEmail({
-      apiKey: getEnv('MAILERSEND_API_KEY'),
-      to: getEnv('CONTACT_EMAIL_TO'),
-      from: getEnv('CONTACT_EMAIL_FROM'),
+      apiKey: getTrimmedEnv('MAILERSEND_API_KEY'),
+      to: getTrimmedEnv('CONTACT_EMAIL_TO'),
+      from: getTrimmedEnv('CONTACT_EMAIL_FROM'),
       name: safeName,
       email: safeEmail,
       message: safeMessage,
