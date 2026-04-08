@@ -21,11 +21,6 @@ variable "contact_lambda_dir" {
   default     = "../dist/services/contact-api"
 }
 
-variable "zone_id" {
-  description = "Route53 hosted zone ID for the primary domain"
-  type        = string
-}
-
 variable "trading212_lambda_dir" {
   description = "Path to the bundled Trading212 Lambda artifact directory"
   type        = string
