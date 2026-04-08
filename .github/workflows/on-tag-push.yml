@@ -87,7 +87,6 @@ jobs:
             -input=false \
             -lock-timeout=5m \
             -var="domain=craigwatt.co.uk" \
-            -var="mailersend_api_key=${{ secrets.MAILERSEND_API_KEY }}" \
             -var="recaptcha_secret_key=${{ secrets.RECAPTCHA_SECRET_KEY }}" \
             -var="t212_api_key=${{ secrets.T212_API_KEY }}" \
             -var="t212_api_secret=${{ secrets.T212_API_SECRET }}" \
