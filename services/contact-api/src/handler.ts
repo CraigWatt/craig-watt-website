@@ -140,7 +140,7 @@ async function sendEmail(payload: {
         },
       },
     },
-  });
+  }));
 }
 
 export async function handler(event: HttpEvent): Promise<HttpResponse> {
