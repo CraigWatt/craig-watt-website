@@ -20,22 +20,24 @@ jobs:
   deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v5.1.1
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: '.nvmrc'
           check-latest: true
@@ -66,7 +68,7 @@ jobs:
         run: npm run build:functions
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+        uses: hashicorp/setup-terraform@v3.1.2
         with:
           terraform_version: 1.5.7
 
