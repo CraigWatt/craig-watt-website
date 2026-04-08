@@ -196,6 +196,8 @@ export async function handler(event: HttpEvent): Promise<HttpResponse> {
       }
     }
 
+    console.log('Contact lambda sender', { from: getTrimmedEnv('CONTACT_EMAIL_FROM') });
+
     await sendEmail({
       to: getTrimmedEnv('CONTACT_EMAIL_TO'),
       from: getTrimmedEnv('CONTACT_EMAIL_FROM'),
