@@ -194,12 +194,15 @@ resource "aws_iam_role_policy" "lambda_ses_send" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowSesSendFromVerifiedIdentity"
+        Sid    = "AllowSesSendFromVerifiedIdentities"
         Effect = "Allow"
         Action = [
           "ses:SendEmail"
         ]
-        Resource = "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.contact_email_from}"
+        Resource = [
+          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.contact_email_from}",
+          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain}"
+        ]
       }
     ]
   })
