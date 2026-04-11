@@ -1,0 +1,4 @@
+module.exports = {
+  allProjects: [],
+  allPosts: [],
+};
