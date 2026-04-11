@@ -32,13 +32,21 @@ export type NavItem = {
 import { ReceiptTextIcon, CpuIcon, CookingPotIcon } from '../components/icons';
 
 export const navItems: NavItem[] = [
-  // {
-  //   label: 'CV',
-  //   href: '/cv',
-  // },
   {
     label: 'Projects',
     href: '/projects',
+  },
+  {
+    label: 'Credentials',
+    href: '/credentials',
+  },
+  {
+    label: 'Experience',
+    href: '/experience',
+  },
+  {
+    label: 'CV',
+    href: '/cv',
   },
   {
     label: 'Writing',

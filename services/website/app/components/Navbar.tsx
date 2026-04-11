@@ -47,7 +47,7 @@ export const Navbar = () => {
 
   return (
     // Controlled open state. Use `open` prop per HeroUI API.
-    <HeroNavbar isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
+    <HeroNavbar className="site-nav print:hidden" isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
       {/* ===== Mobile Header: toggle, centered brand, theme switcher ===== */}
       <NavbarContent className="sm:hidden flex justify-between items-center w-full px-4">
         {/* Menu toggle on left */}

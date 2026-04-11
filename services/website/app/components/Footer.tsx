@@ -17,13 +17,16 @@ const socialLinks = [
 
 const navLinks = [
   { label: 'Projects', href: '/projects' },
+  { label: 'Experience', href: '/experience' },
+  { label: 'Credentials', href: '/credentials' },
+  { label: 'CV', href: '/cv' },
   { label: 'Writing', href: '/blog' },
   { label: 'Trading', href: '/trading212' },
 ];
 
 export function Footer() {
   return (
-    <footer className="border-t border-[var(--color-border)] bg-[var(--color-background)]">
+    <footer className="site-footer print:hidden border-t border-[var(--color-border)] bg-[var(--color-background)]">
       <div className="mx-auto max-w-6xl px-6 md:px-12 lg:px-24 py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
           {/* Brand Column */}
