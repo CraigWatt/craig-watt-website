@@ -1,6 +1,6 @@
 'use client';
-import React, { Suspense, useMemo, useCallback, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import React, { Suspense, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { SiteBreadcrumbs } from '../components/SiteBreadcrumbs';
 import { BlogCard } from '../components/BlogCard';
 import {
@@ -11,6 +11,7 @@ import {
   Button,
 } from '@heroui/react';
 import { ChevronDown } from 'lucide-react';
+import { siteUrl } from '../data/site';
 
 import { allPosts } from 'content-collections';
 
@@ -43,19 +44,9 @@ export default function BlogPage() {
 
 function BlogList({ posts }: { posts: typeof allPosts }) {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const categoryParam = searchParams.get('category') || 'All';
   const pageParam = parseInt(searchParams.get('page') || '1', 10);
   const POSTS_PER_PAGE = 6;
-
-  // This console.log is no longer needed since the problem is resolved.
-  // useEffect(() => {
-  //   console.log(posts.map((p) => typeof p.thumb));
-  // }, []);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [pageParam]);
 
   type CategoryItem = { key: string; label: string; textValue: string };
 
@@ -78,16 +69,17 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
   const selectedOption = allOptions.find(opt => opt.key === categoryParam) ?? allOptions[0];
   const selectedCategory = selectedOption.key;
 
-  // navigate
-  const onCategoryChange = useCallback((newCat: string) => {
-    const params = new URLSearchParams(searchParams);
-    if (newCat === 'All') {
-      params.delete('category');
-    } else {
-      params.set('category', newCat);
+  const buildBlogHref = (nextCategory: string, nextPage?: number) => {
+    const params = new URLSearchParams();
+    if (nextCategory !== 'All') {
+      params.set('category', nextCategory);
     }
-    router.push(`/blog?${params.toString()}`);
-  }, [searchParams, router]);
+    if (nextPage && nextPage > 1) {
+      params.set('page', nextPage.toString());
+    }
+    const query = params.toString();
+    return siteUrl(query ? `/blog?${query}` : '/blog');
+  };
 
   // filter
   const filteredPosts = useMemo(() => {
@@ -109,16 +101,6 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
       : [{ label: selectedCategory, current: true }]),
   ];
 
-  const changePage = useCallback((page: number) => {
-    const params = new URLSearchParams(searchParams);
-    if (page === 1) {
-      params.delete('page');
-    } else {
-      params.set('page', page.toString());
-    }
-    router.push(`/blog?${params.toString()}`);
-  }, [searchParams, router]);
-
   const paginatedPosts = useMemo(() => {
     const start = (pageParam - 1) * POSTS_PER_PAGE;
     return filteredPosts.slice(start, start + POSTS_PER_PAGE);
@@ -134,7 +116,7 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
       {/* FIX: Remove the render prop and pass children directly */}
       <Dropdown>
         <DropdownTrigger>
-          <Button>
+          <Button type="button">
             {selectedOption.label} <ChevronDown size={14} />
           </Button>
         </DropdownTrigger>
@@ -142,14 +124,10 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
         <DropdownMenu<CategoryItem>
           aria-label="Select category"
           items={allOptions}
-          onAction={(key) => onCategoryChange(key as string)}
           selectedKeys={[selectedOption.textValue]}
         >
           {(item) => (
-            <DropdownItem
-              key={item.key}
-              textValue={item.textValue}
-            >
+            <DropdownItem key={item.key} textValue={item.textValue} href={buildBlogHref(item.key)}>
               {item.label}
             </DropdownItem>
           )}
@@ -183,7 +161,8 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
           <Button
             size="sm"
             variant="flat"
-            onClick={() => changePage(pageParam - 1)}
+            as="a"
+            href={buildBlogHref(selectedCategory, pageParam - 1)}
             isDisabled={pageParam <= 1}
           >
             ← Previous
@@ -196,7 +175,8 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
           <Button
             size="sm"
             variant="flat"
-            onClick={() => changePage(pageParam + 1)}
+            as="a"
+            href={buildBlogHref(selectedCategory, pageParam + 1)}
             isDisabled={pageParam >= totalPages}
           >
             Next →
