@@ -128,7 +128,7 @@ export const Navbar = () => {
                   variant="light"
                   className={`
                     px-4 py-2 ${itemRounded}
-                    text-base text-foreground
+                    text-base !text-[var(--color-foreground)]
                     ${hoverBgClass}
                   `}
                 >
@@ -147,7 +147,7 @@ export const Navbar = () => {
                 variant="light"
                 className={`
               px-4 py-2 ${itemRounded}
-              text-base text-foreground
+              text-base !text-[var(--color-foreground)]
               ${hoverBgClass}
               `}
                 target={isExternal ? '_blank' : undefined}
@@ -269,8 +269,8 @@ export const Navbar = () => {
                 className={`
                   flex items-center justify-center
                   ${iconBtnSizeClass} ${itemRounded}
-                  bg-[var(--color-card)] border border-[var(--color-border)]
-                  hover:bg-[var(--color-background)]
+                  bg-white dark:bg-slate-100 border border-[var(--color-border)]
+                  hover:opacity-80
                 `}
                 aria-label={tool.ariaLabel}
               >

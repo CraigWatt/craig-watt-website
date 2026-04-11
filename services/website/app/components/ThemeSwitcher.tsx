@@ -24,7 +24,7 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
       variant="flat"
       aria-label="Toggle theme"
       onPress={() => setTheme(isDark ? 'light' : 'dark')}
-      className={`h-10 w-10 min-w-10 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)] ${className ?? ''}`}
+      className={`h-10 w-10 min-w-10 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:opacity-80 ${className ?? ''}`}
     >
       {isDark ? (
         <Sun size={20} className="text-[var(--color-foreground)]" />
