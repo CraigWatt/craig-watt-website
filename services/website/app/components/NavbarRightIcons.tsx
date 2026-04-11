@@ -47,11 +47,18 @@ export function NavbarRightIcons() {
   return (
     <NavbarContent justify="end" className="hidden sm:flex gap-2">
       {externalTools.map((tool) => {
+        const hasThemeVariants = tool.lightSrc && tool.darkSrc;
+        
+        // Icons with theme variants use card background, single-src icons need light bg for visibility
+        const bgClass = hasThemeVariants
+          ? 'bg-[var(--color-card)]'
+          : 'bg-white dark:bg-slate-200';
+        
         // build the icon markup
-        const Icon = tool.lightSrc && tool.darkSrc ? (
+        const Icon = hasThemeVariants ? (
           <>
             <Image
-              src={tool.lightSrc}
+              src={tool.lightSrc!}
               alt={tool.alt}
               width={tool.size ?? 24}
               height={tool.size ?? 24}
@@ -59,7 +66,7 @@ export function NavbarRightIcons() {
               priority={false}
             />
             <Image
-              src={tool.darkSrc}
+              src={tool.darkSrc!}
               alt={tool.alt}
               width={tool.size ?? 24}
               height={tool.size ?? 24}
@@ -86,7 +93,7 @@ export function NavbarRightIcons() {
                 href={tool.href}
                 variant="flat"
                 isIconOnly
-                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-100 border border-[var(--color-border)] hover:opacity-80"
+                className={`h-10 w-10 min-w-10 p-0 rounded-medium ${bgClass} border border-[var(--color-border)] hover:opacity-80`}
                 aria-label={tool.ariaLabel}
               >
                 {Icon}
@@ -104,7 +111,7 @@ export function NavbarRightIcons() {
                 rel="noopener noreferrer"
                 variant="flat"
                 isIconOnly
-                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-100 border border-[var(--color-border)] hover:opacity-80"
+                className={`h-10 w-10 min-w-10 p-0 rounded-medium ${bgClass} border border-[var(--color-border)] hover:opacity-80`}
                 aria-label={tool.ariaLabel}
               >
                 {Icon}
