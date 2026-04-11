@@ -52,7 +52,7 @@ export const Navbar = () => {
         <NavbarBrand className="flex-1 flex justify-center">
           <NavbarItem>
             <NextLink
-              href="https://craigwatt.co.uk/"
+              href="/"
               onClick={() => setIsMenuOpen(false)}
               className="group flex items-center space-x-2 p-0"
             >
@@ -93,7 +93,7 @@ export const Navbar = () => {
         <NavbarBrand>
           <NavbarItem>
             <NextLink
-              href="https://craigwatt.co.uk/"
+              href="/"
               className="group flex items-center space-x-2 p-0"
             >
               <div
@@ -132,7 +132,7 @@ export const Navbar = () => {
                   variant="light"
                   className={`
                     px-4 py-2 ${itemRounded}
-                    text-base text-inherit
+                    text-base text-foreground
                     ${hoverBgClass}
                   `}
                 >
@@ -146,12 +146,12 @@ export const Navbar = () => {
           return (
             <NavbarItem key={item.label}>
               <Button
-                as="a"
+                as={isExternal ? "a" : NextLink}
                 href={item.href}
                 variant="light"
                 className={`
               px-4 py-2 ${itemRounded}
-              text-base text-inherit
+              text-base text-foreground
               ${hoverBgClass}
               `}
                 target={isExternal ? '_blank' : undefined}
@@ -182,7 +182,7 @@ export const Navbar = () => {
                   className={`
                     w-full flex items-center
                     ${mobileItemPadding} ${itemRounded}
-                    text-inherit text-base
+                    text-foreground text-base
                     ${hoverBgClass}
                   `}
                   target={isExternal ? '_blank' : undefined}
@@ -208,7 +208,7 @@ export const Navbar = () => {
                     className={`
                       w-full flex items-center justify-between
                       ${mobileItemPadding} ${itemRounded}
-                      text-inherit text-base font-medium
+                      text-foreground text-base font-medium
                       ${hoverBgClass}
                     `}
                   >
@@ -240,7 +240,7 @@ export const Navbar = () => {
                                 ? 'font-semibold bg-default/20 dark:bg-default/30'
                                 : hoverBgClass
                             }
-                            text-inherit text-base
+                            text-foreground text-base
                           `}
                           target={childExternal ? '_blank' : undefined}
                           rel={
@@ -267,8 +267,8 @@ export const Navbar = () => {
               <NextLink
                 key={tool.alt}
                 href={tool.href}
-                target="_blank"
-                rel="noopener noreferrer"
+                target={tool.internal ? undefined : '_blank'}
+                rel={tool.internal ? undefined : 'noopener noreferrer'}
                 onClick={() => setIsMenuOpen(false)}
                 className={`
                   flex items-center justify-center

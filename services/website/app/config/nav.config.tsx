@@ -54,9 +54,9 @@ export const navItems: NavItem[] = [
         description: 'Technical notes, case studies, and a few personal posts',
         icon: (
           <ReceiptTextIcon
-            className="text-secondary"
+            className="text-[var(--color-accent)]"
             fill="currentColor"
-            size={30}
+            size={24}
           />
         ),
       },
@@ -65,7 +65,7 @@ export const navItems: NavItem[] = [
         href: '/blog?category=Tech',
         description: 'System notes, experiments, and project write-ups',
         icon: (
-          <CpuIcon className="text-secondary" fill="currentColor" size={30} />
+          <CpuIcon className="text-[var(--color-accent)]" fill="currentColor" size={24} />
         ),
       },
       {
@@ -74,9 +74,9 @@ export const navItems: NavItem[] = [
         description: 'Personal recipes and slow-cooker experiments',
         icon: (
           <CookingPotIcon
-            className="text-primary"
+            className="text-[var(--color-accent)]"
             fill="currentColor"
-            size={30}
+            size={24}
           />
         ),
       },

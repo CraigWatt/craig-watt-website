@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Github, ExternalLink } from 'lucide-react';
+import { Github, Linkedin, ExternalLink } from 'lucide-react';
 import { Button } from '@heroui/react';
 import { siteTechStack } from '../data/profile';
 import { TechIconRow } from './TechIconRow';
@@ -12,9 +12,9 @@ const socialLinks = [
     icon: Github,
   },
   {
-    label: 'Grafana',
-    href: 'https://craigwatt.grafana.net/public-dashboards/9f96dfe163484bafbccb7f825a506899',
-    iconSrc: '/icons/grafana.svg',
+    label: 'LinkedIn',
+    href: 'https://www.linkedin.com/in/craig-watt-a5a10a164/',
+    icon: Linkedin,
   },
 ];
 
@@ -102,17 +102,7 @@ export function Footer() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-accent)] transition-colors group"
                   >
-                    {link.icon ? (
-                      <link.icon className="w-4 h-4" />
-                    ) : link.iconSrc ? (
-                      <Image
-                        src={link.iconSrc}
-                        alt={link.label}
-                        width={16}
-                        height={16}
-                        className="w-4 h-4 opacity-60 group-hover:opacity-100 transition-opacity"
-                      />
-                    ) : null}
+                    <link.icon className="w-4 h-4" />
                     <span>{link.label}</span>
                     <ExternalLink className="w-3 h-3 opacity-50" />
                   </a>
