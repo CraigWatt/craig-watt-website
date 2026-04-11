@@ -45,10 +45,6 @@ export const navItems: NavItem[] = [
     href: '/experience',
   },
   {
-    label: 'CV',
-    href: '/cv',
-  },
-  {
     label: 'Writing',
     href: '/blog',
     children: [
@@ -87,12 +83,3 @@ export const navItems: NavItem[] = [
     ],
   },
 ];
-
-export const frameworkSwitcher = {
-  current: 'Next.js',
-  options: [
-    { label: 'Next.js', href: '/' },
-    { label: 'Vue', href: 'https://your-vue-site.com', disabled: true },
-    { label: 'Svelte', href: 'https://your-svelte-site.com', disabled: true },
-  ],
-};

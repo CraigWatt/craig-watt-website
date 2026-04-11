@@ -12,30 +12,23 @@ import {
   NavbarMenuToggle,
   NavbarMenu,
   NavbarMenuItem,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
   Button,
 } from '@heroui/react';
 import { ChevronDown } from './icons';
-import { navItems, frameworkSwitcher } from '../config/nav.config';
+import { navItems } from '../config/nav.config';
 import { NavbarRightIcons, externalTools } from './NavbarRightIcons';
 import { ThemeSwitcher } from './ThemeSwitcher';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileBlogOpen, setMobileBlogOpen] = useState(false);
-  const [mobileFrameworkOpen, setMobileFrameworkOpen] = useState(false);
 
   // When mobile menu opens/closes, auto-expand/collapse sections
   useEffect(() => {
     if (isMenuOpen) {
       setMobileBlogOpen(true);
-      setMobileFrameworkOpen(true);
     } else {
       setMobileBlogOpen(false);
-      setMobileFrameworkOpen(false);
     }
   }, [isMenuOpen]);
 
@@ -59,7 +52,7 @@ export const Navbar = () => {
         <NavbarBrand className="flex-1 flex justify-center">
           <NavbarItem>
             <NextLink
-              href="/"
+              href="https://craigwatt.co.uk/"
               onClick={() => setIsMenuOpen(false)}
               className="group flex items-center space-x-2 p-0"
             >
@@ -100,7 +93,7 @@ export const Navbar = () => {
         <NavbarBrand>
           <NavbarItem>
             <NextLink
-              href="/"
+              href="https://craigwatt.co.uk/"
               className="group flex items-center space-x-2 p-0"
             >
               <div
@@ -131,69 +124,44 @@ export const Navbar = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
-            // Dropdown for items with children (e.g. Writing)
-            return (
-              <Dropdown key={item.label}>
-                <NavbarItem>
-                  <DropdownTrigger>
-                    <Button
-                      as="button"
-                      variant="light"
-                      className={`
-                        px-4 py-2 ${itemRounded}
-                        text-base text-inherit
-                        ${hoverBgClass}
-                        flex items-center space-x-1
-                        focus:ring-0
-                      `}
-                      aria-label={`${item.label} menu`}
-                    >
-                      <span>{item.label}</span>
-                      <ChevronDown size={16} />
-                    </Button>
-                  </DropdownTrigger>
-                </NavbarItem>
-                <DropdownMenu
-                  aria-label={`${item.label} dropdown`}
-                  itemClasses={{ base: 'gap-4' }}
-                >
-                  {item.children.map((child) => (
-                    <DropdownItem
-                      key={child.label}
-                      description={child.description}
-                      startContent={child.icon}
-                      href={child.href}
-                      className={`${itemRounded} ${hoverBgClass}`}
-                    >
-                      {child.label}
-                    </DropdownItem>
-                  ))}
-                </DropdownMenu>
-              </Dropdown>
-            );
-          } else {
-            // Simple link
-            const isExternal = item.href.startsWith('http');
             return (
               <NavbarItem key={item.label}>
                 <Button
-                  as="a"
+                  as={NextLink}
                   href={item.href}
                   variant="light"
                   className={`
-              px-4 py-2 ${itemRounded}
-              text-base text-inherit
-              ${hoverBgClass}
-              `}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
-                  onPress={() => setIsMenuOpen(false)}
+                    px-4 py-2 ${itemRounded}
+                    text-base text-inherit
+                    ${hoverBgClass}
+                  `}
                 >
                   {item.label}
                 </Button>
               </NavbarItem>
             );
           }
+
+          const isExternal = item.href.startsWith('http');
+          return (
+            <NavbarItem key={item.label}>
+              <Button
+                as="a"
+                href={item.href}
+                variant="light"
+                className={`
+              px-4 py-2 ${itemRounded}
+              text-base text-inherit
+              ${hoverBgClass}
+              `}
+                target={isExternal ? '_blank' : undefined}
+                rel={isExternal ? 'noopener noreferrer' : undefined}
+                onPress={() => setIsMenuOpen(false)}
+              >
+                {item.label}
+              </Button>
+            </NavbarItem>
+          );
         })}
       </NavbarContent>
 
@@ -292,82 +260,7 @@ export const Navbar = () => {
           return null;
         })}
 
-        {/* 3) Frontend Framework collapsible */}
-        <NavbarMenuItem>
-          <button
-            type="button"
-            onClick={() => setMobileFrameworkOpen((prev) => !prev)}
-            className={`
-              w-full flex items-center justify-between
-              ${mobileItemPadding} ${itemRounded}
-              text-inherit text-base font-medium
-              ${hoverBgClass}
-            `}
-          >
-            <span>Frontend Framework</span>
-            <ChevronDown
-              size={16}
-              fill="currentColor"
-              className={`transform transition-transform ${
-                mobileFrameworkOpen ? 'rotate-180' : 'rotate-0'
-              }`}
-            />
-          </button>
-        </NavbarMenuItem>
-        {mobileFrameworkOpen &&
-          frameworkSwitcher.options.map((option) => {
-            // not sure what or why this ext was ever put here, so keeping it commented out
-            // const ext = option.href.startsWith('http');
-            const isCurrent = option.label === frameworkSwitcher.current;
-            return (
-              <NavbarMenuItem key={option.label}>
-                {option.disabled ? (
-                  // render non-link
-                  <div
-                    className={`
-                            w-full flex items-center
-                            pl-8 ${mobileItemPadding}
-                            ${itemRounded}
-                            opacity-50 pointer-events-none cursor-not-allowed
-                            text-inherit text-base
-                          `}
-                  >
-                    {option.label}
-                  </div>
-                ) : (
-                  // existing NextLink
-                  <NextLink
-                    href={option.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`
-                            w-full flex items-center
-                            pl-8 ${mobileItemPadding}
-                            ${itemRounded}
-                            ${
-                              isCurrent
-                                ? 'font-semibold bg-default/20 dark:bg-default/30'
-                                : hoverBgClass
-                            }
-                            text-inherit text-base
-                          `}
-                    target={
-                      option.href.startsWith('http') ? '_blank' : undefined
-                    }
-                    rel={
-                      option.href.startsWith('http')
-                        ? 'noopener noreferrer'
-                        : undefined
-                    }
-                    aria-current={isCurrent ? 'page' : undefined}
-                  >
-                    {option.label}
-                  </NextLink>
-                )}
-              </NavbarMenuItem>
-            );
-          })}
-
-        {/* 4) External tool icons row */}
+        {/* 3) External tool icons row */}
         <NavbarMenuItem>
           <div className="px-4 py-3 flex items-center space-x-4">
             {externalTools.map((tool) => (
