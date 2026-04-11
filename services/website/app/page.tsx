@@ -58,6 +58,19 @@ export default function App() {
               </Button>
             </Link>
           </div>
+
+          <div className="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
+            <span className="uppercase tracking-widest text-[var(--color-muted)]">More</span>
+            <Link href="/experience" className="hover:text-[var(--color-accent)] transition-colors">
+              Experience
+            </Link>
+            <Link href="/credentials" className="hover:text-[var(--color-accent)] transition-colors">
+              Credentials
+            </Link>
+            <Link href="/cv" className="hover:text-[var(--color-accent)] transition-colors">
+              CV
+            </Link>
+          </div>
         </div>
       </section>
 
