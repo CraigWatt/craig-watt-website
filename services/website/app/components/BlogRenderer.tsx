@@ -32,7 +32,7 @@ export interface BlogRendererProps {
 export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
   const crumbs = [
     { label: 'Home', href: '/' },
-    { label: 'Blog', href: '/blog' },
+    { label: 'Writing', href: '/blog' },
     { label: post.title, current: true },
   ];
 
@@ -43,7 +43,7 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
       <div className="mb-6">
         <Link href="/blog">
           <Button as="span" variant="flat" size="sm">
-            ← All Posts
+            ← All Writing
           </Button>
         </Link>
       </div>
@@ -131,7 +131,7 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
                   <NextImage
                     {...props}
                     src={src}
-                    alt={props.alt || 'Blog image'}
+                    alt={props.alt || 'Writing image'}
                     width={props.width}
                     height={props.height}
                     className="rounded-lg"
@@ -148,7 +148,7 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
         <div className="mt-6">
           <Link href="/blog">
             <Button as="span" variant="flat" size="md">
-              ← All Posts
+              ← All Writing
             </Button>
           </Link>
         </div>

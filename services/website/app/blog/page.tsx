@@ -22,7 +22,16 @@ export default function BlogPage() {
   return (
     <div className="bg-default/5 dark:bg-default/20">
       <main className="min-h-screen py-16 px-4 md:px-6 space-y-12 max-w-5xl mx-auto">
-        <h1 className="text-4xl font-bold text-center">Blog</h1>
+        <div className="space-y-4 text-center max-w-3xl mx-auto">
+          <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
+            Writing
+          </p>
+          <h1 className="text-4xl font-bold text-balance">Notes, write-ups, and the odd recipe</h1>
+          <p className="text-[var(--color-muted-foreground)] leading-relaxed">
+            Mostly technical writing, project notes, and experiments, with a few personal posts
+            mixed in for balance.
+          </p>
+        </div>
 
         <Suspense fallback={<div>Loading posts…</div>}>
           <BlogList posts={posts} />
@@ -93,8 +102,8 @@ function BlogList({ posts }: { posts: typeof allPosts }) {
   const crumbs = [
     { label: 'Home', href: '/' },
     selectedCategory === 'All'
-      ? { label: 'Blog', current: true }
-      : { label: 'Blog', href: '/blog' },
+      ? { label: 'Writing', current: true }
+      : { label: 'Writing', href: '/blog' },
     ...(selectedCategory === 'All'
       ? []
       : [{ label: selectedCategory, current: true }]),
