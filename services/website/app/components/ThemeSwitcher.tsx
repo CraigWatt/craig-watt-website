@@ -24,9 +24,13 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
       variant="light"
       aria-label="Toggle theme"
       onPress={() => setTheme(isDark ? 'light' : 'dark')}
-      className={className}
+      className={`h-10 w-10 min-w-10 rounded-medium ${className ?? ''}`}
     >
-      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+      {isDark ? (
+        <Sun size={20} className="text-foreground" />
+      ) : (
+        <Moon size={20} className="text-foreground" />
+      )}
     </Button>
   );
 }
