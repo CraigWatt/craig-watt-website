@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Button, Card } from '@heroui/react';
 import { ArrowRight } from 'lucide-react';
 import { experienceTimeline, profilePositioning } from '../data/profile';
+import { TechIconRow } from '../components/TechIconRow';
 
 export default function ExperiencePage() {
   const [activeId, setActiveId] = useState(experienceTimeline[0]?.id ?? '');
@@ -150,6 +151,15 @@ export default function ExperiencePage() {
                       <p className="text-base leading-relaxed text-[var(--color-muted-foreground)]">
                         {entry.summary}
                       </p>
+
+                      {entry.stackIcons?.length ? (
+                        <div className="space-y-2">
+                          <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">
+                            Stack used
+                          </p>
+                          <TechIconRow icons={entry.stackIcons} />
+                        </div>
+                      ) : null}
 
                       <ul className="space-y-2">
                         {entry.bullets.map((bullet) => (
