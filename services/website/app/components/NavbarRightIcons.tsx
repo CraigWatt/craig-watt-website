@@ -86,7 +86,7 @@ export function NavbarRightIcons() {
                 href={tool.href}
                 variant="flat"
                 isIconOnly
-                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)]"
+                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-100 border border-[var(--color-border)] hover:opacity-80"
                 aria-label={tool.ariaLabel}
               >
                 {Icon}
@@ -104,7 +104,7 @@ export function NavbarRightIcons() {
                 rel="noopener noreferrer"
                 variant="flat"
                 isIconOnly
-                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)]"
+                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-100 border border-[var(--color-border)] hover:opacity-80"
                 aria-label={tool.ariaLabel}
               >
                 {Icon}
