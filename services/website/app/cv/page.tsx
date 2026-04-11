@@ -148,7 +148,7 @@ export default function CvPage() {
                 </div>
                 <div>
                   <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
-                    Selected experience
+                    Career history
                   </p>
                   <p className="text-sm text-[var(--color-muted-foreground)]">
                     The same story as the timeline page, compressed for a PDF export.
@@ -171,10 +171,10 @@ export default function CvPage() {
                         <p className="text-sm text-[var(--color-muted-foreground)]">
                           {entry.organisation}
                         </p>
+                        <p className="mt-1 text-xs uppercase tracking-widest text-[var(--color-muted)]">
+                          {entry.engagement} · {entry.location}
+                        </p>
                       </div>
-                      <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">
-                        {entry.kind}
-                      </p>
                     </div>
 
                     <p className="mt-4 text-sm leading-relaxed text-[var(--color-muted-foreground)]">

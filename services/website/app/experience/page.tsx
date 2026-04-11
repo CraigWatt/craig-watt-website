@@ -47,12 +47,12 @@ export default function ExperiencePage() {
               XP
             </p>
             <h1 className="text-4xl md:text-5xl font-semibold text-balance">
-              A scrollable timeline of the work I want people to see first
+              A scrollable timeline of the roles that shaped my platform engineering path
             </h1>
             <p className="text-lg leading-relaxed text-[var(--color-muted-foreground)] max-w-xl">
-              This page blends selected roles and projects into one readable story. It is meant
-              to feel closer to a modern profile than a plain CV, while still staying useful for
-              hiring managers.
+              This page is the chronological version of my story: the Sky years first, then the
+              earlier roles that explain how I got there. It is designed to feel more engaging
+              than a plain CV while still staying useful for hiring managers.
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -83,7 +83,7 @@ export default function ExperiencePage() {
             <div className="grid grid-cols-2 gap-3">
               <Card className="p-4 border border-[var(--color-border)] bg-[var(--color-card)]">
                 <p className="text-2xl font-semibold">{experienceTimeline.length}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)]">selected entries</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">career entries</p>
               </Card>
               <Card className="p-4 border border-[var(--color-border)] bg-[var(--color-card)]">
                 <p className="text-2xl font-semibold">1</p>
@@ -134,6 +134,9 @@ export default function ExperiencePage() {
                               <p className="text-sm text-[var(--color-muted-foreground)]">
                                 {entry.organisation}
                               </p>
+                              <p className="text-xs uppercase tracking-widest text-[var(--color-muted)] mt-2">
+                                {entry.engagement} · {entry.location}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -181,8 +184,8 @@ export default function ExperiencePage() {
               What this page shows
             </p>
             <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              The page is intentionally a mix of formal experience and visible shipped work.
-              That keeps the story honest while still showing the strongest proof points first.
+              The page follows the actual order of your career, with Sky leading because it is the
+              strongest proof of the platform engineering story.
             </p>
           </Card>
           <Card className="p-6 border border-[var(--color-border)] bg-[var(--color-card)]">
@@ -199,8 +202,7 @@ export default function ExperiencePage() {
               Next step
             </p>
             <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              Fill in the exact employment dates later, then use the CV page as the printable
-              backwards-compatible view.
+              Use the CV page when someone wants the same story in a simple printable format.
             </p>
           </Card>
         </section>
