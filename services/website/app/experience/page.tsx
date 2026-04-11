@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import Link from 'next/link';
 import { Button, Card } from '@heroui/react';
 import { ArrowRight } from 'lucide-react';
@@ -9,11 +9,32 @@ import { TechIconRow } from '../components/TechIconRow';
 
 export default function ExperiencePage() {
   const [activeId, setActiveId] = useState(experienceTimeline[0]?.id ?? '');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const lastScrollY = useRef(0);
 
   const activeIndex = useMemo(
     () => experienceTimeline.findIndex((item) => item.id === activeId),
     [activeId]
   );
+
+  // Track scroll position to fade the sticky sidebar
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollThreshold = 100;
+      
+      if (currentScrollY > scrollThreshold) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-timeline-item]'));
@@ -43,7 +64,7 @@ export default function ExperiencePage() {
     <main className="px-6 md:px-12 lg:px-24 py-16">
       <div className="mx-auto max-w-7xl space-y-12">
         <section className="grid gap-12 lg:grid-cols-[0.9fr,1.1fr] items-start">
-          <div className="space-y-6 lg:sticky lg:top-24">
+          <div className={`space-y-6 lg:sticky lg:top-24 transition-opacity duration-300 ${isScrolled ? 'lg:opacity-0 lg:pointer-events-none' : 'lg:opacity-100'}`}>
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
               XP
             </p>
