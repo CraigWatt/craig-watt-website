@@ -1,8 +1,8 @@
 'use client';
 
 import NextImage from 'next/image';
-import { Link } from '@heroui/link';
 import { ArrowUpRight } from 'lucide-react';
+import { siteUrl } from '../data/site';
 
 export type BlogCardProps = {
   title: string;
@@ -39,8 +39,8 @@ export function BlogCard({
   const formattedDate = date ? formatDate(date) : undefined;
 
   return (
-    <Link
-      href={href}
+    <a
+      href={siteUrl(href)}
       className="
         group block rounded-xl overflow-hidden
         bg-[var(--color-background)]
@@ -96,6 +96,6 @@ export function BlogCard({
           </p>
         )}
       </div>
-    </Link>
+    </a>
   );
 }

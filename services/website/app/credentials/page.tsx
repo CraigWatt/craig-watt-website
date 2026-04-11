@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import { Button, Card } from '@heroui/react';
 import { Award, ArrowRight } from 'lucide-react';
+import { siteUrl } from '../data/site';
 
 export default function CredentialsPage() {
   return (
@@ -30,17 +30,17 @@ export default function CredentialsPage() {
         </Card>
 
         <div className="flex justify-center gap-3">
-          <Link href="/experience">
+          <a href={siteUrl('/experience')}>
             <Button as="span" className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
               View Experience
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
-          </Link>
-          <Link href="/cv">
+          </a>
+          <a href={siteUrl('/cv')}>
             <Button as="span" variant="flat" className="border border-[var(--color-border)]">
               Open CV
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </main>
