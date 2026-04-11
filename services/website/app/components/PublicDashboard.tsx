@@ -174,7 +174,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
                     {pct}
                   </span>
                 </CardBody>
-                <CardFooter className="text-xs text-gray-500">
+                <CardFooter className="text-xs text-zinc-600 dark:text-zinc-400">
                   Purchased {purchaseDate}
                 </CardFooter>
               </Card>
