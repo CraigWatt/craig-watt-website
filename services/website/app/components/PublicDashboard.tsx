@@ -14,7 +14,7 @@ import {
   Alert
 } from '@heroui/react'
 import { ChevronDown } from 'lucide-react'
-import type { PublicApiStatus, PublicMetrics, PublicPos } from '@platform/trading212/transform'
+import type { PublicApiStatus, PublicMetrics, PublicPos } from '../trading212/types'
 import { RefreshArrow } from './icons/RefreshArrow'
 
 interface PublicDashboardProps {

@@ -11,7 +11,7 @@ import type {
   PublicMetrics,
   PublicPos,
   PublicApiStatus,
-} from '@platform/trading212/transform'
+} from './types'
 
 interface ApiResponse {
   apiStatus: PublicApiStatus
