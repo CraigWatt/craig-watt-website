@@ -81,7 +81,7 @@ export function Footer() {
                 as={Link}
                 href="/cv"
                 variant="flat"
-                className="border border-[var(--color-border)] bg-[var(--color-card)]"
+                className="border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-background)]"
               >
                 Export as CV
               </Button>
