@@ -2,6 +2,7 @@
 
 import NextImage from 'next/image';
 import { Link } from '@heroui/link';
+import { ArrowUpRight } from 'lucide-react';
 
 export type ProjectCardProps = {
   title: string;
@@ -26,43 +27,60 @@ export function ProjectCard({
     <Link
       href={href}
       className="
-        block rounded-lg border border-default/40 dark:border-default/60
-        bg-transparent transition hover:bg-default/10 dark:hover:bg-default/30
-        hover:shadow-lg hover:-translate-y-1 motion-safe:transform-gpu cursor-pointer overflow-hidden text-inherit
+        group block rounded-xl overflow-hidden
+        bg-[var(--color-background)] 
+        border border-[var(--color-border)]
+        card-hover
+        cursor-pointer
       "
     >
-      <div className="relative w-full aspect-[16/9] overflow-hidden rounded-t-lg">
+      {/* Image container */}
+      <div className="relative w-full aspect-[16/9] overflow-hidden bg-[var(--color-border)]">
         <NextImage
           src={imageSrc}
           alt={`${title} thumbnail`}
           width={imageWidth}
           height={imageHeight}
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           priority
         />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
       </div>
-      <div className="p-4 space-y-4">
-        <h3 className="text-2xl font-medium text-default-900">{title}</h3>
-        <p className="text-sm text-default-700">{description}</p>
+      
+      {/* Content */}
+      <div className="p-6 space-y-4">
+        <div className="flex items-start justify-between gap-4">
+          <h3 className="text-xl font-semibold text-[var(--color-foreground)] group-hover:text-[var(--color-accent)] transition-colors">
+            {title}
+          </h3>
+          <ArrowUpRight 
+            className="w-5 h-5 text-[var(--color-muted)] group-hover:text-[var(--color-accent)] transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5 flex-shrink-0 mt-1" 
+          />
+        </div>
+        
+        <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed line-clamp-2">
+          {description}
+        </p>
 
         {badges.length > 0 && (
-          <div className="flex flex-wrap items-center space-x-2">
-            {badges.slice(0, 3).map((b) => (
-              <NextImage
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            {badges.slice(0, 4).map((b) => (
+              <div 
                 key={b}
-                src={`/icons/${b}.svg`}
-                alt={`${b} logo`}
-                width={20}
-                height={20}
-                className="h-5 w-5"
-              />
+                className="flex items-center justify-center w-6 h-6 rounded-md bg-[var(--color-card)] p-1"
+              >
+                <NextImage
+                  src={`/icons/${b}.svg`}
+                  alt={`${b} logo`}
+                  width={16}
+                  height={16}
+                  className="w-4 h-4 opacity-70"
+                />
+              </div>
             ))}
           </div>
         )}
-
-        <span className="inline-block text-sm font-semibold underline">
-          Learn more →
-        </span>
       </div>
     </Link>
   );

@@ -70,7 +70,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="bg-white text-zinc-900 dark:bg-zinc-900 dark:text-white">
+      <body className="bg-[var(--color-background)] text-[var(--color-foreground)] min-h-screen">
         <Providers>
           <Navbar />
           {children}
