@@ -36,14 +36,14 @@ export default function CvPage() {
         }
       `}</style>
 
-      <div className="cv-page-controls mx-auto max-w-6xl mb-10 flex flex-wrap items-center justify-between gap-4">
+      <div className="cv-page-controls mx-auto max-w-6xl mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
           <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
             CV export
           </p>
-          <h1 className="text-3xl md:text-4xl font-semibold mt-2">Printable resume view</h1>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold mt-2">Printable resume view</h1>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2 sm:gap-3">
           <Button
             onPress={printPage}
             className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)]"
@@ -65,14 +65,14 @@ export default function CvPage() {
       </div>
 
       <div className="mx-auto max-w-5xl">
-        <Card className="cv-sheet border border-[var(--color-border)] bg-[var(--color-card)] p-8 md:p-10">
+        <Card className="cv-sheet border border-[var(--color-border)] bg-[var(--color-card)] p-5 sm:p-8 md:p-10">
           <header className="space-y-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div className="space-y-2">
                 <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
                   Craig Watt
                 </p>
-                <h2 className="text-4xl md:text-5xl font-semibold text-balance">
+                <h2 className="text-2xl sm:text-4xl md:text-5xl font-semibold text-balance">
                   {profilePositioning.title}
                 </h2>
               </div>
@@ -81,7 +81,7 @@ export default function CvPage() {
               </p>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
               <Card className="border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                 <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">Focus</p>
                 <p className="mt-2 text-sm leading-relaxed">
