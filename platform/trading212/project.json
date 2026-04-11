@@ -1,8 +1,0 @@
-{
-  "name": "platform-trading212",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "platform/trading212",
-  "projectType": "library",
-  "tags": ["scope:platform"],
-  "targets": {}
-}

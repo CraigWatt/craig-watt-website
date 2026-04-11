@@ -56,13 +56,13 @@ jobs:
           EOF
 
       - name: Lint website
-        run: npx nx run website:lint
+        run: npm run lint
 
       - name: Test website
-        run: npx nx run website:test
+        run: npm run test
 
       - name: Build static website
-        run: npx nx run website:build
+        run: npm run build
 
       - name: Build Lambda handlers
         run: npm run build:functions
