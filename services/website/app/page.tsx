@@ -19,7 +19,7 @@ export default function App() {
   return (
     <main className="min-h-screen">
       {/* Hero Section - minimal, left-aligned aesthetic */}
-      <section className="relative min-h-[85vh] flex items-center px-6 md:px-12 lg:px-24">
+      <section className="relative min-h-[80vh] sm:min-h-[85vh] flex items-center px-6 md:px-12 lg:px-24 py-12 sm:py-0">
         {/* This div is a placeholder for your future Three.js background */}
         <div className="absolute inset-0 -z-10" id="hero-canvas-container" />
         
@@ -27,10 +27,10 @@ export default function App() {
           <p className="text-[var(--color-muted-foreground)] text-sm uppercase tracking-widest mb-4">
             Platform Engineer focused on observability
           </p>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-8 text-balance">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-6 sm:mb-8 text-balance">
             Craig Watt
           </h1>
-          <p className="text-lg md:text-xl text-[var(--color-muted-foreground)] max-w-2xl leading-relaxed mb-12">
+          <p className="text-base sm:text-lg md:text-xl text-[var(--color-muted-foreground)] max-w-2xl leading-relaxed mb-8 sm:mb-12">
             I build and operate production platforms that stay observable, automatable,
             and easy to ship. Right now I&apos;m focused on monitoring systems with{' '}
             <span className="text-[var(--color-accent)] font-medium">Grafana</span>,{' '}

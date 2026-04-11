@@ -63,12 +63,12 @@ export default function ExperiencePage() {
   return (
     <main className="px-6 md:px-12 lg:px-24 py-16">
       <div className="mx-auto max-w-7xl space-y-12">
-        <section className="grid gap-12 lg:grid-cols-[0.9fr,1.1fr] items-start">
+        <section className="grid gap-8 md:gap-12 lg:grid-cols-[0.9fr,1.1fr] items-start">
           <div className={`space-y-6 lg:sticky lg:top-24 transition-opacity duration-300 ${isScrolled ? 'lg:opacity-0 lg:pointer-events-none' : 'lg:opacity-100'}`}>
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
               XP
             </p>
-            <h1 className="text-4xl md:text-5xl font-semibold text-balance">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-balance">
               A scrollable timeline of the roles that shaped my platform engineering path
             </h1>
             <p className="text-lg leading-relaxed text-[var(--color-muted-foreground)] max-w-xl">
@@ -102,7 +102,7 @@ export default function ExperiencePage() {
               </p>
             </Card>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <Card className="p-4 border border-[var(--color-border)] bg-[var(--color-card)]">
                 <p className="text-2xl font-semibold">{experienceTimeline.length}</p>
                 <p className="text-sm text-[var(--color-muted-foreground)]">career entries</p>
@@ -209,7 +209,7 @@ export default function ExperiencePage() {
           </div>
         </section>
 
-        <section className="grid gap-6 md:grid-cols-3">
+        <section className="grid gap-4 sm:gap-6 sm:grid-cols-2 md:grid-cols-3">
           <Card className="p-6 border border-[var(--color-border)] bg-[var(--color-card)]">
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
               What this page shows

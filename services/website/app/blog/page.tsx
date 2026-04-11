@@ -21,7 +21,7 @@ const posts = allPosts?.filter((p) => p.thumb) ?? [];
 export default function BlogPage() {
   return (
     <div className="bg-default/5 dark:bg-default/20">
-      <main className="min-h-screen py-16 px-4 md:px-6 space-y-12 max-w-5xl mx-auto">
+      <main className="min-h-screen py-16 px-6 md:px-12 lg:px-24 space-y-12 max-w-5xl mx-auto">
         <div className="space-y-4 text-center max-w-3xl mx-auto">
           <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
             Writing
