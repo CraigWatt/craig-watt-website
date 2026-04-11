@@ -20,11 +20,16 @@ export function TechIconRow({
     <div className={`flex flex-wrap gap-2 ${className}`}>
       {icons.map((icon) => {
         const hasThemePair = Boolean(icon.lightSrc && icon.darkSrc);
+        
+        // Icons with theme variants use card background, single-src icons need light bg for visibility
+        const bgClass = hasThemePair
+          ? 'bg-[var(--color-card)]'
+          : 'bg-white dark:bg-slate-200';
 
         return (
           <span
             key={icon.label}
-            className={`inline-flex items-center justify-center rounded-md border border-[var(--color-border)] bg-white dark:bg-slate-100 ${tileClassName}`}
+            className={`inline-flex items-center justify-center rounded-md border border-[var(--color-border)] ${bgClass} ${tileClassName}`}
             title={icon.label}
             aria-label={icon.label}
           >

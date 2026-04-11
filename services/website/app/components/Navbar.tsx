@@ -259,51 +259,58 @@ export const Navbar = () => {
         {/* 3) External tool icons row */}
         <NavbarMenuItem>
           <div className="px-4 py-3 flex items-center space-x-4">
-            {externalTools.map((tool) => (
-              <NextLink
-                key={tool.alt}
-                href={tool.href}
-                target={tool.internal ? undefined : '_blank'}
-                rel={tool.internal ? undefined : 'noopener noreferrer'}
-                onClick={() => setIsMenuOpen(false)}
-                className={`
-                  flex items-center justify-center
-                  ${iconBtnSizeClass} ${itemRounded}
-                  bg-white dark:bg-slate-100 border border-[var(--color-border)]
-                  hover:opacity-80
-                `}
-                aria-label={tool.ariaLabel}
-              >
-                {tool.lightSrc && tool.darkSrc ? (
-                  <>
+            {externalTools.map((tool) => {
+              const hasThemeVariants = tool.lightSrc && tool.darkSrc;
+              const bgClass = hasThemeVariants
+                ? 'bg-[var(--color-card)]'
+                : 'bg-white dark:bg-slate-200';
+              
+              return (
+                <NextLink
+                  key={tool.alt}
+                  href={tool.href}
+                  target={tool.internal ? undefined : '_blank'}
+                  rel={tool.internal ? undefined : 'noopener noreferrer'}
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`
+                    flex items-center justify-center
+                    ${iconBtnSizeClass} ${itemRounded}
+                    ${bgClass} border border-[var(--color-border)]
+                    hover:opacity-80
+                  `}
+                  aria-label={tool.ariaLabel}
+                >
+                  {hasThemeVariants ? (
+                    <>
+                      <Image
+                        src={tool.lightSrc!}
+                        alt={tool.alt}
+                        width={tool.size ?? 24}
+                        height={tool.size ?? 24}
+                        className="block dark:hidden"
+                        priority={false}
+                      />
+                      <Image
+                        src={tool.darkSrc!}
+                        alt={tool.alt}
+                        width={tool.size ?? 24}
+                        height={tool.size ?? 24}
+                        className="hidden dark:block"
+                        priority={false}
+                      />
+                    </>
+                  ) : tool.src ? (
                     <Image
-                      src={tool.lightSrc}
+                      src={tool.src}
                       alt={tool.alt}
                       width={tool.size ?? 24}
                       height={tool.size ?? 24}
-                      className="block dark:hidden"
                       priority={false}
                     />
-                    <Image
-                      src={tool.darkSrc}
-                      alt={tool.alt}
-                      width={tool.size ?? 24}
-                      height={tool.size ?? 24}
-                      className="hidden dark:block"
-                      priority={false}
-                    />
-                  </>
-                ) : tool.src ? (
-                  <Image
-                    src={tool.src}
-                    alt={tool.alt}
-                    width={tool.size ?? 24}
-                    height={tool.size ?? 24}
-                    priority={false}
-                  />
-                ) : null}
-              </NextLink>
-            ))}
+                  ) : null}
+                </NextLink>
+              );
+            })}
           </div>
         </NavbarMenuItem>
       </NavbarMenu>
