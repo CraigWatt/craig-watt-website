@@ -58,7 +58,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
   }, [positions, sortKey])
 
   return (
-    <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <main className="max-w-4xl mx-auto px-6 md:px-12 lg:px-24 py-16 space-y-6">
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
 
@@ -100,7 +100,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
           />
         </section>
 
-        <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
           {[
             { label: 'Total Value',   value: metrics.totalValue },
             { label: 'Invested',      value: metrics.invested    },
@@ -132,7 +132,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
           ))}
         </section>
 
-        <section className="w-full px-4 sm:px-6 space-y-4">
+        <section className="w-full space-y-4">
           <h4 className="text-lg font-medium mb-4 text-left">
             Craig’s Holdings
           </h4>   
@@ -164,7 +164,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
             </Dropdown>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sorted.map(({ symbol, marketValue, pct, purchaseDate }) => (
               <Card key={symbol} shadow="sm" radius="md" fullWidth>
                 <CardHeader>{symbol}</CardHeader>

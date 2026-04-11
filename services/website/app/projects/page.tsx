@@ -5,7 +5,7 @@ import { ProjectCard } from '../components/ProjectCard';
 
 export default function ProjectsPage() {
   return (
-    <main className="py-16 px-4 md:px-6 space-y-12 max-w-6xl mx-auto">
+    <main className="py-16 px-6 md:px-12 lg:px-24 space-y-12 max-w-6xl mx-auto">
       <div className="space-y-4 text-center max-w-3xl mx-auto">
         <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
           Selected Engineering Work

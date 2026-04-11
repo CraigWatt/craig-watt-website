@@ -13,7 +13,7 @@ const socialLinks = [
   },
   {
     label: 'LinkedIn',
-    href: 'https://www.linkedin.com/in/craig-watt-a5a10a164/',
+    href: 'https://www.linkedin.com/in/craigwatt-dev/',
     icon: Linkedin,
   },
 ];
@@ -30,9 +30,9 @@ export function Footer() {
   return (
     <footer className="site-footer print:hidden border-t border-[var(--color-border)] bg-[var(--color-background)]">
       <div className="mx-auto max-w-6xl px-6 md:px-12 lg:px-24 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 md:gap-12">
           {/* Brand Column */}
-          <div className="md:col-span-5 space-y-6">
+          <div className="sm:col-span-2 md:col-span-5 space-y-6">
             <Link href="/" className="inline-flex items-center gap-3 group">
               <div className="relative w-10 h-10 rounded-full overflow-hidden ring-1 ring-[var(--color-border)]">
                 <Image
