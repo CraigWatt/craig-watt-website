@@ -22,15 +22,15 @@
 
 /* Light mode overrides */
 :root {
-  --color-background: #fafafa;
+  --color-background: #f8fafc;
   --color-foreground: #0f172a;
-  --color-muted: #64748b;
-  --color-muted-foreground: #475569;
-  --color-accent: #0891b2;
+  --color-muted: #475569;
+  --color-muted-foreground: #334155;
+  --color-accent: #0284c7;
   --color-accent-foreground: #ffffff;
   --color-card: #ffffff;
   --color-card-foreground: #0f172a;
-  --color-border: #e2e8f0;
+  --color-border: #cbd5e1;
 }
 
 /* Dark mode */
@@ -90,7 +90,33 @@ a.accent-link:hover {
 
 .card-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+}
+
+.dark .card-hover:hover {
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+}
+
+/* Light mode icon visibility improvements */
+:root {
+  --icon-opacity: 0.85;
+}
+
+.dark {
+  --icon-opacity: 1;
+}
+
+/* Ensure navbar text is legible in both modes */
+.site-nav {
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Improve dropdown/menu background contrast */
+[data-heroui-menu],
+[data-heroui-dropdown] {
+  background-color: var(--color-card);
+  border: 1px solid var(--color-border);
 }
 
 .grecaptcha-badge {
