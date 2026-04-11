@@ -1,9 +1,98 @@
- @import "tailwindcss";
- @plugin './hero.ts';
+@import "tailwindcss";
+@plugin './hero.ts';
 /* Note: You may need to change the path to fit your project structure */
- @source '../../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
- @custom-variant dark (&:is(.dark *));
+@source '../../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+@custom-variant dark (&:is(.dark *));
 
- .grecaptcha-badge {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@theme inline {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --color-background: #0f172a;
+  --color-foreground: #e2e8f0;
+  --color-muted: #64748b;
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #22d3ee;
+  --color-accent-foreground: #0f172a;
+  --color-card: #1e293b;
+  --color-card-foreground: #e2e8f0;
+  --color-border: #334155;
+  --radius: 0.75rem;
+}
+
+/* Light mode overrides */
+:root {
+  --color-background: #fafafa;
+  --color-foreground: #0f172a;
+  --color-muted: #64748b;
+  --color-muted-foreground: #475569;
+  --color-accent: #0891b2;
+  --color-accent-foreground: #ffffff;
+  --color-card: #ffffff;
+  --color-card-foreground: #0f172a;
+  --color-border: #e2e8f0;
+}
+
+/* Dark mode */
+.dark {
+  --color-background: #0f172a;
+  --color-foreground: #e2e8f0;
+  --color-muted: #64748b;
+  --color-muted-foreground: #94a3b8;
+  --color-accent: #22d3ee;
+  --color-accent-foreground: #0f172a;
+  --color-card: #1e293b;
+  --color-card-foreground: #e2e8f0;
+  --color-border: #334155;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography refinements */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+
+/* Accent link styling */
+a.accent-link {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+a.accent-link:hover {
+  opacity: 0.8;
+}
+
+/* Section dividers */
+.section-divider {
+  width: 3rem;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+/* Subtle card hover effect */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+.grecaptcha-badge {
   visibility: hidden;
 }
