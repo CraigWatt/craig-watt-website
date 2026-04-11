@@ -29,17 +29,18 @@ export const externalTools: ExternalTool[] = [
     internal: true,
   },
   {
-    href: 'https://craigwatt.grafana.net/public-dashboards/9f96dfe163484bafbccb7f825a506899',
-    src: '/icons/grafana.svg',
-    alt: 'Grafana',
-    ariaLabel: 'Grafana',
-  },
-  {
     href: 'https://github.com/CraigWatt',
     lightSrc: '/icons/github-dark.svg',
     darkSrc: '/icons/github-light.svg',
     alt: 'GitHub',
     ariaLabel: 'GitHub profile',
+  },
+  {
+    href: 'https://www.linkedin.com/in/craig-watt-a5a10a164/',
+    lightSrc: '/icons/linkedin-dark.svg',
+    darkSrc: '/icons/linkedin-light.svg',
+    alt: 'LinkedIn',
+    ariaLabel: 'LinkedIn profile',
   },
 ];
 
