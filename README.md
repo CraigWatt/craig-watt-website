@@ -28,13 +28,14 @@ craig-watt-website/
 ## Local commands
 
 ```bash
-npx nx run website:serve
-npx nx run website:build
-npx nx run website:start
-npx nx run website:lint
-npx nx run website:test
-npx nx run website:storybook
-npx nx run website:build-storybook
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run test
+npm run e2e
+npm run storybook
+npm run build-storybook
 npm run build:functions
 ```
 

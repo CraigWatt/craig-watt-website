@@ -4,6 +4,8 @@ module.exports = {
   ignorePatterns: [
     '**/.next/**',
     '**/dist/**',
+    '**/out/**',
+    '**/storybook-static/**',
     'services/website/scripts/**/*.js',
     '**/next-env.d.ts',
   ],
@@ -16,28 +18,13 @@ module.exports = {
     sourceType: 'module',
   },
 
-  plugins: ['@nx', '@typescript-eslint', 'import'],
+  plugins: ['@typescript-eslint', 'import'],
 
   extends: [
     'plugin:@typescript-eslint/recommended',
   ],
 
   rules: {
-    // NX monorepo boundaries
-    '@nx/enforce-module-boundaries': [
-      'error',
-      {
-        enforceBuildableLibDependency: true,
-        allow: [
-          '^.*/eslint\\.config\\.[cm]?js$',
-          '@platform/.*',
-          'content-collections',
-          'content-collections/.*',
-        ],
-        depConstraints: [{ sourceTag: '*', onlyDependOnLibsWithTags: ['*'] }],
-      },
-    ],
-
     // Warn about unused vars—but ignore ones prefixed with `_`
     '@typescript-eslint/no-unused-vars': [
       'warn',
@@ -50,8 +37,8 @@ module.exports = {
 
   overrides: [
     {
-      // Plain JS files: no TS project, no unused-vars
-      files: ['*.js', '**/*.js'],
+      // Plain JS / MJS files: no TS project, no unused-vars
+      files: ['*.js', '**/*.js', '*.mjs', '**/*.mjs'],
       parserOptions: { project: null },
       rules: {
         '@typescript-eslint/no-unused-vars': 'off',
