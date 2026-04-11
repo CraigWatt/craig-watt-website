@@ -25,17 +25,18 @@ export default function App() {
         
         <div className="max-w-4xl">
           <p className="text-[var(--color-muted-foreground)] text-sm uppercase tracking-widest mb-4">
-            Observability Engineer
+            Platform Engineer focused on observability
           </p>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-8 text-balance">
             Craig Watt
           </h1>
           <p className="text-lg md:text-xl text-[var(--color-muted-foreground)] max-w-2xl leading-relaxed mb-12">
-            I build accessible, pixel-perfect digital experiences for the web. 
-            Currently crafting monitoring systems with{' '}
+            I build and operate production platforms that stay observable, automatable,
+            and easy to ship. Right now I&apos;m focused on monitoring systems with{' '}
             <span className="text-[var(--color-accent)] font-medium">Grafana</span>,{' '}
-            <span className="text-[var(--color-accent)] font-medium">Telegraf</span>, and{' '}
-            <span className="text-[var(--color-accent)] font-medium">CI/CD pipelines</span>.
+            <span className="text-[var(--color-accent)] font-medium">Telegraf</span>,{' '}
+            <span className="text-[var(--color-accent)] font-medium">Kubernetes</span>, and{' '}
+            <span className="text-[var(--color-accent)] font-medium">Terraform</span>.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
@@ -87,14 +88,14 @@ export default function App() {
                 <div className="space-y-6">
                   <p className="text-lg md:text-xl leading-relaxed text-[var(--color-foreground)]">
                     I&apos;m an Observability Engineer at{' '}
-                    <span className="text-[var(--color-accent)] font-medium">Sky</span>, building and 
-                    maintaining scalable media-asset management systems.
+                    <span className="text-[var(--color-accent)] font-medium">Sky</span>, where I help
+                    keep media-asset platforms reliable, visible, and ready to scale.
                   </p>
                   <p className="text-base leading-relaxed text-[var(--color-muted-foreground)]">
-                    I specialize in real-time monitoring and automation with Grafana, Telegraf, 
-                    Docker, and Kubernetes. When I&apos;m not tuning pipelines or writing back-end 
-                    services in C and Python, you&apos;ll find me setting up a Raspberry Pi k3s cluster, 
-                    writing code, and tackling complex challenges head-on.
+                    I specialize in monitoring, automation, and infrastructure work with Grafana,
+                    Telegraf, Docker, Kubernetes, and Terraform. When I&apos;m not tuning pipelines or
+                    writing backend services in C and Python, you&apos;ll usually find me testing ideas
+                    on a Raspberry Pi k3s cluster or improving the systems around the site itself.
                   </p>
                 </div>
               </div>
@@ -108,7 +109,7 @@ export default function App() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-16">
             <div className="section-divider" />
-            <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Selected Work</span>
+            <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Selected Engineering Work</span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -173,7 +174,7 @@ export default function App() {
                 variant="ghost"
                 className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-card)] transition-colors"
               >
-                Read All Posts
+                Read All Writing
               </Button>
             </Link>
           </div>
@@ -197,8 +198,8 @@ export default function App() {
                 Let&apos;s work together
               </h2>
               <p className="text-[var(--color-muted-foreground)] leading-relaxed">
-                If you would like to discuss a project or just say hi, 
-                I&apos;m always down to chat.
+                If you need help with observability, automation, infrastructure, or platform work,
+                I&apos;m always happy to chat.
               </p>
             </div>
             

@@ -17,7 +17,7 @@ const socialLinks = [
 
 const navLinks = [
   { label: 'Projects', href: '/projects' },
-  { label: 'Blog', href: '/blog' },
+  { label: 'Writing', href: '/blog' },
   { label: 'Trading', href: '/trading212' },
 ];
 
@@ -43,7 +43,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm text-[var(--color-muted-foreground)] max-w-xs leading-relaxed">
-              Observability Engineer building scalable monitoring systems and crafting digital experiences.
+              Platform Engineer focused on observability, automation, and reliable delivery.
             </p>
           </div>
 

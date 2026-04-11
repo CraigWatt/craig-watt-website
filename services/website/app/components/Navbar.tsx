@@ -131,7 +131,7 @@ export const Navbar = () => {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
-            // Dropdown for items with children (e.g. Blog)
+            // Dropdown for items with children (e.g. Writing)
             return (
               <Dropdown key={item.label}>
                 <NavbarItem>
@@ -228,9 +228,9 @@ export const Navbar = () => {
           return null;
         })}
 
-        {/* 2) Blog collapsible section */}
+        {/* 2) Writing collapsible section */}
         {navItems.map((item) => {
-          if (Array.isArray(item.children) && item.label === 'Blog') {
+          if (Array.isArray(item.children) && item.label === 'Writing') {
             return (
               <React.Fragment key={item.label}>
                 <NavbarMenuItem>
@@ -244,7 +244,7 @@ export const Navbar = () => {
                       ${hoverBgClass}
                     `}
                   >
-                    <span>Blog</span>
+                    <span>Writing</span>
                     <ChevronDown
                       size={16}
                       fill="currentColor"

@@ -7,13 +7,13 @@ import Script from 'next/script';
 
 
 export const metadata = {
-  title: 'Craig Watt — Observability Engineer',
+  title: 'Craig Watt — Platform Engineer focused on Observability',
   description:
-    'Building scalable monitoring with Grafana, writing about code & tackling hard challenges.',
+    'Building reliable platforms with observability, automation, Kubernetes, Terraform, and CI/CD.',
   openGraph: {
-    title: 'Craig Watt — Observability Engineer',
+    title: 'Craig Watt — Platform Engineer focused on Observability',
     description:
-      'Building scalable monitoring with Grafana, writing about code & tackling hard challenges.',
+      'Building reliable platforms with observability, automation, Kubernetes, Terraform, and CI/CD.',
     url: 'https://craigwatt.co.uk',
     siteName: 'Craig Watt Website',
     images: [

@@ -41,13 +41,13 @@ export const navItems: NavItem[] = [
     href: '/projects',
   },
   {
-    label: 'Blog',
+    label: 'Writing',
     href: '/blog',
     children: [
       {
-        label: 'All Posts',
+        label: 'All Writing',
         href: '/blog',
-        description: 'View them all',
+        description: 'Technical notes, case studies, and a few personal posts',
         icon: (
           <ReceiptTextIcon
             className="text-secondary"
@@ -59,7 +59,7 @@ export const navItems: NavItem[] = [
       {
         label: 'Tech',
         href: '/blog?category=Tech',
-        description: 'Technical musings and more',
+        description: 'System notes, experiments, and project write-ups',
         icon: (
           <CpuIcon className="text-secondary" fill="currentColor" size={30} />
         ),
@@ -67,7 +67,7 @@ export const navItems: NavItem[] = [
       {
         label: 'Cooking & Recipes',
         href: '/blog?category=Cooking',
-        description: 'Slow cooker ideas and food hacks',
+        description: 'Personal recipes and slow-cooker experiments',
         icon: (
           <CookingPotIcon
             className="text-primary"
