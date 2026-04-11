@@ -72,7 +72,7 @@ export const Navbar = () => {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <span className="font-bold text-base transition-opacity group-hover:opacity-80">
+              <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
                 Craig Watt
               </span>
             </NextLink>
@@ -80,11 +80,7 @@ export const Navbar = () => {
         </NavbarBrand>
         {/* Right: theme switcher */}
         <NavbarItem>
-          <div
-            className={`${iconBtnSizeClass} flex items-center justify-center ${itemRounded} ${hoverBgClass}`}
-          >
-            <ThemeSwitcher />
-          </div>
+          <ThemeSwitcher />
         </NavbarItem>
       </NavbarContent>
 
@@ -112,7 +108,7 @@ export const Navbar = () => {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <span className="font-bold text-base transition-opacity group-hover:opacity-80">
+              <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
                 Craig Watt
               </span>
             </NextLink>
@@ -272,7 +268,9 @@ export const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className={`
                   flex items-center justify-center
-                  ${iconBtnSizeClass} ${itemRounded} ${hoverBgClass}
+                  ${iconBtnSizeClass} ${itemRounded}
+                  bg-[var(--color-card)] border border-[var(--color-border)]
+                  hover:bg-[var(--color-background)]
                 `}
                 aria-label={tool.ariaLabel}
               >

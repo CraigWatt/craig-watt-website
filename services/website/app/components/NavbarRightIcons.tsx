@@ -84,9 +84,9 @@ export function NavbarRightIcons() {
               <Button
                 as={NextLink}
                 href={tool.href}
-                variant="light"
+                variant="flat"
                 isIconOnly
-                className="h-10 w-10 p-0 rounded-medium"
+                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)]"
                 aria-label={tool.ariaLabel}
               >
                 {Icon}
@@ -102,9 +102,9 @@ export function NavbarRightIcons() {
                 href={tool.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                variant="light"
+                variant="flat"
                 isIconOnly
-                className="h-10 w-10 p-0 rounded-medium"
+                className="h-10 w-10 min-w-10 p-0 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)]"
                 aria-label={tool.ariaLabel}
               >
                 {Icon}

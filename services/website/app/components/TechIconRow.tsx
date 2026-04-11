@@ -24,7 +24,7 @@ export function TechIconRow({
         return (
           <span
             key={icon.label}
-            className={`inline-flex items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-background)] ${tileClassName}`}
+            className={`inline-flex items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-card)] ${tileClassName}`}
             title={icon.label}
             aria-label={icon.label}
           >
