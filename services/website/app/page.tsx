@@ -4,9 +4,9 @@ import { allProjects, allPosts } from 'content-collections';
 import { ProjectCard } from './components/ProjectCard';
 import Link from 'next/link';
 import { Button } from '@heroui/react';
-import { User } from '@heroui/user';
 import { BlogCard } from './components/BlogCard';
 import ContactForm from './components/ContactForm';
+import Image from 'next/image';
 
 const projects = allProjects ?? [];
 const posts = allPosts?.filter((p) => p.thumb) ?? [];
@@ -17,118 +17,196 @@ export default function App() {
     .slice(0, 3);
 
   return (
-    <main className="space-y-20">
-      {/* 1) Hero Section */}
-      <section className="relative text-center py-32 px-4 md:px-6">
-        <div className="mx-auto max-w-3xl">
-          <h1 className="text-5xl font-bold mb-6">Hi, I’m Craig Watt.</h1>
-          <p className="text-lg mb-6 text-zinc-600 dark:text-zinc-300">
-            Observability Engineer by day—crafting monitoring with Grafana,
-            Telegraf, and CI/CD—aspiring SRE who enjoys writing about code and
-            tackling hard challenges.
+    <main className="min-h-screen">
+      {/* Hero Section - minimal, left-aligned aesthetic */}
+      <section className="relative min-h-[85vh] flex items-center px-6 md:px-12 lg:px-24">
+        {/* This div is a placeholder for your future Three.js background */}
+        <div className="absolute inset-0 -z-10" id="hero-canvas-container" />
+        
+        <div className="max-w-4xl">
+          <p className="text-[var(--color-muted-foreground)] text-sm uppercase tracking-widest mb-4">
+            Observability Engineer
           </p>
-        </div>
-        <div className="flex justify-center gap-6">
-          {/* Scroll to #contact */}
-          <a href="#contact">
-            <Button as="span" variant="solid">
-              Get in touch
-            </Button>
-          </a>
-          <Link href="/projects">
-            <Button as="span" variant="ghost">
-              See All Projects
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* 2) About / Profile */}
-      <section className="bg-default/5 dark:bg-default/20 py-16 px-4 md:px-6">
-        <div className="max-w-xl mx-auto text-center space-y-6">
-          <User
-            name="Craig Watt"
-            description="Observability Engineer"
-            avatarProps={{ src: '/images/avatar.jpg', alt: 'Craig’s avatar' }}
-          />
-          <p className="text-base leading-relaxed">
-            I’m an Observability Engineer at Sky, building and maintaining
-            scalable media-asset management systems. I specialize in real-time
-            monitoring and automation with Grafana, Telegraf, Docker, and
-            Kubernetes. When I’m not tuning pipelines or writing back-end
-            services in C and Python, you’ll find me setting up a Raspberry Pi
-            k3s cluster, writing code, and tackling complex challenges head-on.
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold leading-tight mb-8 text-balance">
+            Craig Watt
+          </h1>
+          <p className="text-lg md:text-xl text-[var(--color-muted-foreground)] max-w-2xl leading-relaxed mb-12">
+            I build accessible, pixel-perfect digital experiences for the web. 
+            Currently crafting monitoring systems with{' '}
+            <span className="text-[var(--color-accent)] font-medium">Grafana</span>,{' '}
+            <span className="text-[var(--color-accent)] font-medium">Telegraf</span>, and{' '}
+            <span className="text-[var(--color-accent)] font-medium">CI/CD pipelines</span>.
           </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <a href="#contact">
+              <Button 
+                as="span" 
+                className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)] font-medium px-8 py-3 rounded-lg hover:opacity-90 transition-opacity"
+              >
+                Get in touch
+              </Button>
+            </a>
+            <Link href="/projects">
+              <Button 
+                as="span" 
+                variant="ghost"
+                className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-card)] transition-colors"
+              >
+                View Projects
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* 3) Featured Projects */}
-      <section className="py-16 px-4 md:px-6">
-        <h2 className="text-3xl font-semibold text-center mb-8">
-          Featured Projects
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {projects.slice(0, 3).map((p) => (
-          <ProjectCard
-            key={p.slug}
-            title={p.title}
-            href={`/projects/${p.slug}`}
-            description={p.summary}
-            imageSrc={p.thumb ?? p.thumbLg!}
-            imageWidth={p.thumbWidth  ?? p.thumbLgWidth!}
-            imageHeight={p.thumbHeight ?? p.thumbLgHeight!}
-            badges={p.badges}
-          />
-        ))}
-        </div>
-        <div className="text-center mt-10">
-          <Link href="/projects">
-            <Button as="span" variant="ghost">
-              See All Projects
-            </Button>
-          </Link>
-        </div>
-      </section>
-
-      {/* 4) Blog Teaser */}
-      <section className="bg-default/5 dark:bg-default/20 py-16 px-4 md:px-6">
-        <h2 className="text-3xl font-semibold text-center mb-8">
-          From the Blog
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {recentPosts.map((post) => (
-          <BlogCard
-            key={post.slug ?? 'missing-slug'}
-            title={post.title ?? 'Untitled'}
-            href={`/blog/${post.slug ?? ''}`}
-            excerpt={post.excerpt ?? post.summary ?? ''}
-            imageSrc={post.thumb}
-            imageWidth={post.thumbWidth!}
-            imageHeight={post.thumbHeight!}
-            date={post.date ?? '1970-01-01'}
-            readingTime={post.readingTime ?? ''}
-            category={post.category ?? 'Uncategorized'}
-            badges={post.badges ?? []}
-          />
-          ))}
-        </div>
-        <div className="text-center mt-10">
-          <Link href="/blog">
-            <Button as="span" variant="ghost">
-              See All Posts
-            </Button>
-          </Link>
+      {/* About Section */}
+      <section className="py-24 px-6 md:px-12 lg:px-24 border-t border-[var(--color-border)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            {/* Left column - Label */}
+            <div className="lg:col-span-3">
+              <div className="flex items-center gap-4 mb-6 lg:mb-0">
+                <div className="section-divider" />
+                <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">About</span>
+              </div>
+            </div>
+            
+            {/* Right column - Content */}
+            <div className="lg:col-span-9">
+              <div className="flex flex-col md:flex-row gap-8 md:gap-12 items-start">
+                <div className="relative w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden ring-2 ring-[var(--color-border)] flex-shrink-0">
+                  <Image
+                    src="/images/avatar.jpg"
+                    alt="Craig Watt"
+                    fill
+                    className="object-cover"
+                    sizes="128px"
+                  />
+                </div>
+                <div className="space-y-6">
+                  <p className="text-lg md:text-xl leading-relaxed text-[var(--color-foreground)]">
+                    I&apos;m an Observability Engineer at{' '}
+                    <span className="text-[var(--color-accent)] font-medium">Sky</span>, building and 
+                    maintaining scalable media-asset management systems.
+                  </p>
+                  <p className="text-base leading-relaxed text-[var(--color-muted-foreground)]">
+                    I specialize in real-time monitoring and automation with Grafana, Telegraf, 
+                    Docker, and Kubernetes. When I&apos;m not tuning pipelines or writing back-end 
+                    services in C and Python, you&apos;ll find me setting up a Raspberry Pi k3s cluster, 
+                    writing code, and tackling complex challenges head-on.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 5) Contact Section */}
+      {/* Featured Projects */}
+      <section className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-card)]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-16">
+            <div className="section-divider" />
+            <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Selected Work</span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {projects.slice(0, 3).map((p) => (
+              <ProjectCard
+                key={p.slug}
+                title={p.title}
+                href={`/projects/${p.slug}`}
+                description={p.summary}
+                imageSrc={p.thumb ?? p.thumbLg!}
+                imageWidth={p.thumbWidth ?? p.thumbLgWidth!}
+                imageHeight={p.thumbHeight ?? p.thumbLgHeight!}
+                badges={p.badges}
+              />
+            ))}
+          </div>
+          
+          <div className="mt-16 text-center">
+            <Link href="/projects">
+              <Button 
+                as="span" 
+                variant="ghost"
+                className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-background)] transition-colors"
+              >
+                View All Projects
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Blog Section */}
+      <section className="py-24 px-6 md:px-12 lg:px-24">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center gap-4 mb-16">
+            <div className="section-divider" />
+            <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Writing</span>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {recentPosts.map((post) => (
+              <BlogCard
+                key={post.slug ?? 'missing-slug'}
+                title={post.title ?? 'Untitled'}
+                href={`/blog/${post.slug ?? ''}`}
+                excerpt={post.excerpt ?? post.summary ?? ''}
+                imageSrc={post.thumb}
+                imageWidth={post.thumbWidth!}
+                imageHeight={post.thumbHeight!}
+                date={post.date ?? '1970-01-01'}
+                readingTime={post.readingTime ?? ''}
+                category={post.category ?? 'Uncategorized'}
+                badges={post.badges ?? []}
+              />
+            ))}
+          </div>
+          
+          <div className="mt-16 text-center">
+            <Link href="/blog">
+              <Button 
+                as="span" 
+                variant="ghost"
+                className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-card)] transition-colors"
+              >
+                Read All Posts
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
       <section
         id="contact"
-        className="py-16 px-4 md:px-6"
+        className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-card)] border-t border-[var(--color-border)]"
       >
-        <h2 className="text-3xl font-semibold text-center mb-8">Contact Me</h2>
-        <div className="max-w-xl mx-auto">
-          <ContactForm />
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+            {/* Left column */}
+            <div className="lg:col-span-5">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="section-divider" />
+                <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Contact</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-semibold mb-6">
+                Let&apos;s work together
+              </h2>
+              <p className="text-[var(--color-muted-foreground)] leading-relaxed">
+                If you would like to discuss a project or just say hi, 
+                I&apos;m always down to chat.
+              </p>
+            </div>
+            
+            {/* Right column - Form */}
+            <div className="lg:col-span-7">
+              <ContactForm />
+            </div>
+          </div>
         </div>
       </section>
     </main>
