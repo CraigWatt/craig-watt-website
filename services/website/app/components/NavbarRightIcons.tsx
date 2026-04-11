@@ -1,6 +1,5 @@
 'use client';
 import React from 'react';
-import NextLink from 'next/link';
 import Image from 'next/image';
 import {
   NavbarContent,
@@ -8,6 +7,7 @@ import {
   Button,
 } from '@heroui/react';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { siteUrl } from '../data/site';
 
 type ExternalTool = {
   href: string;
@@ -89,8 +89,8 @@ export function NavbarRightIcons() {
           return (
             <NavbarItem key={tool.alt}>
               <Button
-                as={NextLink}
-                href={tool.href}
+                as="a"
+                href={siteUrl(tool.href)}
                 variant="flat"
                 isIconOnly
                 className={`h-10 w-10 min-w-10 p-0 rounded-medium ${bgClass} border border-[var(--color-border)] hover:opacity-80`}

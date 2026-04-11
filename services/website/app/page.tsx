@@ -2,11 +2,11 @@
 'use client';
 import { allProjects, allPosts } from 'content-collections';
 import { ProjectCard } from './components/ProjectCard';
-import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { BlogCard } from './components/BlogCard';
 import ContactForm from './components/ContactForm';
 import Image from 'next/image';
+import { siteUrl } from './data/site';
 
 const projects = allProjects ?? [];
 const posts = allPosts?.filter((p) => p.thumb) ?? [];
@@ -48,28 +48,28 @@ export default function App() {
                 Get in touch
               </Button>
             </a>
-            <Link href="/projects">
+            <a href={siteUrl('/projects')}>
               <Button 
-                as="span" 
+                as="span"
                 variant="ghost"
                 className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-card)] transition-colors"
               >
                 View Projects
               </Button>
-            </Link>
+            </a>
           </div>
 
           <div className="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
             <span className="uppercase tracking-widest text-[var(--color-muted)]">More</span>
-            <Link href="/experience" className="hover:text-[var(--color-accent)] transition-colors">
+            <a href={siteUrl('/experience')} className="hover:text-[var(--color-accent)] transition-colors">
               Experience
-            </Link>
-            <Link href="/credentials" className="hover:text-[var(--color-accent)] transition-colors">
+            </a>
+            <a href={siteUrl('/credentials')} className="hover:text-[var(--color-accent)] transition-colors">
               Credentials
-            </Link>
-            <Link href="/cv" className="hover:text-[var(--color-accent)] transition-colors">
+            </a>
+            <a href={siteUrl('/cv')} className="hover:text-[var(--color-accent)] transition-colors">
               CV
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -141,7 +141,7 @@ export default function App() {
           </div>
           
           <div className="mt-16 text-center">
-            <Link href="/projects">
+            <a href={siteUrl('/projects')}>
               <Button 
                 as="span" 
                 variant="ghost"
@@ -149,7 +149,7 @@ export default function App() {
               >
                 View All Projects
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>
@@ -181,7 +181,7 @@ export default function App() {
           </div>
           
           <div className="mt-16 text-center">
-            <Link href="/blog">
+            <a href={siteUrl('/blog')}>
               <Button 
                 as="span" 
                 variant="ghost"
@@ -189,7 +189,7 @@ export default function App() {
               >
                 Read All Writing
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

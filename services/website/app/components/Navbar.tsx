@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import NextLink from 'next/link';
 import Image from 'next/image';
 import {
   Navbar as HeroNavbar,
@@ -18,6 +17,7 @@ import { ChevronDown } from './icons';
 import { navItems } from '../config/nav.config';
 import { NavbarRightIcons, externalTools } from './NavbarRightIcons';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import { siteUrl } from '../data/site';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,8 +51,8 @@ export const Navbar = () => {
         {/* Center: Brand */}
         <NavbarBrand className="flex-1 flex justify-center">
           <NavbarItem>
-            <NextLink
-              href="/"
+            <a
+              href={siteUrl('/')}
               onClick={() => setIsMenuOpen(false)}
               className="group flex items-center space-x-2 p-0"
             >
@@ -75,7 +75,7 @@ export const Navbar = () => {
               <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
                 Craig Watt
               </span>
-            </NextLink>
+            </a>
           </NavbarItem>
         </NavbarBrand>
         {/* Right: theme switcher */}
@@ -88,8 +88,8 @@ export const Navbar = () => {
       <NavbarContent className="hidden sm:flex items-center">
         <NavbarBrand>
           <NavbarItem>
-            <NextLink
-              href="/"
+            <a
+              href={siteUrl('/')}
               className="group flex items-center space-x-2 p-0"
             >
               <div
@@ -111,7 +111,7 @@ export const Navbar = () => {
               <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
                 Craig Watt
               </span>
-            </NextLink>
+            </a>
           </NavbarItem>
         </NavbarBrand>
       </NavbarContent>
@@ -123,8 +123,8 @@ export const Navbar = () => {
             return (
               <NavbarItem key={item.label}>
                 <Button
-                  as={NextLink}
-                  href={item.href}
+                  as="a"
+                  href={siteUrl(item.href)}
                   variant="light"
                   className={`
                     px-4 py-2 ${itemRounded}
@@ -138,20 +138,17 @@ export const Navbar = () => {
             );
           }
 
-          const isExternal = item.href.startsWith('http');
           return (
             <NavbarItem key={item.label}>
               <Button
-                as={isExternal ? "a" : NextLink}
-                href={item.href}
+                as="a"
+                href={siteUrl(item.href)}
                 variant="light"
                 className={`
               px-4 py-2 ${itemRounded}
               text-base !text-[var(--color-foreground)]
               ${hoverBgClass}
               `}
-                target={isExternal ? '_blank' : undefined}
-                rel={isExternal ? 'noopener noreferrer' : undefined}
                 onPress={() => setIsMenuOpen(false)}
               >
                 {item.label}
@@ -169,11 +166,10 @@ export const Navbar = () => {
         {/* 1) Projects (top-level links without children) */}
         {navItems.map((item) => {
           if (!Array.isArray(item.children)) {
-            const isExternal = item.href.startsWith('http');
             return (
               <NavbarMenuItem key={item.label}>
-                <NextLink
-                  href={item.href}
+                <a
+                  href={siteUrl(item.href)}
                   onClick={() => setIsMenuOpen(false)}
                   className={`
                     w-full flex items-center
@@ -181,11 +177,9 @@ export const Navbar = () => {
                     text-foreground text-base
                     ${hoverBgClass}
                   `}
-                  target={isExternal ? '_blank' : undefined}
-                  rel={isExternal ? 'noopener noreferrer' : undefined}
                 >
                   {item.label}
-                </NextLink>
+                </a>
               </NavbarMenuItem>
             );
           }
@@ -200,7 +194,7 @@ export const Navbar = () => {
                 <NavbarMenuItem>
                   <button
                     type="button"
-                    onClick={() => setMobileBlogOpen((prev) => !prev)}
+                      onClick={() => setMobileBlogOpen((prev) => !prev)}
                     className={`
                       w-full flex items-center justify-between
                       ${mobileItemPadding} ${itemRounded}
@@ -218,14 +212,14 @@ export const Navbar = () => {
                     />
                   </button>
                 </NavbarMenuItem>
-                {mobileBlogOpen &&
+                    {mobileBlogOpen &&
                   item.children.map((child) => {
                     const childExternal = child.href.startsWith('http');
                     const isCurrent = false; // optionally detect current route
                     return (
                       <NavbarMenuItem key={child.label}>
-                        <NextLink
-                          href={child.href}
+                        <a
+                          href={childExternal ? child.href : siteUrl(child.href)}
                           onClick={() => setIsMenuOpen(false)}
                           className={`
                             w-full flex items-center gap-2
@@ -238,15 +232,11 @@ export const Navbar = () => {
                             }
                             text-foreground text-base
                           `}
-                          target={childExternal ? '_blank' : undefined}
-                          rel={
-                            childExternal ? 'noopener noreferrer' : undefined
-                          }
                           aria-current={isCurrent ? 'page' : undefined}
                         >
                           <span className="flex-shrink-0">{child.icon}</span>
                           <span>{child.label}</span>
-                        </NextLink>
+                        </a>
                       </NavbarMenuItem>
                     );
                   })}
@@ -266,9 +256,9 @@ export const Navbar = () => {
                 : 'bg-white dark:bg-slate-200';
               
               return (
-                <NextLink
+                <a
                   key={tool.alt}
-                  href={tool.href}
+                  href={tool.internal ? siteUrl(tool.href) : tool.href}
                   target={tool.internal ? undefined : '_blank'}
                   rel={tool.internal ? undefined : 'noopener noreferrer'}
                   onClick={() => setIsMenuOpen(false)}
@@ -308,7 +298,7 @@ export const Navbar = () => {
                       priority={false}
                     />
                   ) : null}
-                </NextLink>
+                </a>
               );
             })}
           </div>

@@ -1,10 +1,10 @@
 'use client';
 
 import { ComponentProps, ReactNode } from 'react';
-import { Link } from '@heroui/link';
 import NextImage from 'next/image';
 import { SiteBreadcrumbs } from './SiteBreadcrumbs';
 import { Button, Snippet, Card } from '@heroui/react';
+import { siteUrl } from '../data/site';
 
 // 1) Shape of the post metadata you consume:
 interface PostMeta {
@@ -41,11 +41,11 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
       <SiteBreadcrumbs items={crumbs} />
 
       <div className="mb-6">
-        <Link href="/blog">
+        <a href={siteUrl('/blog')}>
           <Button as="span" variant="flat" size="sm">
             ← All Writing
           </Button>
-        </Link>
+        </a>
       </div>
 
       <h1 className="text-4xl font-bold">{post.title}</h1>
@@ -115,9 +115,9 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
 
             // turn MDX <a> into HeroUI Link
             a: ({ href = '#', children }: { href?: string; children: ReactNode }) => (
-              <Link href={href} className="underline">
+              <a href={href.startsWith('http') ? href : siteUrl(href)} className="underline">
                 {children}
-              </Link>
+              </a>
             ),
 
             // turn MDX <Image> into NextImage
@@ -146,11 +146,11 @@ export function BlogRenderer({ post, MDXBody }: BlogRendererProps) {
         />
 
         <div className="mt-6">
-          <Link href="/blog">
+          <a href={siteUrl('/blog')}>
             <Button as="span" variant="flat" size="md">
               ← All Writing
             </Button>
-          </Link>
+          </a>
         </div>
       </article>
     </main>
