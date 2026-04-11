@@ -21,15 +21,15 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
   return (
     <Button
       isIconOnly
-      variant="light"
+      variant="flat"
       aria-label="Toggle theme"
       onPress={() => setTheme(isDark ? 'light' : 'dark')}
-      className={`h-10 w-10 min-w-10 rounded-medium ${className ?? ''}`}
+      className={`h-10 w-10 min-w-10 rounded-medium bg-[var(--color-card)] border border-[var(--color-border)] hover:bg-[var(--color-background)] ${className ?? ''}`}
     >
       {isDark ? (
-        <Sun size={20} className="text-foreground" />
+        <Sun size={20} className="text-[var(--color-foreground)]" />
       ) : (
-        <Moon size={20} className="text-foreground" />
+        <Moon size={20} className="text-[var(--color-foreground)]" />
       )}
     </Button>
   );
