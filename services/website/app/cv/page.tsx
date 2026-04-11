@@ -1,10 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { Button, Card } from '@heroui/react';
 import { Download, FileText, Printer, ShieldCheck } from 'lucide-react';
 import { coreSkills, experienceTimeline, profilePositioning } from '../data/profile';
 import { TechIconRow } from '../components/TechIconRow';
+import { siteUrl } from '../data/site';
 
 export default function CvPage() {
   const printPage = () => window.print();
@@ -51,16 +51,16 @@ export default function CvPage() {
           >
             Save as PDF
           </Button>
-          <Link href="/experience">
+          <a href={siteUrl('/experience')}>
             <Button as="span" variant="flat" startContent={<FileText className="h-4 w-4" />}>
               Experience
             </Button>
-          </Link>
-          <Link href="/credentials">
+          </a>
+          <a href={siteUrl('/credentials')}>
             <Button as="span" variant="flat" startContent={<ShieldCheck className="h-4 w-4" />}>
               Credentials
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
 

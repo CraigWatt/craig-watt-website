@@ -1,11 +1,11 @@
 'use client';
 
 import { ComponentProps, ReactNode } from 'react';
-import { Link } from '@heroui/link';
 import NextImage from 'next/image';
 import { Snippet, Button, Card } from '@heroui/react';
 import { SiteBreadcrumbs } from './SiteBreadcrumbs';
 import { type Project } from 'content-collections';
+import { siteUrl } from '../data/site';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // MDXBody needs to accept arbitrary props (className, style, data-*, etc.)
@@ -35,11 +35,11 @@ export function ProjectRenderer({
 
       <article className="space-y-8">
         <div className="mb-6">
-          <Link href="/projects">
+          <a href={siteUrl('/projects')}>
             <Button as="span" variant="flat" size="sm">
               ← All Projects
             </Button>
-          </Link>
+          </a>
         </div>
 
         <h1 className="text-4xl font-bold">{project.title}</h1>
@@ -102,10 +102,10 @@ export function ProjectRenderer({
               li: (props: ComponentProps<'li'>) => (
                 <li className="text-lg leading-relaxed" {...props} />
               ),
-              a: ({ href = '#', children }: { href?: string; children: ReactNode }) => (
-                <Link href={href} className="underline">
+            a: ({ href = '#', children }: { href?: string; children: ReactNode }) => (
+                <a href={href.startsWith('http') ? href : siteUrl(href)} className="underline">
                   {children}
-                </Link>
+                </a>
               ),
 
               Snippet,
@@ -165,11 +165,11 @@ export function ProjectRenderer({
 
         {/* bottom links */}
         <div className="flex justify-between items-center mt-8">
-          <Link href="/projects">
+          <a href={siteUrl('/projects')}>
             <Button as="span" variant="flat" size="md">
               ← All Projects
             </Button>
-          </Link>
+          </a>
           {project.github && (
             <Button as="a" href={project.github} variant="ghost" size="md">
               View on GitHub

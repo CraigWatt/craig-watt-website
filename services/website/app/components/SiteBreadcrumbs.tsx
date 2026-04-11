@@ -2,6 +2,7 @@
 'use client';
 
 import { Breadcrumbs, BreadcrumbItem } from '@heroui/react';
+import { siteUrl } from '../data/site';
 
 export type Crumb = {
   label: string;
@@ -15,7 +16,7 @@ export function SiteBreadcrumbs({ items }: { items: Crumb[] }) {
       {items.map((crumb, idx) => (
         <BreadcrumbItem
           key={idx}
-          {...(crumb.href && !crumb.current ? { href: crumb.href } : {})}
+          {...(crumb.href && !crumb.current ? { href: crumb.href.startsWith('http') ? crumb.href : siteUrl(crumb.href) } : {})}
           isCurrent={crumb.current}
         >
           {/* Just render text; BreadcrumbItem will wrap in <a> if href provided */}
