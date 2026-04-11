@@ -1,6 +1,13 @@
 import { BadgeCheck, BriefcaseBusiness, FileText, MonitorSmartphone } from 'lucide-react';
 import type { ReactNode } from 'react';
 
+export type TechIcon = {
+  label: string;
+  src?: string;
+  lightSrc?: string;
+  darkSrc?: string;
+};
+
 export type TimelineEntry = {
   id: string;
   period: string;
@@ -11,6 +18,7 @@ export type TimelineEntry = {
   summary: string;
   bullets: string[];
   tags: string[];
+  stackIcons?: TechIcon[];
   href?: string;
   icon?: ReactNode;
 };
@@ -50,6 +58,18 @@ export const coreSkills = [
   'k3s',
 ];
 
+export const siteTechStack: TechIcon[] = [
+  { label: 'Next.js', src: '/icons/next.js.svg' },
+  { label: 'TypeScript', src: '/icons/typescript.svg' },
+  { label: 'Tailwind CSS', src: '/icons/tailwindcss.svg' },
+  { label: 'AWS', src: '/icons/aws.svg' },
+  {
+    label: 'GitHub',
+    lightSrc: '/icons/github-dark.svg',
+    darkSrc: '/icons/github-light.svg',
+  },
+];
+
 export const experienceTimeline: TimelineEntry[] = [
   {
     id: 'sky',
@@ -66,6 +86,14 @@ export const experienceTimeline: TimelineEntry[] = [
       'Focus on practical observability that helps people spot problems early and keep delivery predictable.',
     ],
     tags: ['Grafana', 'Telegraf', 'Kubernetes', 'Terraform'],
+    stackIcons: [
+      { label: 'Grafana', src: '/icons/grafana.svg' },
+      { label: 'Bash', src: '/icons/bash.svg' },
+      { label: 'Kubernetes', src: '/icons/kubernetes.svg' },
+      { label: 'Terraform', src: '/icons/terraform.svg' },
+      { label: 'Ansible', src: '/icons/ansible.svg' },
+      { label: 'AWS', src: '/icons/aws.svg' },
+    ],
     icon: <BriefcaseBusiness className="h-5 w-5" />,
   },
   {
@@ -83,6 +111,14 @@ export const experienceTimeline: TimelineEntry[] = [
       'Migrated Prometheus, Grafana, Loki, Tempo, and Telegraf to Kubernetes to improve scalability, security, and costs.',
     ],
     tags: ['Prometheus', 'Grafana', 'Loki', 'Tempo', 'Telegraf'],
+    stackIcons: [
+      { label: 'AWS', src: '/icons/aws.svg' },
+      { label: 'Terraform', src: '/icons/terraform.svg' },
+      { label: 'Ansible', src: '/icons/ansible.svg' },
+      { label: 'Kubernetes', src: '/icons/kubernetes.svg' },
+      { label: 'Grafana', src: '/icons/grafana.svg' },
+      { label: 'Bash', src: '/icons/bash.svg' },
+    ],
     icon: <BriefcaseBusiness className="h-5 w-5" />,
   },
   {
@@ -100,6 +136,11 @@ export const experienceTimeline: TimelineEntry[] = [
       'Contributed automation and monitoring improvements across teams, leading to promotion.',
     ],
     tags: ['AWS', 'Monitoring', 'Git', 'Scripting'],
+    stackIcons: [
+      { label: 'AWS', src: '/icons/aws.svg' },
+      { label: 'Bash', src: '/icons/bash.svg' },
+      { label: 'Grafana', src: '/icons/grafana.svg' },
+    ],
     icon: <BriefcaseBusiness className="h-5 w-5" />,
   },
   {
@@ -117,6 +158,13 @@ export const experienceTimeline: TimelineEntry[] = [
       'Used portfolio projects to secure the engineering role at Sky.',
     ],
     tags: ['C', 'FFmpeg', 'React', 'Next.js', 'TypeScript'],
+    stackIcons: [
+      { label: 'C', src: '/icons/c.svg' },
+      { label: 'Next.js', src: '/icons/next.js.svg' },
+      { label: 'TypeScript', src: '/icons/typescript.svg' },
+      { label: 'Jest', src: '/icons/jest.svg' },
+      { label: 'Storybook', src: '/icons/storybook.svg' },
+    ],
     href: '/projects/vfo',
     icon: <MonitorSmartphone className="h-5 w-5" />,
   },

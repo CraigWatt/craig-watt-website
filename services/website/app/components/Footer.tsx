@@ -2,6 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Github, ExternalLink } from 'lucide-react';
 import { Button } from '@heroui/react';
+import { siteTechStack } from '../data/profile';
+import { TechIconRow } from './TechIconRow';
 
 const socialLinks = [
   {
@@ -48,6 +50,13 @@ export function Footer() {
             <p className="text-sm text-[var(--color-muted-foreground)] max-w-xs leading-relaxed">
               Platform Engineer focused on observability, automation, and reliable delivery.
             </p>
+
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-[var(--color-foreground)] uppercase tracking-wider">
+                Website stack
+              </h4>
+              <TechIconRow icons={siteTechStack} size={20} tileClassName="h-9 w-9" />
+            </div>
           </div>
 
           {/* Navigation Column */}

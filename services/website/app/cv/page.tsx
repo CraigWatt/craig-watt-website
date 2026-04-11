@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Button, Card } from '@heroui/react';
 import { Download, FileText, Printer, ShieldCheck } from 'lucide-react';
 import { coreSkills, experienceTimeline, profilePositioning } from '../data/profile';
+import { TechIconRow } from '../components/TechIconRow';
 
 export default function CvPage() {
   const printPage = () => window.print();
@@ -180,6 +181,15 @@ export default function CvPage() {
                     <p className="mt-4 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
                       {entry.summary}
                     </p>
+
+                    {entry.stackIcons?.length ? (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">
+                          Stack used
+                        </p>
+                        <TechIconRow icons={entry.stackIcons} size={20} tileClassName="h-8 w-8" />
+                      </div>
+                    ) : null}
 
                     <ul className="mt-4 space-y-2">
                       {entry.bullets.slice(0, 2).map((bullet) => (
