@@ -1,8 +1,8 @@
 'use client';
 
 import NextImage from 'next/image';
-import { Link } from '@heroui/link';
 import { ArrowUpRight } from 'lucide-react';
+import { siteUrl } from '../data/site';
 
 export type ProjectCardProps = {
   title: string;
@@ -24,8 +24,8 @@ export function ProjectCard({
   badges = [],
 }: ProjectCardProps) {
   return (
-    <Link
-      href={href}
+    <a
+      href={siteUrl(href)}
       className="
         group block rounded-xl overflow-hidden
         bg-[var(--color-background)] 
@@ -82,6 +82,6 @@ export function ProjectCard({
           </div>
         )}
       </div>
-    </Link>
+    </a>
   );
 }

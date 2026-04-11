@@ -1,16 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useState, useRef } from 'react';
-import Link from 'next/link';
-import { Button, Card } from '@heroui/react';
+import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@heroui/react';
 import { ArrowRight } from 'lucide-react';
-import { experienceTimeline, profilePositioning } from '../data/profile';
+import { experienceTimeline } from '../data/profile';
 import { TechIconRow } from '../components/TechIconRow';
+import { siteUrl } from '../data/site';
 
 export default function ExperiencePage() {
   const [activeId, setActiveId] = useState(experienceTimeline[0]?.id ?? '');
   const [isScrolled, setIsScrolled] = useState(false);
-  const lastScrollY = useRef(0);
 
   const activeIndex = useMemo(
     () => experienceTimeline.findIndex((item) => item.id === activeId),
@@ -28,8 +27,6 @@ export default function ExperiencePage() {
       } else {
         setIsScrolled(false);
       }
-      
-      lastScrollY.current = currentScrollY;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -63,8 +60,12 @@ export default function ExperiencePage() {
   return (
     <main className="px-6 md:px-12 lg:px-24 py-16">
       <div className="mx-auto max-w-7xl space-y-12">
-        <section className="grid gap-8 md:gap-12 lg:grid-cols-[0.9fr,1.1fr] items-start">
-          <div className={`space-y-6 lg:sticky lg:top-24 transition-opacity duration-300 ${isScrolled ? 'lg:opacity-0 lg:pointer-events-none' : 'lg:opacity-100'}`}>
+        <section className="grid gap-8 md:gap-12 lg:grid-cols-[0.8fr,1.2fr] items-start">
+          <div
+            className={`space-y-6 lg:sticky lg:top-24 transition-all duration-300 ${
+              isScrolled ? 'lg:opacity-0 lg:-translate-y-4 lg:pointer-events-none' : 'lg:opacity-100'
+            }`}
+          >
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
               XP
             </p>
@@ -78,39 +79,16 @@ export default function ExperiencePage() {
             </p>
 
             <div className="flex flex-wrap gap-3">
-              <Link href="/cv">
+              <a href={siteUrl('/cv')}>
                 <Button as="span" className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                   Open CV
                 </Button>
-              </Link>
-              <Link href="/credentials">
+              </a>
+              <a href={siteUrl('/credentials')}>
                 <Button as="span" variant="flat">
                   View Credentials
                 </Button>
-              </Link>
-            </div>
-
-            <Card className="p-5 border border-[var(--color-border)] bg-[var(--color-card)]">
-              <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
-                Positioning
-              </p>
-              <p className="text-lg font-medium leading-relaxed">
-                {profilePositioning.title}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                {profilePositioning.summary}
-              </p>
-            </Card>
-
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              <Card className="p-4 border border-[var(--color-border)] bg-[var(--color-card)]">
-                <p className="text-2xl font-semibold">{experienceTimeline.length}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)]">career entries</p>
-              </Card>
-              <Card className="p-4 border border-[var(--color-border)] bg-[var(--color-card)]">
-                <p className="text-2xl font-semibold">1</p>
-                <p className="text-sm text-[var(--color-muted-foreground)]">current role</p>
-              </Card>
+              </a>
             </div>
           </div>
 
@@ -163,9 +141,9 @@ export default function ExperiencePage() {
                           </div>
                         </div>
                         {entry.href && (
-                          <Link href={entry.href} className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-accent)]">
+                          <a href={siteUrl(entry.href)} className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-accent)]">
                             View page <ArrowRight className="h-4 w-4" />
-                          </Link>
+                          </a>
                         )}
                       </div>
 
@@ -209,34 +187,6 @@ export default function ExperiencePage() {
           </div>
         </section>
 
-        <section className="grid gap-4 sm:gap-6 sm:grid-cols-2 md:grid-cols-3">
-          <Card className="p-6 border border-[var(--color-border)] bg-[var(--color-card)]">
-            <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
-              What this page shows
-            </p>
-            <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              The page follows the actual order of your career, with Sky leading because it is the
-              strongest proof of the platform engineering story.
-            </p>
-          </Card>
-          <Card className="p-6 border border-[var(--color-border)] bg-[var(--color-card)]">
-            <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
-              Use cases
-            </p>
-            <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              Share this page when you want something more engaging than a CV but more specific
-              than a homepage.
-            </p>
-          </Card>
-          <Card className="p-6 border border-[var(--color-border)] bg-[var(--color-card)]">
-            <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
-              Next step
-            </p>
-            <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              Use the CV page when someone wants the same story in a simple printable format.
-            </p>
-          </Card>
-        </section>
       </div>
     </main>
   );

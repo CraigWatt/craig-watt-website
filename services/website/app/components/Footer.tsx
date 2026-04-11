@@ -1,9 +1,9 @@
-import Link from 'next/link';
 import Image from 'next/image';
 import { Github, Linkedin, ExternalLink } from 'lucide-react';
 import { Button } from '@heroui/react';
 import { siteTechStack } from '../data/profile';
 import { TechIconRow } from './TechIconRow';
+import { siteUrl } from '../data/site';
 
 const socialLinks = [
   {
@@ -33,7 +33,7 @@ export function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 md:gap-12">
           {/* Brand Column */}
           <div className="sm:col-span-2 md:col-span-5 space-y-6">
-            <Link href="/" className="inline-flex items-center gap-3 group">
+            <a href={siteUrl('/')} className="inline-flex items-center gap-3 group">
               <div className="relative w-10 h-10 rounded-full overflow-hidden ring-1 ring-[var(--color-border)]">
                 <Image
                   src="/images/avatar.jpg"
@@ -46,7 +46,7 @@ export function Footer() {
               <span className="font-semibold text-[var(--color-foreground)] group-hover:text-[var(--color-accent)] transition-colors">
                 Craig Watt
               </span>
-            </Link>
+            </a>
             <p className="text-sm text-[var(--color-muted-foreground)] max-w-xs leading-relaxed">
               Platform Engineer focused on observability, automation, and reliable delivery.
             </p>
@@ -67,19 +67,19 @@ export function Footer() {
             <ul className="space-y-3">
               {navLinks.map((link) => (
                 <li key={link.label}>
-                  <Link 
-                    href={link.href}
+                  <a
+                    href={siteUrl(link.href)}
                     className="text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-accent)] transition-colors"
                   >
                     {link.label}
-                  </Link>
+                  </a>
                 </li>
               ))}
             </ul>
             <div className="mt-6">
               <Button
-                as={Link}
-                href="/cv"
+                as="a"
+                href={siteUrl('/cv')}
                 variant="flat"
                 className="border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-background)]"
               >
