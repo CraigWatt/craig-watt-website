@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Github, ExternalLink } from 'lucide-react';
+import { Button } from '@heroui/react';
 
 const socialLinks = [
   {
@@ -19,7 +20,6 @@ const navLinks = [
   { label: 'Projects', href: '/projects' },
   { label: 'Experience', href: '/experience' },
   { label: 'Credentials', href: '/credentials' },
-  { label: 'CV', href: '/cv' },
   { label: 'Writing', href: '/blog' },
   { label: 'Trading', href: '/trading212' },
 ];
@@ -67,6 +67,16 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+            <div className="mt-6">
+              <Button
+                as={Link}
+                href="/cv"
+                variant="flat"
+                className="border border-[var(--color-border)] bg-[var(--color-card)]"
+              >
+                Export as CV
+              </Button>
+            </div>
           </div>
 
           {/* Social Column */}
