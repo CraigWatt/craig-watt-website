@@ -251,41 +251,5 @@ export const experienceTimeline: TimelineEntry[] = [
   },
 ];
 
-export const credentialSections: CredentialSection[] = [
-  {
-    id: 'cloud',
-    title: 'Cloud certifications',
-    summary:
-      'A tidy place for AWS and other cloud certs, with issue dates and renewal details once you add them.',
-    items: [
-      'AWS certification name',
-      'Issue date',
-      'Expiry date or renewal status',
-    ],
-    icon: <BadgeCheck className="h-5 w-5" />,
-  },
-  {
-    id: 'awards',
-    title: 'Awards and recognition',
-    summary:
-      'Use this section for Oracle awards, employer recognition, or anything else that adds external proof.',
-    items: [
-      'Award name',
-      'Issuer',
-      'What it was for',
-    ],
-    icon: <FileText className="h-5 w-5" />,
-  },
-  {
-    id: 'badges',
-    title: 'Training and badges',
-    summary:
-      'Short-form badges, courses, and internal training completions can live here as a quick reference.',
-    items: [
-      'Badge or course name',
-      'Provider',
-      'Completion date',
-    ],
-    icon: <MonitorSmartphone className="h-5 w-5" />,
-  },
-];
+// Credentials will be populated once available
+export const credentialSections: CredentialSection[] = [];
