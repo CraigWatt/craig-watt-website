@@ -10,10 +10,9 @@ module.exports = {
   moduleNameMapper: {
     '^next/image$': '<rootDir>/test/mocks/next-image.cjs',
     '^@platform/(.*)$': '<rootDir>/platform/$1',
-    '^content-collections$':
-      '<rootDir>/services/website/.content-collections/generated/index',
-    '^content-collections/generated/(.*)$':
-      '<rootDir>/services/website/.content-collections/generated/$1',
+    '^content-collections$': '<rootDir>/test/mocks/content-collections.cjs',
+    '^content-collections/generated/allPosts$':
+      '<rootDir>/test/mocks/content-collections-generated-allPosts.cjs',
   },
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx', 'mjs', 'cjs'],
   testPathIgnorePatterns: [
