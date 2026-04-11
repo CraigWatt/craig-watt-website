@@ -23,7 +23,7 @@
     "tailwind:init": "node ./node_modules/tailwindcss/dist/lib.js init -p"
   },
   "dependencies": {
-    "mailersend": "^2.6.0",
+    "@aws-sdk/client-ses": "^3.1029.0",
     "@content-collections/core": "^0.10.0",
     "@content-collections/next": "^0.2.6",
     "@heroui/react": "^2.8.2",
@@ -34,6 +34,7 @@
     "content-collections": "^0.2.1",
     "framer-motion": "^12.23.6",
     "lucide-react": "^0.536.0",
+    "mailersend": "^2.6.0",
     "next": "^15.4.3",
     "next-themes": "^0.4.6",
     "p-limit": "^6.2.0",
