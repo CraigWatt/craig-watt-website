@@ -6,14 +6,8 @@ import {
   NavbarContent,
   NavbarItem,
   Button,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
 } from '@heroui/react';
-import { ChevronDown } from './icons';
 import { ThemeSwitcher } from './ThemeSwitcher';
-import { frameworkSwitcher } from '../config/nav.config';
 
 type ExternalTool = {
   href: string;
@@ -125,41 +119,6 @@ export function NavbarRightIcons() {
         <ThemeSwitcher />
       </NavbarItem>
 
-      {/* Framework dropdown */}
-      <Dropdown>
-        <NavbarItem>
-          <DropdownTrigger>
-            <Button
-              variant="light"
-              className="text-sm font-semibold"
-              endContent={<ChevronDown fill="currentColor" size={16} />}
-            >
-              {frameworkSwitcher.current}
-            </Button>
-          </DropdownTrigger>
-        </NavbarItem>
-        <DropdownMenu aria-label="Frontend Framework">
-          {frameworkSwitcher.options.map((option) => (
-            <DropdownItem
-              key={option.label}
-              href={option.disabled ? undefined : option.href}
-              target={
-                option.disabled || !option.href.startsWith('http')
-                  ? undefined
-                  : '_blank'
-              }
-              isDisabled={option.disabled}
-              className={
-                option.disabled
-                  ? 'opacity-50 pointer-events-none cursor-not-allowed'
-                  : undefined
-              }
-            >
-              {option.label}
-            </DropdownItem>
-          ))}
-        </DropdownMenu>
-      </Dropdown>
     </NavbarContent>
   );
 }
