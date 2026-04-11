@@ -35,19 +35,19 @@ badges:
   - longhorn
 ---
 
-stream.craigwatt.win is my self-hosted video streaming platform, built to run reliably on a Raspberry Pi Kubernetes (k3s) cluster.
+stream.craigwatt.win is my self-hosted video streaming platform, but I treat it like a small production deployment rather than a toy lab.
 
-It’s designed as a practical, production-style home-lab deployment: automated, repeatable, observable, and resilient — with a focus on real-world streaming performance (direct play where possible, predictable networking, and clean storage workflows).
+The goal is to keep it repeatable, observable, and resilient on commodity hardware while still giving me a clean place to experiment with Kubernetes and automation.
 
-## What I Built
+## Platform Pieces
 
-- **Raspberry Pi k3s cluster** — multi-node Kubernetes cluster as the compute foundation.
-- **Jellyfin on Kubernetes** — containerised media server deployment with persistent storage.
-- **MetalLB** — stable, LAN-friendly load balancing so services get proper IPs on the local network.
-- **Ingress / routing** — ingress setup (e.g. Traefik) to expose services cleanly and consistently.
-- **Persistent storage layer** — storage provisioned and managed for media libraries (e.g. Longhorn-backed PVCs where appropriate).
-- **Automation-first** — Ansible playbooks/roles to bootstrap nodes, apply configs, and keep deployments reproducible.
-- **Operational guard rails** — deployments and upgrades designed to avoid foot-guns (idempotency, safe defaults, clear separation of concerns).
+- **Raspberry Pi k3s cluster** — multi-node Kubernetes as the compute foundation
+- **Jellyfin on Kubernetes** — containerised media server with persistent storage
+- **MetalLB** — stable, LAN-friendly load balancing for predictable local access
+- **Ingress / routing** — Traefik-based ingress so services are exposed consistently
+- **Persistent storage layer** — media libraries and config are treated as first-class state
+- **Automation-first** — Ansible playbooks and roles to bootstrap nodes and apply config
+- **Operational guard rails** — upgrades and deploys are designed to avoid foot-guns
 
 <ProjectImage
   src="/images/projects/stream-craigwatt-win/stream-craigwatt-win-screen-1.webp"
@@ -59,16 +59,16 @@ It’s designed as a practical, production-style home-lab deployment: automated,
 
 ## Engineering Highlights
 
-- **Reproducible cluster build** — new nodes can be provisioned consistently via automation rather than manual steps.
-- **Clean separation of concerns** — cluster bootstrap, platform services, and app workloads are managed independently.
-- **Networking that behaves** — MetalLB avoids “random NodePort” mess and makes LAN access predictable.
-- **Storage decisions made deliberately** — media libraries and config are handled as first-class persistent concerns.
+- **Reproducible cluster build** — new nodes can be provisioned consistently via automation rather than manual steps
+- **Clean separation of concerns** — cluster bootstrap, platform services, and app workloads are managed independently
+- **Networking that behaves** — MetalLB avoids “random NodePort” mess and makes LAN access predictable
+- **Storage decisions made deliberately** — media libraries and config are handled as first-class persistent concerns
 
 ## Why It Matters
 
 This project is a realistic demonstration of how I build and run systems:
 
-- Infrastructure as code (repeatable builds, not “hand-crafted” servers)
+- infrastructure as code instead of hand-crafted servers
 - Kubernetes fundamentals applied pragmatically
-- Operational reliability and upgradeability as design goals
-- A home-lab that behaves like a small production environment
+- operational reliability and upgradeability as design goals
+- a home-lab that behaves like a small production environment
