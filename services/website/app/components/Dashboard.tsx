@@ -13,7 +13,7 @@ import {
   Button
 } from '@heroui/react'
 import { ChevronDown } from 'lucide-react'
-import type { Position, PortfolioMetrics } from '@platform/trading212/types'
+import type { Position, PortfolioMetrics } from '../trading212/types'
 
 interface ApiStatus {
   t212: boolean
