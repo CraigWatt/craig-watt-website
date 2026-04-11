@@ -74,6 +74,8 @@ const posts = defineCollection({
     thumbLg:      z.string(),
     thumbWidth:   z.number(),
     thumbHeight:  z.number(),
+    thumbLgWidth: z.number().optional(),
+    thumbLgHeight: z.number().optional(),
 
     og:           z.string(),
     ogWidth:      z.number(),
