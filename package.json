@@ -11,13 +11,14 @@
     "npm": ">=11.x"
   },
   "scripts": {
-    "dev": "nx run website:serve",
-    "build": "nx run website:build",
-    "start": "nx run website:start",
-    "lint": "nx run website:lint",
-    "storybook": "nx run website:storybook",
-    "build-storybook": "nx run website:build-storybook",
-    "test": "nx run website:test",
+    "dev": "cd services/website && next dev",
+    "build": "cd services/website && next build",
+    "start": "node ./tools/static-server.mjs services/website/out",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint . --ext .ts,.tsx,.js,.jsx,.mjs",
+    "storybook": "storybook dev -c services/website/.storybook -p 6006",
+    "build-storybook": "storybook build -c services/website/.storybook -o services/website/storybook-static",
+    "test": "jest --config jest.config.cjs",
+    "e2e": "playwright test -c services/website-e2e/playwright.config.ts",
     "build:functions": "node ./tools/build-functions.mjs",
     "tailwind:init": "node ./node_modules/tailwindcss/dist/lib.js init -p"
   },
@@ -29,7 +30,6 @@
     "@heroui/user": "^2.2.20",
     "@mdx-js/loader": "^3.1.0",
     "@next/mdx": "^15.4.5",
-    "@nx/cypress": "^21.3.9",
     "@stitches/react": "^1.2.8",
     "content-collections": "^0.2.1",
     "framer-motion": "^12.23.6",
@@ -49,16 +49,6 @@
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
     "@mdx-js/react": "^3.1.0",
-    "@nx/devkit": "^21.3.11",
-    "@nx/eslint-plugin": "^21.3.7",
-    "@nx/jest": "^21.3.9",
-    "@nx/js": "^21.3.11",
-    "@nx/next": "^21.3.9",
-    "@nx/playwright": "^21.3.11",
-    "@nx/react": "^21.3.11",
-    "@nx/storybook": "^21.3.11",
-    "@nx/vue": "^21.3.11",
-    "@nx/web": "^21.3.11",
     "@playwright/test": "^1.54.1",
     "@storybook/addon-links": "^9.1.1",
     "@storybook/builder-vite": "^9.1.1",
@@ -88,7 +78,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
-    "nx": "^21.3.9",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "remark-frontmatter": "^5.0.0",
@@ -106,6 +95,5 @@
     "inflight": "^2.0.0",
     "cross-spawn": "7.0.6",
     "abab": "2.0.7"
-  },
-  "nx": {}
+  }
 }
