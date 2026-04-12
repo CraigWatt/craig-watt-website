@@ -45,7 +45,7 @@ export const externalTools: ExternalTool[] = [
 
 export function NavbarRightIcons() {
   return (
-    <NavbarContent justify="end" className="hidden sm:flex gap-2">
+    <NavbarContent justify="end" className="hidden md:flex gap-2">
       {externalTools.map((tool) => {
         const hasThemeVariants = tool.lightSrc && tool.darkSrc;
         
@@ -122,7 +122,7 @@ export function NavbarRightIcons() {
       })}
 
       {/* Theme switcher */}
-      <NavbarItem className="hidden sm:flex">
+      <NavbarItem className="hidden md:flex">
         <ThemeSwitcher />
       </NavbarItem>
 
