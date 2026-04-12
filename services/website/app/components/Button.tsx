@@ -1,4 +1,3 @@
-// apps/nextjs-app/app/components/Button.tsx
 'use client';
 
 import { styled } from '../stitches.config';

@@ -1,4 +1,3 @@
-// apps/nextjs-app/scripts/generate-images.js
 import sharp from 'sharp';
 import path from 'path';
 import fs from 'fs/promises';
