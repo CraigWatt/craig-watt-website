@@ -42,7 +42,7 @@ export const Navbar = () => {
     // Controlled open state. Use `open` prop per HeroUI API.
     <HeroNavbar className="site-nav print:hidden" isMenuOpen={isMenuOpen} onMenuOpenChange={setIsMenuOpen}>
       {/* ===== Mobile Header: toggle, centered brand, theme switcher ===== */}
-      <NavbarContent className="sm:hidden flex justify-between items-center w-full px-4">
+      <NavbarContent className="md:hidden flex justify-between items-center w-full px-4">
         {/* Menu toggle on left */}
         <NavbarMenuToggle
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
@@ -85,7 +85,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       {/* ===== Desktop Left: Logo / Home (avatar + name) ===== */}
-      <NavbarContent className="hidden sm:flex items-center">
+      <NavbarContent className="hidden md:flex items-center">
         <NavbarBrand>
           <NavbarItem>
             <a
@@ -117,7 +117,7 @@ export const Navbar = () => {
       </NavbarContent>
 
       {/* ===== Desktop Center: Menu Items ===== */}
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+      <NavbarContent className="hidden md:flex gap-4" justify="center">
         {navItems.map((item) => {
           if (Array.isArray(item.children)) {
             return (
