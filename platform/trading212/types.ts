@@ -1,6 +1,3 @@
-// apps/nextjs-app/app/trading212/lib/types.ts
-
-// ─── raw T212 API shapes ──────────────────────────────────────────────────────
 export interface Cash {
   blocked: number
   free: number
@@ -47,33 +44,29 @@ export interface PieDetail {
   }>
   settings: { name: string; id: number }
 }
-
-// ─── the shape of your combined JSON endpoint ────────────────────────────────
 export interface ApiResponse {
   cash: Cash
   portfolio: PortfolioItem[]
   pies: PieSummary[]
   pieDetails: PieDetail[]
 }
-
-// ─── the shapes your Dashboard actually **consumes** ───────────────────────────
 export interface ApiStatus {
-  t212: boolean    // Trading212 connectivity
+  t212: boolean
 }
 
 export interface PortfolioMetrics {
-  totalValue:      number
-  invested:        number
-  freeCash:        number
-  profitLoss:      number
-  profitLossPct:   number
+  totalValue: number
+  invested: number
+  freeCash: number
+  profitLoss: number
+  profitLossPct: number
   simpleReturnPct: number
 }
 
 export interface Position {
-  symbol:       string
-  marketValue:  number
-  pct:          number
-  ppl:          number
+  symbol: string
+  marketValue: number
+  pct: number
+  ppl: number
   purchaseDate: string
 }

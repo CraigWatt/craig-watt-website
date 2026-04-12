@@ -1,4 +1,3 @@
-// apps/nextjs-app/stitches.config.ts
 import { createStitches } from '@stitches/react';
 
 export const {
