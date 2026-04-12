@@ -1,6 +1,6 @@
 # craigwatt.co.uk
 
-Static-first personal site with two small managed APIs:
+Static-first personal site with supporting APIs and infrastructure:
 
 - `services/website`
 - `services/contact-api`
@@ -39,7 +39,7 @@ npm run build-storybook
 npm run build:functions
 ```
 
-`website:build` produces the exported static site in [services/website/out](/Users/craigwatt/localProjects/craig-watt-website/services/website/out) and `build:functions` bundles the Lambda handlers into `dist/services/*`.
+`npm run build` produces the exported static site in `services/website/out`, and `npm run build:functions` bundles the Lambda handlers into `dist/services/*`.
 
 ## Deployment
 
@@ -61,4 +61,4 @@ terraform apply
 
 Terraform state locking now uses S3 lockfiles, so there is no separate DynamoDB lock table.
 
-Bootstrap resources for the GitHub Actions deployment role live under [infra/bootstrap](/Users/craigwatt/localProjects/craig-watt-website/infra/bootstrap).
+Bootstrap resources for the GitHub Actions deployment role live under `infra/bootstrap`.
