@@ -36,6 +36,15 @@ jobs:
           node-version-file: '.nvmrc'
           check-latest: true
           cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Cache Next.js build cache
+        uses: actions/cache@v4
+        with:
+          path: services/website/.next/cache
+          key: ${{ runner.os }}-next-cache-${{ hashFiles('package-lock.json', 'services/website/app/**/*', 'services/website/content/**/*', 'services/website/public/**/*', 'services/website/.storybook/**/*') }}
+          restore-keys: |
+            ${{ runner.os }}-next-cache-
 
       - name: Upgrade npm
         run: npm install -g npm@11
@@ -60,6 +69,14 @@ jobs:
 
       - name: Build static website
         run: npm run build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-chromium-
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
