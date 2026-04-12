@@ -4,6 +4,7 @@ import path from 'node:path';
 
 const rootDir = path.resolve(process.argv[2] || 'services/website/out');
 const port = Number(process.env.PORT || 3000);
+const host = process.env.HOST || '127.0.0.1';
 
 const mimeTypes = new Map([
   ['.css', 'text/css; charset=utf-8'],
@@ -38,9 +39,16 @@ async function readCandidate(filePath) {
   try {
     const fileStat = await stat(filePath);
     if (fileStat.isDirectory()) {
-      return readFile(path.join(filePath, 'index.html'));
+      const indexPath = path.join(filePath, 'index.html');
+      return {
+        body: await readFile(indexPath),
+        contentPath: indexPath,
+      };
     }
-    return readFile(filePath);
+    return {
+      body: await readFile(filePath),
+      contentPath: filePath,
+    };
   } catch {
     return null;
   }
@@ -49,15 +57,17 @@ async function readCandidate(filePath) {
 createServer(async (req, res) => {
   const requestPath = req.url || '/';
   const filePath = resolveRequestPath(requestPath);
-  let body = await readCandidate(filePath);
+  let candidate = await readCandidate(filePath);
+  let body = candidate?.body ?? null;
   let statusCode = 200;
-  let contentPath = filePath;
+  let contentPath = candidate?.contentPath ?? filePath;
 
   if (!body) {
     const fallback = path.join(rootDir, '404.html');
-    body = await readCandidate(fallback);
+    candidate = await readCandidate(fallback);
+    body = candidate?.body ?? null;
     statusCode = 404;
-    contentPath = fallback;
+    contentPath = candidate?.contentPath ?? fallback;
   }
 
   if (!body) {
@@ -72,6 +82,6 @@ createServer(async (req, res) => {
 
   res.writeHead(statusCode, { 'content-type': contentType });
   res.end(body);
-}).listen(port, () => {
-  console.log(`Serving ${rootDir} on http://localhost:${port}`);
+}).listen(port, host, () => {
+  console.log(`Serving ${rootDir} on http://${host}:${port}`);
 });
