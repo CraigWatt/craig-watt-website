@@ -60,3 +60,9 @@ jobs:
 
       - name: Build static website
         run: npm run build
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright e2e
+        run: npm run e2e -- --project chromium

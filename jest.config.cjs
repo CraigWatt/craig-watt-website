@@ -3,6 +3,10 @@ module.exports = {
   testMatch: [
     '<rootDir>/services/website/specs/**/*.spec.[jt]s?(x)',
     '<rootDir>/services/website/specs/**/*.test.[jt]s?(x)',
+    '<rootDir>/services/contact-api/specs/**/*.spec.[jt]s?(x)',
+    '<rootDir>/services/contact-api/specs/**/*.test.[jt]s?(x)',
+    '<rootDir>/platform/**/*.spec.[jt]s?(x)',
+    '<rootDir>/platform/**/*.test.[jt]s?(x)',
   ],
   transform: {
     '^.+\\.[jt]sx?$': ['babel-jest', { presets: ['next/babel'] }],
