@@ -29,7 +29,7 @@
     "@heroui/react": "^2.8.2",
     "@heroui/user": "^2.2.20",
     "@mdx-js/loader": "^3.1.0",
-    "@next/mdx": "^15.4.5",
+    "@next/mdx": "^16.2.3",
     "@stitches/react": "^1.2.8",
     "content-collections": "^0.2.1",
     "framer-motion": "^12.23.6",
