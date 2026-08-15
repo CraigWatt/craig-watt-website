@@ -46,6 +46,26 @@ export const externalTools: ExternalTool[] = [
 export function NavbarRightIcons() {
   return (
     <NavbarContent justify="end" className="hidden md:flex gap-2">
+      <NavbarItem>
+        <Button
+          as="a"
+          href={siteUrl('/cost-of-living')}
+          variant="flat"
+          isIconOnly
+          className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-200 border border-[var(--color-border)] hover:opacity-80"
+          aria-label="Cost of living"
+        >
+          <Image
+            src="/icons/pound-coin.png"
+            alt="Cost of living"
+            width={28}
+            height={28}
+            className="object-contain"
+            priority={false}
+          />
+        </Button>
+      </NavbarItem>
+
       {externalTools.map((tool) => {
         const hasThemeVariants = tool.lightSrc && tool.darkSrc;
         

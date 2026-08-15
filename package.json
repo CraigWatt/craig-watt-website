@@ -23,6 +23,7 @@
     "tailwind:init": "node ./node_modules/tailwindcss/dist/lib.js init -p"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1096.0",
     "@aws-sdk/client-ses": "^3.1029.0",
     "@content-collections/core": "^0.10.0",
     "@content-collections/next": "^0.2.6",
@@ -31,6 +32,7 @@
     "@mdx-js/loader": "^3.1.0",
     "@next/mdx": "^15.4.5",
     "@stitches/react": "^1.2.8",
+    "@tremor/react": "^3.18.7",
     "content-collections": "^0.2.1",
     "framer-motion": "^12.23.6",
     "lucide-react": "^0.536.0",

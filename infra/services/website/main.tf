@@ -15,19 +15,19 @@ locals {
   bucket_name = "${replace(var.domain, ".", "-")}-site"
   site_files  = fileset(var.site_build_dir, "**")
   mime_types = {
-    css   = "text/css; charset=utf-8"
-    html  = "text/html; charset=utf-8"
-    ico   = "image/x-icon"
-    jpg   = "image/jpeg"
-    jpeg  = "image/jpeg"
-    js    = "application/javascript; charset=utf-8"
-    json  = "application/json; charset=utf-8"
-    map   = "application/json; charset=utf-8"
-    png   = "image/png"
-    svg   = "image/svg+xml"
-    txt   = "text/plain; charset=utf-8"
-    webp  = "image/webp"
-    xml   = "application/xml; charset=utf-8"
+    css  = "text/css; charset=utf-8"
+    html = "text/html; charset=utf-8"
+    ico  = "image/x-icon"
+    jpg  = "image/jpeg"
+    jpeg = "image/jpeg"
+    js   = "application/javascript; charset=utf-8"
+    json = "application/json; charset=utf-8"
+    map  = "application/json; charset=utf-8"
+    png  = "image/png"
+    svg  = "image/svg+xml"
+    txt  = "text/plain; charset=utf-8"
+    webp = "image/webp"
+    xml  = "application/xml; charset=utf-8"
   }
 }
 
@@ -37,6 +37,12 @@ data "archive_file" "contact_lambda" {
   type        = "zip"
   source_dir  = var.contact_lambda_dir
   output_path = "${path.root}/.terraform/contact-api.zip"
+}
+
+data "archive_file" "cost_of_living_lambda" {
+  type        = "zip"
+  source_dir  = var.cost_of_living_lambda_dir
+  output_path = "${path.root}/.terraform/cost-of-living-api.zip"
 }
 
 data "archive_file" "trading212_lambda" {
@@ -79,8 +85,20 @@ resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
 }
 
+resource "aws_s3_bucket" "cost_of_living_history" {
+  bucket = "${replace(var.domain, ".", "-")}-cost-of-living-history"
+}
+
 resource "aws_s3_bucket_public_access_block" "site" {
   bucket                  = aws_s3_bucket.site.id
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_public_access_block" "cost_of_living_history" {
+  bucket                  = aws_s3_bucket.cost_of_living_history.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -122,6 +140,14 @@ resource "aws_cloudfront_cache_policy" "static" {
     query_strings_config {
       query_string_behavior = "none"
     }
+  }
+}
+
+resource "aws_s3_bucket_ownership_controls" "cost_of_living_history" {
+  bucket = aws_s3_bucket.cost_of_living_history.id
+
+  rule {
+    object_ownership = "BucketOwnerPreferred"
   }
 }
 
@@ -208,6 +234,30 @@ resource "aws_iam_role_policy" "lambda_ses_send" {
   })
 }
 
+resource "aws_iam_role_policy" "lambda_cost_of_living_history" {
+  name = "${replace(var.domain, ".", "-")}-website-lambda-cost-of-living-history"
+  role = aws_iam_role.lambda.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCostOfLivingHistoryStorage"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.cost_of_living_history.arn,
+          "${aws_s3_bucket.cost_of_living_history.arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
 resource "aws_lambda_function" "contact" {
   function_name    = "${replace(var.domain, ".", "-")}-contact"
   role             = aws_iam_role.lambda.arn
@@ -223,6 +273,24 @@ resource "aws_lambda_function" "contact" {
       CONTACT_EMAIL_FROM   = var.contact_email_from
       CONTACT_EMAIL_TO     = var.contact_email_to
       RECAPTCHA_SECRET_KEY = var.recaptcha_secret_key
+    }
+  }
+}
+
+resource "aws_lambda_function" "cost_of_living" {
+  function_name    = "${replace(var.domain, ".", "-")}-cost-of-living"
+  role             = aws_iam_role.lambda.arn
+  runtime          = "nodejs20.x"
+  handler          = "index.handler"
+  filename         = data.archive_file.cost_of_living_lambda.output_path
+  source_code_hash = data.archive_file.cost_of_living_lambda.output_base64sha256
+  timeout          = 15
+  memory_size      = 256
+
+  environment {
+    variables = {
+      COST_OF_LIVING_HISTORY_BUCKET = aws_s3_bucket.cost_of_living_history.bucket
+      COST_OF_LIVING_HISTORY_KEY     = "cost-of-living/meal-deal-history.json"
     }
   }
 }
@@ -266,6 +334,15 @@ resource "aws_apigatewayv2_integration" "contact" {
   timeout_milliseconds   = 15000
 }
 
+resource "aws_apigatewayv2_integration" "cost_of_living" {
+  api_id                 = aws_apigatewayv2_api.website.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.cost_of_living.invoke_arn
+  integration_method     = "GET"
+  payload_format_version = "2.0"
+  timeout_milliseconds   = 15000
+}
+
 resource "aws_apigatewayv2_integration" "trading212" {
   api_id                 = aws_apigatewayv2_api.website.id
   integration_type       = "AWS_PROXY"
@@ -281,6 +358,12 @@ resource "aws_apigatewayv2_route" "contact" {
   target    = "integrations/${aws_apigatewayv2_integration.contact.id}"
 }
 
+resource "aws_apigatewayv2_route" "cost_of_living" {
+  api_id    = aws_apigatewayv2_api.website.id
+  route_key = "GET /api/cost-of-living"
+  target    = "integrations/${aws_apigatewayv2_integration.cost_of_living.id}"
+}
+
 resource "aws_apigatewayv2_route" "trading212" {
   api_id    = aws_apigatewayv2_api.website.id
   route_key = "GET /api/trading212"
@@ -291,6 +374,14 @@ resource "aws_lambda_permission" "contact" {
   statement_id  = "AllowApiGatewayContactInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.contact.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.website.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "cost_of_living" {
+  statement_id  = "AllowApiGatewayCostOfLivingInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cost_of_living.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.website.execution_arn}/*/*"
 }
@@ -382,13 +473,13 @@ resource "aws_cloudfront_distribution" "website" {
   }
 
   ordered_cache_behavior {
-    path_pattern           = "/api/*"
-    target_origin_id       = "api-origin"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
-    cached_methods         = ["GET", "HEAD", "OPTIONS"]
-    compress               = true
-    cache_policy_id        = aws_cloudfront_cache_policy.api.id
+    path_pattern             = "/api/*"
+    target_origin_id         = "api-origin"
+    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "PATCH", "POST", "DELETE"]
+    cached_methods           = ["GET", "HEAD", "OPTIONS"]
+    compress                 = true
+    cache_policy_id          = aws_cloudfront_cache_policy.api.id
     origin_request_policy_id = aws_cloudfront_origin_request_policy.api.id
   }
 
@@ -445,11 +536,11 @@ resource "aws_s3_bucket_policy" "site" {
 resource "aws_s3_object" "site" {
   for_each = local.site_files
 
-  bucket       = aws_s3_bucket.site.id
-  key          = each.value
-  source       = "${var.site_build_dir}/${each.value}"
-  etag         = filemd5("${var.site_build_dir}/${each.value}")
-  content_type = lookup(local.mime_types, lower(element(reverse(split(".", each.value)), 0)), null)
+  bucket        = aws_s3_bucket.site.id
+  key           = each.value
+  source        = "${var.site_build_dir}/${each.value}"
+  etag          = filemd5("${var.site_build_dir}/${each.value}")
+  content_type  = lookup(local.mime_types, lower(element(reverse(split(".", each.value)), 0)), null)
   cache_control = startswith(each.value, "_next/") ? "public, max-age=31536000, immutable" : (endswith(each.value, ".html") ? "public, max-age=0, must-revalidate" : "public, max-age=86400")
 
   depends_on = [
