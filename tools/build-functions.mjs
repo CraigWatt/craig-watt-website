@@ -13,6 +13,10 @@ const builds = [
     outdir: path.join(distRoot, 'contact-api'),
   },
   {
+    entry: path.join(root, 'services', 'cost-of-living-api', 'src', 'handler.ts'),
+    outdir: path.join(distRoot, 'cost-of-living-api'),
+  },
+  {
     entry: path.join(root, 'services', 'trading212-api', 'src', 'handler.ts'),
     outdir: path.join(distRoot, 'trading212-api'),
   },

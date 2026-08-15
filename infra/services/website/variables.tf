@@ -23,6 +23,11 @@ variable "contact_lambda_dir" {
   type        = string
 }
 
+variable "cost_of_living_lambda_dir" {
+  description = "Directory containing the bundled cost-of-living Lambda artifact"
+  type        = string
+}
+
 variable "zone_id" {
   description = "Route53 hosted zone ID for the primary domain"
   type        = string

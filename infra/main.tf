@@ -9,11 +9,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "craig-watt-tfstate"
-    key            = "prod/terraform.tfstate"
-    region         = "eu-west-2"
-    use_lockfile   = true
-    encrypt        = true
+    bucket       = "craig-watt-tfstate"
+    key          = "prod/terraform.tfstate"
+    region       = "eu-west-2"
+    use_lockfile = true
+    encrypt      = true
   }
 }
 
@@ -45,18 +45,19 @@ module "certificate" {
 module "website" {
   source = "./services/website"
 
-  domain                = var.domain
-  certificate_arn       = module.certificate.certificate_arn
-  aws_region            = var.aws_region
-  site_build_dir        = var.site_build_dir
-  contact_lambda_dir    = var.contact_lambda_dir
-  zone_id               = module.route53.zone_id
-  trading212_lambda_dir = var.trading212_lambda_dir
-  recaptcha_secret_key  = var.recaptcha_secret_key
-  t212_api_key          = var.t212_api_key
-  t212_api_secret       = var.t212_api_secret
-  contact_email_to      = var.contact_email_to
-  contact_email_from    = var.contact_email_from
+  domain                    = var.domain
+  certificate_arn           = module.certificate.certificate_arn
+  aws_region                = var.aws_region
+  site_build_dir            = var.site_build_dir
+  contact_lambda_dir        = var.contact_lambda_dir
+  cost_of_living_lambda_dir = var.cost_of_living_lambda_dir
+  zone_id                   = module.route53.zone_id
+  trading212_lambda_dir     = var.trading212_lambda_dir
+  recaptcha_secret_key      = var.recaptcha_secret_key
+  t212_api_key              = var.t212_api_key
+  t212_api_secret           = var.t212_api_secret
+  contact_email_to          = var.contact_email_to
+  contact_email_from        = var.contact_email_from
 }
 
 module "dns_records" {

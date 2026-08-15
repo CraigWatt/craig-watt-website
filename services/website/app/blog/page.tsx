@@ -44,8 +44,8 @@ export default function BlogPage() {
 
 function BlogList({ posts }: { posts: typeof allPosts }) {
   const searchParams = useSearchParams();
-  const categoryParam = searchParams.get('category') || 'All';
-  const pageParam = parseInt(searchParams.get('page') || '1', 10);
+  const categoryParam = searchParams?.get('category') || 'All';
+  const pageParam = parseInt(searchParams?.get('page') || '1', 10);
   const POSTS_PER_PAGE = 6;
 
   type CategoryItem = { key: string; label: string; textValue: string };

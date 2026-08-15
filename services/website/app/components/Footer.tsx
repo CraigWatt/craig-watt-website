@@ -19,6 +19,7 @@ const socialLinks = [
 ];
 
 const navLinks = [
+  { label: 'Cost of Living', href: '/cost-of-living' },
   { label: 'Projects', href: '/projects' },
   { label: 'Experience', href: '/experience' },
   { label: 'Credentials', href: '/credentials' },

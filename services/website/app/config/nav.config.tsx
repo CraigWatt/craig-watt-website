@@ -33,6 +33,10 @@ import { ReceiptTextIcon, CpuIcon, CookingPotIcon } from '../components/icons';
 
 export const navItems: NavItem[] = [
   {
+    label: 'Cost of Living',
+    href: '/cost-of-living',
+  },
+  {
     label: 'Projects',
     href: '/projects',
   },

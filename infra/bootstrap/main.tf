@@ -47,10 +47,10 @@ resource "aws_iam_role" "github_actions" {
   name = "${local.repo_short}-gha-role"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [{
-      Effect    = "Allow"
-      Action    = "sts:AssumeRoleWithWebIdentity"
+      Effect = "Allow"
+      Action = "sts:AssumeRoleWithWebIdentity"
       Principal = {
         Federated = data.aws_iam_openid_connect_provider.github.arn
       }
@@ -94,9 +94,9 @@ resource "aws_iam_role_policy" "github_actions" {
         ]
       },
       {
-        Sid    = "StaticSiteBucketCreate"
-        Effect = "Allow"
-        Action = ["s3:CreateBucket"]
+        Sid      = "StaticSiteBucketCreate"
+        Effect   = "Allow"
+        Action   = ["s3:CreateBucket"]
         Resource = "*"
       },
       {
