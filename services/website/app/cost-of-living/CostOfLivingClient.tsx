@@ -3,7 +3,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Spinner } from '@heroui/react';
-import { AreaChart, LineChart, type CustomTooltipProps } from '@tremor/react';
+import {
+  Area,
+  AreaChart as RechartsAreaChart,
+  CartesianGrid,
+  Line,
+  LineChart as RechartsLineChart,
+  ResponsiveContainer,
+  Tooltip as RechartsTooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { Activity } from '../components/icons';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
 
@@ -88,6 +98,20 @@ type MealDealSnapshot = {
   clubcardPrice: number | null;
   regularPrice: number | null;
   fetchedAt: string;
+};
+
+type ChartDatum = Record<string, string | number | null | undefined>;
+
+type CustomTooltipProps = {
+  active?: boolean;
+  label?: string | number;
+  payload?: Array<{
+    color?: string;
+    dataKey?: string | number;
+    name?: string | number;
+    payload?: ChartDatum;
+    value?: string | number | null;
+  }>;
 };
 
 const FALLBACK_BENCHMARK: SalaryBenchmark = {
@@ -196,6 +220,185 @@ function enumerateMonthKeys(startMonth: string, endMonth: string) {
   }
 
   return months;
+}
+
+const CHART_COLOR_MAP: Record<string, string> = {
+  cyan: '#06b6d4',
+  rose: '#f43f5e',
+  gray: '#71717a',
+  emerald: '#10b981',
+  amber: '#f59e0b',
+};
+
+function toChartColor(color: string) {
+  return CHART_COLOR_MAP[color] ?? color;
+}
+
+function renderTooltip(
+  CustomTooltip: ((props: CustomTooltipProps) => React.ReactNode) | undefined
+) {
+  if (!CustomTooltip) {
+    return undefined;
+  }
+
+  return ({ active, label, payload }: CustomTooltipProps) =>
+    CustomTooltip({
+      active,
+      label,
+      payload: (payload ?? []).map((entry) => ({
+        ...entry,
+        color: entry.color,
+      })),
+    });
+}
+
+function AreaChart({
+  className,
+  data,
+  index,
+  categories,
+  colors,
+  valueFormatter,
+  showGridLines,
+  showYAxis,
+  showXAxis,
+  autoMinValue,
+  connectNulls,
+  curveType,
+  showGradient,
+  yAxisWidth,
+  customTooltip,
+}: {
+  className?: string;
+  data: ChartDatum[];
+  index: string;
+  categories: readonly string[];
+  colors: string[];
+  valueFormatter?: (value: number) => string;
+  showGridLines?: boolean;
+  showYAxis?: boolean;
+  showXAxis?: boolean;
+  autoMinValue?: boolean;
+  connectNulls?: boolean;
+  curveType?: 'monotone' | 'linear' | 'step';
+  showGradient?: boolean;
+  yAxisWidth?: number;
+  customTooltip?: (props: CustomTooltipProps) => React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsAreaChart data={data}>
+          {showGridLines && <CartesianGrid stroke="rgba(148, 163, 184, 0.18)" vertical={false} />}
+          <XAxis dataKey={index} hide={showXAxis === false} tickLine={false} axisLine={false} />
+          {showYAxis && (
+            <YAxis
+              width={yAxisWidth ?? 56}
+              tickLine={false}
+              axisLine={false}
+              domain={autoMinValue ? ['auto', 'auto'] : undefined}
+              tickFormatter={valueFormatter}
+            />
+          )}
+          <RechartsTooltip content={renderTooltip(customTooltip)} />
+          {showGradient &&
+            categories.map((category, idx) => {
+              const color = toChartColor(colors[idx] ?? colors[0] ?? '#06b6d4');
+              return (
+                <defs key={category}>
+                  <linearGradient id={`gradient-${category}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor={color} stopOpacity={0.28} />
+                    <stop offset="95%" stopColor={color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+              );
+            })}
+          {categories.map((category, idx) => {
+            const color = toChartColor(colors[idx] ?? colors[0] ?? '#06b6d4');
+            return (
+              <Area
+                key={category}
+                type={curveType ?? 'monotone'}
+                dataKey={category}
+                connectNulls={connectNulls}
+                stroke={color}
+                fill={showGradient ? `url(#gradient-${category})` : color}
+                fillOpacity={showGradient ? 1 : 0.18}
+                strokeWidth={2}
+                dot={false}
+                activeDot={{ r: 4 }}
+              />
+            );
+          })}
+        </RechartsAreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+function LineChart({
+  className,
+  data,
+  index,
+  categories,
+  colors,
+  valueFormatter,
+  showGridLines,
+  showYAxis,
+  showXAxis,
+  autoMinValue,
+  connectNulls,
+  curveType,
+  yAxisWidth,
+  customTooltip,
+}: {
+  className?: string;
+  data: ChartDatum[];
+  index: string;
+  categories: readonly string[];
+  colors: string[];
+  valueFormatter?: (value: number) => string;
+  showGridLines?: boolean;
+  showYAxis?: boolean;
+  showXAxis?: boolean;
+  autoMinValue?: boolean;
+  connectNulls?: boolean;
+  curveType?: 'monotone' | 'linear' | 'step';
+  yAxisWidth?: number;
+  customTooltip?: (props: CustomTooltipProps) => React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <ResponsiveContainer width="100%" height="100%">
+        <RechartsLineChart data={data}>
+          {showGridLines && <CartesianGrid stroke="rgba(148, 163, 184, 0.18)" vertical={false} />}
+          <XAxis dataKey={index} hide={showXAxis === false} tickLine={false} axisLine={false} />
+          {showYAxis && (
+            <YAxis
+              width={yAxisWidth ?? 72}
+              tickLine={false}
+              axisLine={false}
+              domain={autoMinValue ? ['auto', 'auto'] : undefined}
+              tickFormatter={valueFormatter}
+            />
+          )}
+          <RechartsTooltip content={renderTooltip(customTooltip)} />
+          {categories.map((category, idx) => (
+            <Line
+              key={category}
+              type={curveType ?? 'monotone'}
+              dataKey={category}
+              connectNulls={connectNulls}
+              stroke={toChartColor(colors[idx] ?? colors[0] ?? '#71717a')}
+              strokeWidth={2}
+              dot={false}
+              activeDot={{ r: 4 }}
+            />
+          ))}
+        </RechartsLineChart>
+      </ResponsiveContainer>
+    </div>
+  );
 }
 
 function DataCard({
