@@ -3,9 +3,7 @@
 import { useEffect } from 'react'
 import useSWR from 'swr'
 import PublicDashboard from '../components/PublicDashboard'
-import { Button } from '@heroui/react'
-import { Alert } from '@heroui/alert'
-import { Spinner } from "@heroui/spinner";
+import { Alert, Button, Spinner } from '@heroui/react'
 
 import type {
   PublicMetrics,
