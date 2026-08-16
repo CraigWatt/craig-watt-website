@@ -30,18 +30,19 @@ craig-watt-website/
 ## Local commands
 
 ```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-npm run test
-npm run e2e
-npm run storybook
-npm run build-storybook
-npm run build:functions
+pnpm install
+pnpm dev
+pnpm build
+pnpm start
+pnpm lint
+pnpm test
+pnpm e2e
+pnpm storybook
+pnpm build-storybook
+pnpm build:functions
 ```
 
-`npm run build` produces the exported static site in `services/website/out`, and `npm run build:functions` bundles the Lambda handlers into `dist/services/*`.
+`pnpm build` produces the exported static site in `services/website/out`, and `pnpm build:functions` bundles the Lambda handlers into `dist/services/*`.
 
 ## Public data sources
 
