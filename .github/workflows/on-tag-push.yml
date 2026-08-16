@@ -36,6 +36,12 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+          run_install: false
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -43,12 +49,6 @@ jobs:
           check-latest: true
           cache: 'pnpm'
           cache-dependency-path: pnpm-lock.yaml
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.15.1
-          run_install: false
 
       - name: Cache Next.js build cache
         uses: actions/cache@v4
