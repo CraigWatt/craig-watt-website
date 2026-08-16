@@ -14,6 +14,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import type { TooltipContentProps, TooltipValueType } from 'recharts';
 import { Activity } from '../components/icons';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
 
@@ -101,18 +102,14 @@ type MealDealSnapshot = {
 };
 
 type ChartDatum = Record<string, string | number | null | undefined>;
-
-type CustomTooltipProps = {
-  active?: boolean;
-  label?: string | number;
-  payload?: Array<{
-    color?: string;
-    dataKey?: string | number;
-    name?: string | number;
-    payload?: ChartDatum;
-    value?: string | number | null;
-  }>;
+type SalaryHistoryDatum = ChartDatum & {
+  date: string;
+  monthKey: string;
+  'Your salary': number;
+  'Inflation-adjusted salary': number;
 };
+
+type CustomTooltipProps = Pick<TooltipContentProps<TooltipValueType, string | number>, 'active' | 'label' | 'payload'>;
 
 const FALLBACK_BENCHMARK: SalaryBenchmark = {
   role: 'all-employees',
@@ -236,19 +233,16 @@ function toChartColor(color: string) {
 
 function renderTooltip(
   CustomTooltip: ((props: CustomTooltipProps) => React.ReactNode) | undefined
-) {
+): ((props: TooltipContentProps<TooltipValueType, string | number>) => React.ReactNode) | undefined {
   if (!CustomTooltip) {
     return undefined;
   }
 
-  return ({ active, label, payload }: CustomTooltipProps) =>
+  return ({ active, label, payload }: TooltipContentProps<TooltipValueType, string | number>) =>
     CustomTooltip({
       active,
       label,
-      payload: (payload ?? []).map((entry) => ({
-        ...entry,
-        color: entry.color,
-      })),
+      payload,
     });
 }
 
@@ -698,7 +692,6 @@ function MealDealHistoryChart({
           categories={['Clubcard', 'CPI']}
           colors={['cyan', 'rose']}
           valueFormatter={(value: number) => `${formatNumber(value, 1)} index`}
-          showLegend={false}
           showGridLines
           showYAxis
           showXAxis={false}
@@ -707,7 +700,6 @@ function MealDealHistoryChart({
           curveType="monotone"
           showGradient
           yAxisWidth={56}
-          startEndOnly
           customTooltip={MealDealTooltip}
         />
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
@@ -811,15 +803,17 @@ function SalaryHistoryChart({
           return null;
         }
 
-        return {
+        const point: SalaryHistoryDatum = {
           date: `${monthKey}-01`,
           monthKey,
           'Your salary': salaryValue,
           'Inflation-adjusted salary': salaryValue * (cpiIndex / salaryBaseIndex),
           [benchmarkLabel]: benchmarkValue,
         };
+
+        return point;
       })
-      .filter((point) => Boolean(point));
+      .filter((point): point is SalaryHistoryDatum => point !== null);
   }, [benchmarkLabel, benchmarkValue, historyRange, inflationHistory, salaryStartMonth, salaryValue]);
 
   if (chartData.length === 0) {
@@ -893,7 +887,6 @@ function SalaryHistoryChart({
           categories={[...categories]}
           colors={benchmarkValue === null ? ['gray', 'emerald'] : ['gray', 'emerald', 'amber']}
           valueFormatter={(value: number) => formatCurrency(value)}
-          showLegend={false}
           showGridLines
           showYAxis
           showXAxis={false}
@@ -901,7 +894,6 @@ function SalaryHistoryChart({
           connectNulls
           curveType="monotone"
           yAxisWidth={72}
-          startEndOnly
           customTooltip={SalaryTooltip}
         />
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
