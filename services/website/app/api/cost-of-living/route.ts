@@ -1,3 +1,9 @@
+import {
+  extractSalaryBenchmarksFromAsheTable15Zip,
+  extractSalaryBenchmarksFromAsheTable7Zip,
+  SALARY_BENCHMARK_FALLBACKS,
+  type SalaryBenchmark,
+} from '../../../../cost-of-living-api/src/ashe';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 
 type SourceSnapshot = {
@@ -5,6 +11,8 @@ type SourceSnapshot = {
   url: string;
   fetchedAt: string;
 };
+
+type SourceMode = 'live' | 'fallback' | 'unavailable';
 
 type MealDealHistoryPoint = {
   date: string;
@@ -24,6 +32,11 @@ type CostOfLivingPayload = {
     salaries: boolean;
     mealDeals: boolean;
   };
+  sourceStatus: {
+    inflation: SourceMode;
+    salaries: SourceMode;
+    mealDeals: SourceMode;
+  };
   inflation: {
     index: number | null;
     rate12m: number | null;
@@ -36,6 +49,7 @@ type CostOfLivingPayload = {
     downloadUrl: string | null;
     source: SourceSnapshot;
     notes: string;
+    benchmarks: SalaryBenchmark[];
   };
   mealDeal: {
     retailer: string;
@@ -54,12 +68,21 @@ type CostOfLivingPayload = {
   };
 };
 
-const ONS_CPIH_SERIES_URL = 'https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/l522/mm23';
+type SourceStatuses = CostOfLivingPayload['sourceStatus'];
+
+const ONS_API_BASE_URL = 'https://api.beta.ons.gov.uk/v1';
+const ONS_CPIH_DATASET_URL = `${ONS_API_BASE_URL}/datasets/cpih01`;
+const ONS_CPIH_EDITION_URL = `${ONS_CPIH_DATASET_URL}/editions/time-series`;
+const ONS_CPIH_OBSERVATION_QUERY = 'time=*&geography=K02000001&aggregate=cpih1dim1A0';
 const ONS_ASHE_TABLE_7_URL =
   'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7';
+const ONS_ASHE_TABLE_15_URL =
+  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional';
 const ONS_INFLATION_TOPIC_URL = 'https://www.ons.gov.uk/economy/inflationandpriceindices?os=0';
 const ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7/2025provisional/ashetable72025provisional.zip';
+const ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL =
+  'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional/ashetable152025provisional.zip';
 const TESCO_MEAL_DEAL_URL =
   'https://www.tesco.com/groceries/en-GB/shop/fresh-food/chilled-soup-sandwiches-and-salad-pots/lunch-meal-deals';
 const HISTORY_BUCKET = process.env.COST_OF_LIVING_HISTORY_BUCKET ?? '';
@@ -137,12 +160,14 @@ const INFLATION_FALLBACK_SNAPSHOT: CostOfLivingPayload['inflation'] = {
 };
 
 const SALARY_FALLBACK_SNAPSHOT = {
-  downloadUrl: ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL,
+  table7DownloadUrl: ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL,
+  table15DownloadUrl: ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL,
   source: {
-    name: 'ONS ASHE Table 7 fallback snapshot',
+    name: 'ONS ASHE salary benchmark fallback snapshot',
     url: ONS_ASHE_TABLE_7_URL,
     fetchedAt: '2025-10-23T07:00:00.000Z',
   },
+  benchmarks: SALARY_BENCHMARK_FALLBACKS,
 };
 
 const MEAL_DEAL_FALLBACK_SNAPSHOT = {
@@ -157,13 +182,23 @@ const MEAL_DEAL_FALLBACK_SNAPSHOT = {
 
 const MEAL_DEAL_HISTORY_SEED: MealDealHistoryPoint[] = [
   {
+    date: '2022-02-01',
+    clubcardPrice: 3,
+    regularPrice: 3.5,
+    source: {
+      name: 'Tesco meal deal February 2022 price rise coverage',
+      url: 'https://www.moneysavingexpert.com/news/2022/10/tesco-meal-deal-price-hike/',
+      fetchedAt: '2022-10-21T00:00:00.000Z',
+    },
+  },
+  {
     date: '2022-10-24',
     clubcardPrice: 3.4,
     regularPrice: 3.9,
     source: {
-      name: 'Reuters / Euronews Tesco meal deal price rise',
-      url: 'https://www.euronews.com/2022/10/22/tesco-prices',
-      fetchedAt: '2022-10-22T00:00:00.000Z',
+      name: 'Tesco meal deal October 2022 price rise coverage',
+      url: 'https://www.moneysavingexpert.com/news/2022/10/tesco-meal-deal-price-hike/',
+      fetchedAt: '2022-10-21T00:00:00.000Z',
     },
   },
   {
@@ -209,6 +244,47 @@ function response(body: unknown, init?: ResponseInit): Response {
   });
 }
 
+function summariseFetchFailureBody(body: string) {
+  const compact = body
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!compact) {
+    return '';
+  }
+
+  return compact.slice(0, 180);
+}
+
+async function fetchJson<T>(url: string): Promise<T> {
+  for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
+    const res = await fetch(url, {
+      headers: {
+        accept: 'application/json',
+        'user-agent': 'craigwatt-cost-of-living-dev/1.0',
+      },
+    });
+
+    if (res.ok) {
+      return (await res.json()) as T;
+    }
+
+    if (res.status === 429 && attempt < RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+      continue;
+    }
+
+    const body = await res.text().catch(() => '');
+    const summary = summariseFetchFailureBody(body);
+    throw new Error(`Fetch failed for ${url} with HTTP ${res.status}${summary ? `: ${summary}` : ''}`);
+  }
+
+  throw new Error(`Fetch failed for ${url} after retries`);
+}
+
 async function fetchText(url: string): Promise<string> {
   for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
     const res = await fetch(url, {
@@ -228,7 +304,34 @@ async function fetchText(url: string): Promise<string> {
     }
 
     const body = await res.text().catch(() => '');
-    throw new Error(`Fetch failed for ${url} with HTTP ${res.status}${body ? `: ${body}` : ''}`);
+    const summary = summariseFetchFailureBody(body);
+    throw new Error(`Fetch failed for ${url} with HTTP ${res.status}${summary ? `: ${summary}` : ''}`);
+  }
+
+  throw new Error(`Fetch failed for ${url} after retries`);
+}
+
+async function fetchBuffer(url: string): Promise<Buffer> {
+  for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
+    const res = await fetch(url, {
+      headers: {
+        accept: 'application/zip,application/octet-stream;q=0.9,*/*;q=0.8',
+        'user-agent': 'craigwatt-cost-of-living-dev/1.0',
+      },
+    });
+
+    if (res.ok) {
+      return Buffer.from(await res.arrayBuffer());
+    }
+
+    if (res.status === 429 && attempt < RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));
+      continue;
+    }
+
+    const body = await res.text().catch(() => '');
+    const summary = summariseFetchFailureBody(body);
+    throw new Error(`Fetch failed for ${url} with HTTP ${res.status}${summary ? `: ${summary}` : ''}`);
   }
 
   throw new Error(`Fetch failed for ${url} after retries`);
@@ -302,13 +405,25 @@ async function writeHistoryToS3(points: MealDealHistoryPoint[]) {
 }
 
 function buildMeta(
-  apiStatus: CostOfLivingPayload['apiStatus'],
+  sourceStatus: SourceStatuses,
   overrides: Partial<CostOfLivingPayload['_meta']> = {}
 ): CostOfLivingPayload['_meta'] {
   const warnings = [
-    !apiStatus.inflation ? 'Inflation data unavailable' : null,
-    !apiStatus.salaries ? 'Salary data unavailable' : null,
-    !apiStatus.mealDeals ? 'Meal-deal data unavailable' : null,
+    sourceStatus.inflation === 'fallback'
+      ? 'Inflation source is on fallback snapshot'
+      : sourceStatus.inflation === 'unavailable'
+        ? 'Inflation data unavailable'
+        : null,
+    sourceStatus.salaries === 'fallback'
+      ? 'Salary source is on fallback snapshot'
+      : sourceStatus.salaries === 'unavailable'
+        ? 'Salary data unavailable'
+        : null,
+    sourceStatus.mealDeals === 'fallback'
+      ? 'Meal-deal source is on fallback snapshot'
+      : sourceStatus.mealDeals === 'unavailable'
+        ? 'Meal-deal data unavailable'
+        : null,
   ].filter((entry): entry is string => Boolean(entry));
 
   return {
@@ -320,45 +435,94 @@ function buildMeta(
   };
 }
 
+function toAbsoluteOnsUrl(href: string) {
+  return href.startsWith('http') ? href : new URL(href, ONS_API_BASE_URL).toString();
+}
+
+function parseOnsMonthCode(value: string) {
+  const match = value.match(/^([A-Za-z]{3})-(\d{2}|\d{4})$/);
+  if (!match) {
+    return null;
+  }
+
+  const [, monthLabel, yearLabel] = match;
+  const monthMap: Record<string, string> = {
+    Jan: '01',
+    Feb: '02',
+    Mar: '03',
+    Apr: '04',
+    May: '05',
+    Jun: '06',
+    Jul: '07',
+    Aug: '08',
+    Sep: '09',
+    Oct: '10',
+    Nov: '11',
+    Dec: '12',
+  };
+  const month = monthMap[monthLabel];
+  if (!month) {
+    return null;
+  }
+
+  const year = yearLabel.length === 2 ? `19${yearLabel}` : yearLabel;
+  return `${year}-${month}`;
+}
+
 async function loadCpihSnapshot(): Promise<CostOfLivingPayload['inflation']> {
   try {
-    const html = await fetchText(ONS_CPIH_SERIES_URL);
-    const monthPattern =
-      /(\d{4})\s+(JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)\s+\|\s+([0-9]+(?:\.[0-9]+)?)/g;
-    const monthMap: Record<string, string> = {
-      JAN: '01',
-      FEB: '02',
-      MAR: '03',
-      APR: '04',
-      MAY: '05',
-      JUN: '06',
-      JUL: '07',
-      AUG: '08',
-      SEP: '09',
-      OCT: '10',
-      NOV: '11',
-      DEC: '12',
-    };
-    const history: InflationHistoryPoint[] = [];
-    let match = monthPattern.exec(html);
+    const editionPayload = await fetchJson<{
+      links?: {
+        latest_version?: {
+          href?: string;
+        };
+      };
+    }>(ONS_CPIH_EDITION_URL);
 
-    while (match) {
-      const [, year, month, value] = match;
-      const index = Number(value);
-      if (!Number.isFinite(index)) {
-        match = monthPattern.exec(html);
-        continue;
-      }
-      history.push({
-        date: `${year}-${monthMap[month]}`,
-        index,
-      });
-
-      match = monthPattern.exec(html);
+    const latestVersionHref = editionPayload.links?.latest_version?.href;
+    if (!latestVersionHref) {
+      throw new Error('ONS CPIH edition payload did not expose links.latest_version.href');
     }
 
+    const observationsUrl = `${toAbsoluteOnsUrl(latestVersionHref)}/observations?${ONS_CPIH_OBSERVATION_QUERY}`;
+    const observationsPayload = await fetchJson<{
+      observations?: Array<{
+        observation?: string;
+        dimensions?: {
+          time?: {
+            option?: {
+              id?: string;
+            };
+          };
+        };
+      }>;
+      links?: {
+        version?: {
+          href?: string;
+          id?: string;
+        };
+      };
+    }>(observationsUrl);
+
+    const history = (observationsPayload.observations ?? [])
+      .map((observation) => {
+        const rawMonth = observation.dimensions?.time?.option?.id;
+        const month = rawMonth ? parseOnsMonthCode(rawMonth) : null;
+        const index = Number(observation.observation);
+        if (!month || !Number.isFinite(index)) {
+          return null;
+        }
+
+        return {
+          date: month,
+          index,
+        };
+      })
+      .filter((point): point is InflationHistoryPoint => Boolean(point))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
     if (history.length === 0) {
-      throw new Error('ONS CPIH series page did not contain monthly history rows');
+      throw new Error('ONS CPIH observations response did not contain monthly history rows');
     }
 
     const latestPoint = history[history.length - 1];
@@ -379,8 +543,10 @@ async function loadCpihSnapshot(): Promise<CostOfLivingPayload['inflation']> {
       rate12m,
       period: latestTime.replace('-', ' '),
       source: {
-        name: 'ONS CPIH index time series',
-        url: ONS_CPIH_SERIES_URL,
+        name: 'ONS CPIH dataset API',
+        url: observationsPayload.links?.version?.href
+          ? `${toAbsoluteOnsUrl(observationsPayload.links.version.href)}/observations?${ONS_CPIH_OBSERVATION_QUERY}`
+          : observationsUrl,
         fetchedAt: new Date().toISOString(),
       },
       history,
@@ -391,11 +557,77 @@ async function loadCpihSnapshot(): Promise<CostOfLivingPayload['inflation']> {
   }
 }
 
-function parseAsheSnapshot(html: string) {
+function getInflationStatus(
+  inflation: CostOfLivingPayload['inflation']
+): SourceMode {
+  if (inflation.index === null || inflation.history.length === 0) {
+    return 'unavailable';
+  }
+
+  return inflation.source.name === INFLATION_FALLBACK_SNAPSHOT.source.name ? 'fallback' : 'live';
+}
+
+function parseDatasetZipUrl(html: string, baseUrl: string) {
   const zipMatch = html.match(/href="([^"]+\.zip)"/i) ?? html.match(/href='([^']+\.zip)'/i);
   return {
-    downloadUrl: zipMatch?.[1] ? new URL(zipMatch[1], ONS_ASHE_TABLE_7_URL).toString() : null,
+    downloadUrl: zipMatch?.[1] ? new URL(zipMatch[1], baseUrl).toString() : null,
   };
+}
+
+async function loadSalarySnapshot(table7Html: string | null, table15Html: string | null) {
+  const table7Snapshot = table7Html
+    ? parseDatasetZipUrl(table7Html, ONS_ASHE_TABLE_7_URL)
+    : { downloadUrl: SALARY_FALLBACK_SNAPSHOT.table7DownloadUrl };
+  const table15Snapshot = table15Html
+    ? parseDatasetZipUrl(table15Html, ONS_ASHE_TABLE_15_URL)
+    : { downloadUrl: SALARY_FALLBACK_SNAPSHOT.table15DownloadUrl };
+
+  if (!table7Snapshot.downloadUrl && !table15Snapshot.downloadUrl) {
+    return {
+      downloadUrl: null,
+      benchmarks: SALARY_BENCHMARK_FALLBACKS,
+      source: SALARY_FALLBACK_SNAPSHOT.source,
+      sourceMode: 'unavailable' as const,
+    };
+  }
+
+  try {
+    const [table7ZipBuffer, table15ZipBuffer] = await Promise.all([
+      table7Snapshot.downloadUrl
+        ? fetchBuffer(table7Snapshot.downloadUrl)
+        : Promise.resolve<Buffer | null>(null),
+      table15Snapshot.downloadUrl
+        ? fetchBuffer(table15Snapshot.downloadUrl)
+        : Promise.resolve<Buffer | null>(null),
+    ]);
+
+    const table7Benchmarks = table7ZipBuffer
+      ? extractSalaryBenchmarksFromAsheTable7Zip(table7ZipBuffer)
+      : SALARY_BENCHMARK_FALLBACKS.filter((benchmark) => benchmark.role === 'all-employees');
+    const table15Benchmarks = table15ZipBuffer
+      ? extractSalaryBenchmarksFromAsheTable15Zip(table15ZipBuffer)
+      : SALARY_BENCHMARK_FALLBACKS.filter((benchmark) => benchmark.role === 'software-engineer');
+
+    return {
+      downloadUrl: table7Snapshot.downloadUrl ?? table15Snapshot.downloadUrl,
+      benchmarks: [...table7Benchmarks, ...table15Benchmarks],
+      source: {
+        name: 'ONS ASHE Table 7 and Table 15 dataset pages',
+        url: ONS_ASHE_TABLE_7_URL,
+        fetchedAt: new Date().toISOString(),
+      },
+      sourceMode:
+        table7Html && table15Html ? ('live' as const) : ('fallback' as const),
+    };
+  } catch (error) {
+    console.error('ASHE benchmark extraction failed', error);
+    return {
+      downloadUrl: table7Snapshot.downloadUrl ?? table15Snapshot.downloadUrl,
+      benchmarks: SALARY_BENCHMARK_FALLBACKS,
+      source: SALARY_FALLBACK_SNAPSHOT.source,
+      sourceMode: 'fallback' as const,
+    };
+  }
 }
 
 async function loadMealDealHistory(
@@ -436,6 +668,13 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
     console.error('ASHE snapshot failed', error);
   }
 
+  let asheOccupationHtml: string | null = null;
+  try {
+    asheOccupationHtml = await fetchText(ONS_ASHE_TABLE_15_URL);
+  } catch (error) {
+    console.error('ASHE occupation snapshot failed', error);
+  }
+
   let tescoHtml: string | null = null;
   try {
     tescoHtml = await fetchText(TESCO_MEAL_DEAL_URL);
@@ -443,13 +682,30 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
     console.error('Tesco meal-deal snapshot failed', error);
   }
 
-  const salaries = asheHtml ? parseAsheSnapshot(asheHtml) : SALARY_FALLBACK_SNAPSHOT;
+  const salaries = await loadSalarySnapshot(asheHtml, asheOccupationHtml);
+  const salaryStatus: SourceMode = salaries.sourceMode;
   const parsedMealDeal = tescoHtml ? parseTescoSnapshot(tescoHtml) : null;
   const mealDeal =
     parsedMealDeal &&
     (parsedMealDeal.clubcardPrice !== null || parsedMealDeal.regularPrice !== null)
       ? parsedMealDeal
       : MEAL_DEAL_FALLBACK_SNAPSHOT;
+  const mealDealStatus: SourceMode =
+    mealDeal.clubcardPrice === null && mealDeal.regularPrice === null
+      ? 'unavailable'
+      : mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
+        ? 'fallback'
+        : 'live';
+  const sourceStatus: SourceStatuses = {
+    inflation: getInflationStatus(inflation),
+    salaries: salaryStatus,
+    mealDeals: mealDealStatus,
+  };
+  const apiStatus = {
+    inflation: sourceStatus.inflation !== 'unavailable',
+    salaries: sourceStatus.salaries !== 'unavailable',
+    mealDeals: sourceStatus.mealDeals !== 'unavailable',
+  };
   const mealDealHistory = await loadMealDealHistory({
     date: todayKey(),
     clubcardPrice: mealDeal.clubcardPrice,
@@ -465,27 +721,15 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
   });
 
   return {
-    apiStatus: {
-      inflation: inflation.index !== null,
-      salaries: Boolean(salaries.downloadUrl),
-      mealDeals: mealDeal.clubcardPrice !== null || mealDeal.regularPrice !== null,
-    },
+    apiStatus,
+    sourceStatus,
     inflation,
     salaries: {
       dataset: 'ASHE Table 7',
       downloadUrl: salaries.downloadUrl,
-      source: {
-        name:
-          salaries.downloadUrl === SALARY_FALLBACK_SNAPSHOT.downloadUrl
-            ? SALARY_FALLBACK_SNAPSHOT.source.name
-            : 'ONS ASHE Table 7 dataset page',
-        url: ONS_ASHE_TABLE_7_URL,
-        fetchedAt:
-          salaries.downloadUrl === SALARY_FALLBACK_SNAPSHOT.downloadUrl
-            ? SALARY_FALLBACK_SNAPSHOT.source.fetchedAt
-            : new Date().toISOString(),
-      },
-      notes: 'Public source used to derive salary-by-location snapshots.',
+      source: salaries.source,
+      notes: 'Public sources used to derive representative local-authority and software-engineer salary benchmarks.',
+      benchmarks: salaries.benchmarks,
     },
     mealDeal: {
       retailer: 'Tesco',
@@ -505,11 +749,7 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
       notes: 'Public retailer page used to snapshot meal-deal pricing.',
       history: mealDealHistory,
     },
-    _meta: buildMeta({
-      inflation: inflation.index !== null,
-      salaries: Boolean(salaries.downloadUrl),
-      mealDeals: mealDeal.clubcardPrice !== null || mealDeal.regularPrice !== null,
-    }),
+    _meta: buildMeta(sourceStatus),
   };
 }
 
@@ -519,7 +759,11 @@ export async function GET() {
   if (cachedPayload && now - lastFetchedAt < TTL_MS) {
     return response({
       ...cachedPayload,
-      _meta: buildMeta(cachedPayload.apiStatus, { cold: false, stale: false, local: true }),
+      _meta: buildMeta(cachedPayload.sourceStatus, {
+        cold: false,
+        stale: false,
+        local: true,
+      }),
     });
   }
 
@@ -532,7 +776,11 @@ export async function GET() {
     lastFetchedAt = Date.now();
     return response({
       ...cachedPayload,
-      _meta: buildMeta(cachedPayload.apiStatus, { cold: false, stale: false, local: true }),
+      _meta: buildMeta(cachedPayload.sourceStatus, {
+        cold: false,
+        stale: false,
+        local: true,
+      }),
     });
   } catch (error) {
     console.error('Local cost-of-living route failed', error);
@@ -541,7 +789,7 @@ export async function GET() {
       return response(
         {
           ...cachedPayload,
-          _meta: buildMeta(cachedPayload.apiStatus, {
+          _meta: buildMeta(cachedPayload.sourceStatus, {
             ...cachedPayload._meta,
             stale: true,
             local: true,

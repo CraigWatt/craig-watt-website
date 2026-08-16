@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { Alert, Button, Card, CardBody, CardHeader, Chip, Spinner } from '@heroui/react';
-import { AreaChart, type CustomTooltipProps } from '@tremor/react';
+import { AreaChart, LineChart, type CustomTooltipProps } from '@tremor/react';
 import { Activity } from '../components/icons';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
 
@@ -13,11 +13,31 @@ type SourceSnapshot = {
   fetchedAt: string;
 };
 
+type SourceMode = 'live' | 'fallback' | 'unavailable';
+type SalaryRole = 'all-employees' | 'software-engineer';
+
+type SalaryBenchmark = {
+  role: SalaryRole;
+  key: 'central-london' | 'west-london' | 'edinburgh';
+  label: string;
+  locality: string;
+  areaCode: string;
+  annualMedian: number | null;
+  sourceSheet: string;
+  sourceDataset: string;
+  notes: string;
+};
+
 type CostOfLivingPayload = {
   apiStatus: {
     inflation: boolean;
     salaries: boolean;
     mealDeals: boolean;
+  };
+  sourceStatus: {
+    inflation: SourceMode;
+    salaries: SourceMode;
+    mealDeals: SourceMode;
   };
   inflation: {
     index: number | null;
@@ -31,6 +51,7 @@ type CostOfLivingPayload = {
     downloadUrl: string | null;
     source: SourceSnapshot;
     notes: string;
+    benchmarks: SalaryBenchmark[];
   };
   mealDeal: {
     retailer: string;
@@ -61,12 +82,24 @@ type InflationHistoryPoint = {
   index: number;
 };
 
-type HistoryRange = '1y' | '5y' | '10y' | '20y' | 'all';
+type HistoryRange = '1y' | '5y' | '10y' | '20y' | '40y';
 
 type MealDealSnapshot = {
   clubcardPrice: number | null;
   regularPrice: number | null;
   fetchedAt: string;
+};
+
+const FALLBACK_BENCHMARK: SalaryBenchmark = {
+  role: 'all-employees',
+  key: 'central-london',
+  label: 'Central London',
+  locality: 'Westminster',
+  areaCode: 'E09000033',
+  annualMedian: null,
+  sourceSheet: 'Full-Time',
+  sourceDataset: 'ASHE Table 7',
+  notes: 'Representative benchmark unavailable right now.',
 };
 
 const fetcher = async (url: string): Promise<CostOfLivingPayload> => {
@@ -116,6 +149,11 @@ function formatMoney(value: number | null) {
   }).format(value);
 }
 
+function formatPercent(value: number | null, fractionDigits = 1) {
+  if (value === null) return 'Unavailable';
+  return `${formatNumber(value, fractionDigits)}%`;
+}
+
 function parseSalaryInput(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
@@ -134,15 +172,45 @@ function formatDisplayDate(value: string) {
   }).format(parsed);
 }
 
+function monthKeyFromValue(value: string) {
+  const match = value.match(/^(\d{4}-\d{2})/);
+  return match ? match[1] : value;
+}
+
+function compareMonthKeys(left: string, right: string) {
+  return left.localeCompare(right);
+}
+
+function enumerateMonthKeys(startMonth: string, endMonth: string) {
+  const months: string[] = [];
+  let [year, month] = startMonth.split('-').map(Number);
+  const [endYear, endMonthNumber] = endMonth.split('-').map(Number);
+
+  while (year < endYear || (year === endYear && month <= endMonthNumber)) {
+    months.push(`${year}-${String(month).padStart(2, '0')}`);
+    month += 1;
+    if (month > 12) {
+      month = 1;
+      year += 1;
+    }
+  }
+
+  return months;
+}
+
 function DataCard({
   title,
   value,
   detail,
+  source,
+  fetchedAt,
   tone = 'default',
 }: {
   title: string;
   value: string;
   detail?: string;
+  source?: string;
+  fetchedAt?: string;
   tone?: 'default' | 'success' | 'warning';
 }) {
   const toneClass =
@@ -162,9 +230,26 @@ function DataCard({
       <CardBody className="space-y-2">
         <p className={`text-2xl font-semibold ${toneClass}`}>{value}</p>
         {detail && <p className="text-sm text-[var(--color-muted-foreground)] leading-relaxed">{detail}</p>}
+        {source && <p className="text-xs text-[var(--color-muted)]">{source}</p>}
+        {fetchedAt && <p className="text-xs text-[var(--color-muted)]">Updated {formatDisplayDate(fetchedAt)}</p>}
       </CardBody>
     </Card>
   );
+}
+
+function formatSourceState(mode: SourceMode) {
+  switch (mode) {
+    case 'live':
+      return 'Live';
+    case 'fallback':
+      return 'Fallback';
+    default:
+      return 'Unavailable';
+  }
+}
+
+function toneFromSourceState(mode: SourceMode): 'success' | 'warning' {
+  return mode === 'live' ? 'success' : 'warning';
 }
 
 function MealDealTooltip({ active, payload, label }: CustomTooltipProps) {
@@ -172,21 +257,32 @@ function MealDealTooltip({ active, payload, label }: CustomTooltipProps) {
     return null;
   }
 
+  const point = payload[0]?.payload as
+    | {
+        monthKey?: string;
+        clubcardRaw?: number | null;
+        cpiRaw?: number | null;
+      }
+    | undefined;
+
   const dateLabel =
-    typeof label === 'string'
-      ? new Intl.DateTimeFormat('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-        }).format(new Date(label))
-      : String(label ?? '');
+    point?.monthKey
+      ? formatMonthYear(point.monthKey)
+      : typeof label === 'string'
+        ? new Intl.DateTimeFormat('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }).format(new Date(label))
+        : String(label ?? '');
 
   return (
     <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-lg backdrop-blur">
       <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-muted)]">{dateLabel}</p>
       <div className="mt-3 space-y-2">
         {payload.map((entry) => {
-          const value = typeof entry.value === 'number' ? formatCurrency(entry.value) : 'Unavailable';
+          const value =
+            typeof entry.value === 'number' ? `${formatNumber(entry.value, 1)} index` : 'Unavailable';
           return (
             <div key={String(entry.dataKey)} className="flex items-center justify-between gap-6">
               <span className="inline-flex items-center gap-2 text-sm text-[var(--color-foreground)]">
@@ -200,6 +296,23 @@ function MealDealTooltip({ active, payload, label }: CustomTooltipProps) {
             </div>
           );
         })}
+        {point && (
+          <>
+            <div className="mt-3 h-px bg-[var(--color-border)]" />
+            <div className="flex items-center justify-between gap-6 text-sm">
+              <span className="text-[var(--color-muted-foreground)]">Clubcard price</span>
+              <span className="font-semibold text-[var(--color-foreground)]">
+                {formatCurrency(point.clubcardRaw ?? null)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-6 text-sm">
+              <span className="text-[var(--color-muted-foreground)]">CPI level</span>
+              <span className="font-semibold text-[var(--color-foreground)]">
+                {formatNumber(point.cpiRaw ?? null, 1)}
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -208,63 +321,115 @@ function MealDealTooltip({ active, payload, label }: CustomTooltipProps) {
 function MealDealHistoryChart({
   history,
   currentSnapshot,
+  inflationHistory,
 }: {
   history: MealDealHistoryPoint[];
   currentSnapshot: MealDealSnapshot;
+  inflationHistory: InflationHistoryPoint[];
 }) {
-  const [historyRange, setHistoryRange] = useState<HistoryRange>('20y');
+  const [historyRange, setHistoryRange] = useState<HistoryRange>('40y');
   const points = [...history].sort((a, b) => a.date.localeCompare(b.date));
 
   const chartData = useMemo(() => {
     const now = new Date();
-    const rangeYears: Record<Exclude<HistoryRange, 'all'>, number> = {
+    const rangeYears: Record<HistoryRange, number> = {
       '1y': 1,
       '5y': 5,
       '10y': 10,
       '20y': 20,
+      '40y': 40,
     };
 
-    const cutoff =
-      historyRange === 'all'
-        ? null
-        : new Date(now.getFullYear() - rangeYears[historyRange], now.getMonth(), now.getDate());
+    const cutoff = new Date(
+      now.getFullYear() - rangeYears[historyRange],
+      now.getMonth(),
+      now.getDate()
+    );
 
-    const basePoints = points
-      .filter((point) => {
-        if (!cutoff) return true;
-        return new Date(point.date) >= cutoff;
-      })
+    const mealEvents = points
       .map((point) => ({
-        date: point.date,
-        Clubcard: point.clubcardPrice,
-        Regular: point.regularPrice,
-      }));
+        monthKey: monthKeyFromValue(point.date),
+        clubcardPrice: point.clubcardPrice,
+      }))
+      .filter((point) => point.clubcardPrice !== null);
 
-    const currentDate = currentSnapshot.fetchedAt ? currentSnapshot.fetchedAt.slice(0, 10) : '';
-    const hasCurrentValues =
-      currentSnapshot.clubcardPrice !== null || currentSnapshot.regularPrice !== null;
-    const currentPoint =
-      hasCurrentValues && currentDate
-        ? {
-            date: currentDate,
-            Clubcard: currentSnapshot.clubcardPrice,
-            Regular: currentSnapshot.regularPrice,
-          }
-        : null;
-
-    if (!currentPoint) {
-      return basePoints;
+    const currentMonthKey = currentSnapshot.fetchedAt
+      ? monthKeyFromValue(currentSnapshot.fetchedAt.slice(0, 10))
+      : '';
+    if (currentMonthKey && currentSnapshot.clubcardPrice !== null) {
+      mealEvents.push({
+        monthKey: currentMonthKey,
+        clubcardPrice: currentSnapshot.clubcardPrice,
+      });
     }
 
-    const deduped = new Map(basePoints.map((point) => [point.date, point]));
-    deduped.set(currentPoint.date, currentPoint);
-    return Array.from(deduped.values()).sort((a, b) => a.date.localeCompare(b.date));
-  }, [historyRange, points]);
+    const dedupedMealEvents = Array.from(
+      new Map(mealEvents.map((point) => [point.monthKey, point])).values()
+    ).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
 
-  if (points.length === 0) {
+    const cpiLookup = new Map(inflationHistory.map((point) => [point.date, point.index]));
+    const cpiMonths = inflationHistory.map((point) => point.date).sort(compareMonthKeys);
+    const mealMonths = dedupedMealEvents.map((point) => point.monthKey).sort(compareMonthKeys);
+
+    if (cpiMonths.length === 0) {
+      return [];
+    }
+
+    const earliestCpiMonth = cpiMonths[0];
+    const earliestMealMonth = mealMonths[0] ?? null;
+    const latestCpiMonth = cpiMonths[cpiMonths.length - 1];
+    const latestMealMonth = mealMonths[mealMonths.length - 1] ?? latestCpiMonth;
+    const overallEnd =
+      compareMonthKeys(latestMealMonth, latestCpiMonth) > 0 ? latestMealMonth : latestCpiMonth;
+    const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
+    const filteredStart =
+      compareMonthKeys(rangeStartMonth, earliestCpiMonth) > 0 ? rangeStartMonth : earliestCpiMonth;
+    const months = enumerateMonthKeys(filteredStart, overallEnd);
+    let latestClubcard: number | null = null;
+    let mealIndex = 0;
+    let clubcardBase: number | null = null;
+    let cpiBase: number | null = null;
+
+    return months
+      .map((monthKey) => {
+        while (mealIndex < dedupedMealEvents.length && dedupedMealEvents[mealIndex].monthKey <= monthKey) {
+          latestClubcard = dedupedMealEvents[mealIndex].clubcardPrice;
+          mealIndex += 1;
+        }
+
+        const cpiRaw = cpiLookup.get(monthKey) ?? null;
+        if (cpiBase === null && cpiRaw !== null) {
+          cpiBase = cpiRaw;
+        }
+
+        const clubcardRaw =
+          earliestMealMonth !== null && compareMonthKeys(monthKey, earliestMealMonth) >= 0
+            ? latestClubcard
+            : null;
+        if (clubcardBase === null && clubcardRaw !== null) {
+          clubcardBase = clubcardRaw;
+        }
+
+        return {
+          date: `${monthKey}-01`,
+          monthKey,
+          Clubcard:
+            clubcardRaw !== null && clubcardBase !== null && clubcardBase !== 0
+              ? (clubcardRaw / clubcardBase) * 100
+              : null,
+          CPI:
+            cpiRaw !== null && cpiBase !== null && cpiBase !== 0 ? (cpiRaw / cpiBase) * 100 : null,
+          clubcardRaw,
+          cpiRaw,
+        };
+      })
+      .filter((point) => point.Clubcard !== null || point.CPI !== null);
+  }, [currentSnapshot.clubcardPrice, currentSnapshot.fetchedAt, historyRange, inflationHistory, points]);
+
+  if (chartData.length === 0) {
     return (
       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-6 text-sm text-[var(--color-muted-foreground)]">
-        No meal-deal history yet.
+        Clubcard and CPI comparison is unavailable right now.
       </div>
     );
   }
@@ -274,17 +439,10 @@ function MealDealHistoryChart({
     { label: '5Y', value: '5y' },
     { label: '10Y', value: '10y' },
     { label: '20Y', value: '20y' },
-    { label: 'All', value: 'all' },
+    { label: '40Y', value: '40y' },
   ];
-
   const firstPoint = chartData[0];
   const lastPoint = chartData[chartData.length - 1];
-  const latestLabel =
-    lastPoint?.date && currentSnapshot.fetchedAt.slice(0, 10) === lastPoint.date
-      ? `Latest tracked ${formatDisplayDate(lastPoint.date)}`
-      : lastPoint?.date
-        ? `Latest historical ${formatDisplayDate(lastPoint.date)}`
-        : 'Latest';
 
   return (
     <div className="space-y-4">
@@ -295,13 +453,16 @@ function MealDealHistoryChart({
             Clubcard
           </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-            Regular
+            <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
+            CPI
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            Seeded from known price changes and then kept up to date by the scraper.
+            CPI from Jan 1988
+          </span>
+          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
+            Tesco from Feb 2022
           </span>
           <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
             {rangeButtons.map((button) => {
@@ -331,9 +492,9 @@ function MealDealHistoryChart({
           className="h-80"
           data={chartData}
           index="date"
-          categories={['Clubcard', 'Regular']}
-          colors={['cyan', 'amber']}
-          valueFormatter={formatCurrency}
+          categories={['Clubcard', 'CPI']}
+          colors={['cyan', 'rose']}
+          valueFormatter={(value: number) => `${formatNumber(value, 1)} index`}
           showLegend={false}
           showGridLines
           showYAxis
@@ -347,12 +508,209 @@ function MealDealHistoryChart({
           customTooltip={MealDealTooltip}
         />
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-          <span>{firstPoint?.date ? formatDisplayDate(firstPoint.date) : 'Earlier'}</span>
-          <span>
-            Last {historyRange === 'all' ? 'all available' : historyRange.toUpperCase()} · {latestLabel}
-          </span>
-          <span>{lastPoint?.date ? formatDisplayDate(lastPoint.date) : 'Latest'}</span>
+          <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
+          <span>Last {historyRange.toUpperCase()} · Each series starts at 100 from its own visible baseline</span>
+          <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
         </div>
+        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+          Clubcard and CPI are normalized independently from the first visible month so you can
+          compare rate of change rather than absolute units.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SalaryTooltip({ active, payload, label }: CustomTooltipProps) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const point = payload[0]?.payload as { monthKey?: string } | undefined;
+  const dateLabel = point?.monthKey ? formatMonthYear(point.monthKey) : String(label ?? '');
+
+  return (
+    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-lg backdrop-blur">
+      <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-muted)]">{dateLabel}</p>
+      <div className="mt-3 space-y-2">
+        {payload.map((entry) => {
+          const value =
+            typeof entry.value === 'number' ? formatCurrency(entry.value) : 'Unavailable';
+          return (
+            <div key={String(entry.dataKey)} className="flex items-center justify-between gap-6">
+              <span className="inline-flex items-center gap-2 text-sm text-[var(--color-foreground)]">
+                <span
+                  className="h-2.5 w-2.5 rounded-full"
+                  style={{ backgroundColor: String(entry.color ?? 'currentColor') }}
+                />
+                {String(entry.name ?? entry.dataKey)}
+              </span>
+              <span className="text-sm font-semibold text-[var(--color-foreground)]">{value}</span>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SalaryHistoryChart({
+  inflationHistory,
+  salaryValue,
+  salaryStartMonth,
+  benchmarkLabel,
+  benchmarkValue,
+}: {
+  inflationHistory: InflationHistoryPoint[];
+  salaryValue: number;
+  salaryStartMonth: string | null;
+  benchmarkLabel: string;
+  benchmarkValue: number | null;
+}) {
+  const [historyRange, setHistoryRange] = useState<HistoryRange>('10y');
+
+  const chartData = useMemo(() => {
+    if (!salaryStartMonth || salaryValue <= 0) {
+      return [];
+    }
+
+    const rangeYears: Record<HistoryRange, number> = {
+      '1y': 1,
+      '5y': 5,
+      '10y': 10,
+      '20y': 20,
+      '40y': 40,
+    };
+    const cpiLookup = new Map(inflationHistory.map((point) => [point.date, point.index]));
+    const salaryBaseIndex = cpiLookup.get(salaryStartMonth) ?? null;
+    if (salaryBaseIndex === null || salaryBaseIndex === 0) {
+      return [];
+    }
+
+    const now = new Date();
+    const cutoff = new Date(
+      now.getFullYear() - rangeYears[historyRange],
+      now.getMonth(),
+      now.getDate()
+    );
+    const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
+    const firstMonth =
+      compareMonthKeys(rangeStartMonth, salaryStartMonth) > 0 ? rangeStartMonth : salaryStartMonth;
+    const lastMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
+    if (compareMonthKeys(firstMonth, lastMonth) > 0) {
+      return [];
+    }
+
+    return enumerateMonthKeys(firstMonth, lastMonth)
+      .map((monthKey) => {
+        const cpiIndex = cpiLookup.get(monthKey);
+        if (cpiIndex === undefined) {
+          return null;
+        }
+
+        return {
+          date: `${monthKey}-01`,
+          monthKey,
+          'Your salary': salaryValue,
+          'Inflation-adjusted salary': salaryValue * (cpiIndex / salaryBaseIndex),
+          [benchmarkLabel]: benchmarkValue,
+        };
+      })
+      .filter((point) => Boolean(point));
+  }, [benchmarkLabel, benchmarkValue, historyRange, inflationHistory, salaryStartMonth, salaryValue]);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-6 text-sm text-[var(--color-muted-foreground)]">
+        Salary history comparison is unavailable right now.
+      </div>
+    );
+  }
+
+  const rangeButtons: { label: string; value: HistoryRange }[] = [
+    { label: '1Y', value: '1y' },
+    { label: '5Y', value: '5y' },
+    { label: '10Y', value: '10y' },
+    { label: '20Y', value: '20y' },
+    { label: '40Y', value: '40y' },
+  ];
+  const firstPoint = chartData[0] as { monthKey?: string };
+  const lastPoint = chartData[chartData.length - 1] as { monthKey?: string };
+  const categories =
+    benchmarkValue === null
+      ? (['Your salary', 'Inflation-adjusted salary'] as const)
+      : (['Your salary', 'Inflation-adjusted salary', benchmarkLabel] as const);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-zinc-500" />
+            Your salary
+          </span>
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+            Inflation-adjusted salary
+          </span>
+          {benchmarkValue !== null && (
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
+              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
+              {benchmarkLabel}
+            </span>
+          )}
+        </div>
+        <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
+          {rangeButtons.map((button) => {
+            const active = historyRange === button.value;
+            return (
+              <button
+                key={button.value}
+                type="button"
+                onClick={() => setHistoryRange(button.value)}
+                className={[
+                  'rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors',
+                  active
+                    ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                ].join(' ')}
+              >
+                {button.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 md:p-5 shadow-sm">
+        <LineChart
+          className="h-80"
+          data={chartData}
+          index="date"
+          categories={[...categories]}
+          colors={benchmarkValue === null ? ['gray', 'emerald'] : ['gray', 'emerald', 'amber']}
+          valueFormatter={(value: number) => formatCurrency(value)}
+          showLegend={false}
+          showGridLines
+          showYAxis
+          showXAxis={false}
+          autoMinValue
+          connectNulls
+          curveType="monotone"
+          yAxisWidth={72}
+          startEndOnly
+          customTooltip={SalaryTooltip}
+        />
+        <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+          <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
+          <span>Last {historyRange.toUpperCase()} · Actual GBP values</span>
+          <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
+        </div>
+        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+          Your salary stays flat from the month you selected. The inflation-adjusted line shows
+          what that salary would need to become over time to preserve the same buying power. The
+          benchmark line is the current selected location benchmark, shown as a horizontal reference.
+        </p>
       </div>
     </div>
   );
@@ -360,9 +718,14 @@ function MealDealHistoryChart({
 
 export default function CostOfLivingClient() {
   const [historicalSalary, setHistoricalSalary] = useState('100000');
+  const [selectedRole, setSelectedRole] = useState<SalaryRole>('all-employees');
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
   );
+  const [submittedSalaryAnalysis, setSubmittedSalaryAnalysis] = useState<{
+    salary: number;
+    period: string;
+  } | null>(null);
 
   const { data, error, isValidating, mutate } = useSWR<CostOfLivingPayload>(
     '/api/cost-of-living',
@@ -391,6 +754,7 @@ export default function CostOfLivingClient() {
     downloadUrl: null,
     source: { name: 'Unavailable', url: '#', fetchedAt: '' },
     notes: '',
+    benchmarks: [],
   };
   const mealDeal = data?.mealDeal ?? {
     retailer: 'Tesco',
@@ -400,10 +764,10 @@ export default function CostOfLivingClient() {
     notes: '',
     history: [],
   };
-  const apiStatus = data?.apiStatus ?? {
-    inflation: false,
-    salaries: false,
-    mealDeals: false,
+  const sourceStates = data?.sourceStatus ?? {
+    inflation: 'unavailable' as SourceMode,
+    salaries: 'unavailable' as SourceMode,
+    mealDeals: 'unavailable' as SourceMode,
   };
   const _meta = data?._meta ?? {
     cold: false,
@@ -413,10 +777,10 @@ export default function CostOfLivingClient() {
     warnings: [],
   };
 
-  const sourceStatus = [
-    { label: 'Inflation', ok: apiStatus.inflation },
-    { label: 'Salaries', ok: apiStatus.salaries },
-    { label: 'Meal deals', ok: apiStatus.mealDeals },
+  const sourceHealthItems = [
+    { label: 'Inflation', mode: sourceStates.inflation },
+    { label: 'Salaries', mode: sourceStates.salaries },
+    { label: 'Meal deals', mode: sourceStates.mealDeals },
   ];
 
   const historicalSalaryValue = parseSalaryInput(historicalSalary);
@@ -458,32 +822,106 @@ export default function CostOfLivingClient() {
     latestInflationPoint && selectedInflationPoint && selectedInflationPoint.index !== 0
       ? latestInflationPoint.index / selectedInflationPoint.index
       : null;
+  const selectedSalaryPeriod = `${selectedSalaryYear}-${selectedSalaryMonth}`;
+  const submittedInflationPoint =
+    submittedSalaryAnalysis
+      ? inflationHistory.find((point) => point.date === submittedSalaryAnalysis.period) ?? null
+      : null;
+  const submittedInflationMultiplier =
+    latestInflationPoint && submittedInflationPoint && submittedInflationPoint.index !== 0
+      ? latestInflationPoint.index / submittedInflationPoint.index
+      : null;
 
-  const benchmarkRows = [
-    {
-      key: 'central-london' as const,
-      label: 'Central London',
-      value: 78000,
-      detail: 'Working benchmark for the City and West End salary band.',
-    },
-    {
-      key: 'west-london' as const,
-      label: 'West London',
-      value: 70000,
-      detail: 'Useful as a west London benchmark for hybrid and office-based work.',
-    },
-    {
-      key: 'edinburgh' as const,
-      label: 'Edinburgh',
-      value: 62000,
-      detail: 'A lower-cost comparator for a broader UK market view.',
-    },
-  ];
+  const benchmarkRows = salaries.benchmarks.filter((row) => {
+    if (row.role !== selectedRole) {
+      return false;
+    }
+
+    if (selectedRole === 'software-engineer' && row.key === 'west-london') {
+      return false;
+    }
+
+    return true;
+  });
   const activeBenchmark =
-    benchmarkRows.find((row) => row.key === selectedLocation) ?? benchmarkRows[0];
+    benchmarkRows.find((row) => row.key === selectedLocation) ?? benchmarkRows[0] ?? FALLBACK_BENCHMARK;
+  const roleOptions: Array<{ key: SalaryRole; label: string }> = [
+    { key: 'all-employees', label: 'All employees' },
+    { key: 'software-engineer', label: 'Software engineer' },
+  ];
+
+  useEffect(() => {
+    if (!benchmarkRows.some((row) => row.key === selectedLocation) && benchmarkRows[0]) {
+      setSelectedLocation(benchmarkRows[0].key);
+    }
+  }, [benchmarkRows, selectedLocation]);
 
   const inflatedHistoricalSalary =
     inflationMultiplier === null ? null : historicalSalaryValue * inflationMultiplier;
+  const submittedAdjustedSalary =
+    submittedSalaryAnalysis && submittedInflationMultiplier !== null
+      ? submittedSalaryAnalysis.salary * submittedInflationMultiplier
+      : null;
+  const salaryAnalysisReady = submittedSalaryAnalysis !== null && submittedInflationPoint !== null;
+  const salaryAnalysisStale =
+    submittedSalaryAnalysis !== null &&
+    (submittedSalaryAnalysis.salary !== historicalSalaryValue ||
+      submittedSalaryAnalysis.period !== selectedSalaryPeriod);
+  const submittedSalaryPeriodLabel = submittedInflationPoint
+    ? formatMonthYear(submittedInflationPoint.date)
+    : null;
+  const latestInflationPeriodLabel = latestInflationPoint
+    ? formatMonthYear(latestInflationPoint.date)
+    : null;
+  const mealDealStartPoint =
+    [...mealDeal.history]
+      .filter((point) => point.clubcardPrice !== null)
+      .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
+  const mealDealPercentChange =
+    mealDealStartPoint?.clubcardPrice && mealDeal.clubcardPrice
+      ? ((mealDeal.clubcardPrice - mealDealStartPoint.clubcardPrice) / mealDealStartPoint.clubcardPrice) * 100
+      : null;
+  const salaryRequiredGrowthPct =
+    submittedSalaryAnalysis && submittedAdjustedSalary !== null
+      ? ((submittedAdjustedSalary - submittedSalaryAnalysis.salary) / submittedSalaryAnalysis.salary) * 100
+      : null;
+  const benchmarkDelta =
+    submittedAdjustedSalary !== null && activeBenchmark.annualMedian !== null
+      ? submittedAdjustedSalary - activeBenchmark.annualMedian
+      : null;
+  const summaryParagraph = useMemo(() => {
+    const roleLabel = selectedRole === 'software-engineer' ? 'software engineer' : 'all-employee';
+    const salarySentence =
+      submittedSalaryAnalysis &&
+      submittedSalaryPeriodLabel &&
+      latestInflationPeriodLabel &&
+      submittedAdjustedSalary !== null
+        ? `A salary of ${formatMoney(submittedSalaryAnalysis.salary)} from ${submittedSalaryPeriodLabel} would need to be ${formatMoney(submittedAdjustedSalary)} by ${latestInflationPeriodLabel} to preserve the same buying power, a required increase of ${formatPercent(salaryRequiredGrowthPct)}.`
+        : 'Salary purchasing-power adjustment is currently unavailable because the inflation history needed for that calculation is missing.';
+    const benchmarkSentence =
+      benchmarkDelta !== null && activeBenchmark.annualMedian !== null
+        ? `Against the current ${activeBenchmark.label} ${roleLabel} benchmark of ${formatMoney(activeBenchmark.annualMedian)}, that leaves you ${benchmarkDelta >= 0 ? formatMoney(benchmarkDelta) : formatMoney(Math.abs(benchmarkDelta))} ${benchmarkDelta >= 0 ? 'above' : 'below'} the benchmark today.`
+        : `The current ${activeBenchmark.label} ${roleLabel} benchmark is ${formatMoney(activeBenchmark.annualMedian)}.`;
+    const mealDealSentence =
+      mealDealStartPoint?.clubcardPrice !== null && mealDeal.clubcardPrice !== null
+        ? `Over the same broader period, the Tesco Clubcard meal deal moved from ${formatCurrency(mealDealStartPoint.clubcardPrice)} in ${formatDisplayDate(mealDealStartPoint.date)} to ${formatCurrency(mealDeal.clubcardPrice)} now, a change of ${formatPercent(mealDealPercentChange)}.`
+        : 'The Tesco meal-deal series is currently unavailable, so the everyday-cost comparison is paused.';
+
+    return `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
+  }, [
+    activeBenchmark.annualMedian,
+    activeBenchmark.label,
+    benchmarkDelta,
+    latestInflationPeriodLabel,
+    mealDeal.clubcardPrice,
+    mealDealPercentChange,
+    mealDealStartPoint,
+    salaryRequiredGrowthPct,
+    selectedRole,
+    submittedAdjustedSalary,
+    submittedSalaryAnalysis,
+    submittedSalaryPeriodLabel,
+  ]);
 
   if (error) {
     return (
@@ -557,44 +995,48 @@ export default function CostOfLivingClient() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <DataCard
-            title="Inflation"
-            value={
-              inflation.index === null ? 'Unavailable' : `${formatNumber(inflation.index, 2)}`
-            }
+            title="Inflation source"
+            value={formatSourceState(sourceStates.inflation)}
             detail={
               inflation.rate12m === null
-                ? 'Latest CPIH snapshot is not available right now.'
-                : `${formatNumber(inflation.rate12m, 2)}% year on year`
+                ? 'Monthly CPIH history for salary adjustment is unavailable right now.'
+                : `Latest CPIH reading ${formatNumber(inflation.index, 2)} with ${formatNumber(inflation.rate12m, 2)}% year-on-year inflation.`
             }
-            tone={apiStatus.inflation ? 'success' : 'warning'}
+            source={inflation.source.name}
+            fetchedAt={inflation.source.fetchedAt}
+            tone={toneFromSourceState(sourceStates.inflation)}
           />
 
-          <DataCard
-            title="Salary feed"
-            value={apiStatus.salaries ? 'Available' : 'Unavailable'}
+              <DataCard
+            title="Salary source"
+            value={formatSourceState(sourceStates.salaries)}
             detail={
               salaries.downloadUrl
-                ? 'ONS ASHE Table 7 download is reachable for building location-based salary views.'
+                ? 'ONS ASHE Table 7 and Table 15 are reachable for locality and software-engineer salary benchmarks.'
                 : 'The salary source is currently unavailable.'
             }
-            tone={apiStatus.salaries ? 'success' : 'warning'}
+            source={salaries.source.name}
+            fetchedAt={salaries.source.fetchedAt}
+            tone={toneFromSourceState(sourceStates.salaries)}
           />
 
           <DataCard
-            title="Meal deal"
-            value={
+            title="Everyday price source"
+            value={formatSourceState(sourceStates.mealDeals)}
+            detail={
               mealDeal.clubcardPrice === null && mealDeal.regularPrice === null
-                ? 'Unavailable'
-                : `${formatCurrency(mealDeal.clubcardPrice)} / ${formatCurrency(mealDeal.regularPrice)}`
+                ? `Tracked from ${mealDeal.retailer} as a lightweight everyday-cost signal.`
+                : `Current ${mealDeal.retailer} signal: ${formatCurrency(mealDeal.clubcardPrice)} Clubcard / ${formatCurrency(mealDeal.regularPrice)} regular.`
             }
-            detail={`Tracked from ${mealDeal.retailer} as a lightweight everyday-cost signal.`}
-            tone={apiStatus.mealDeals ? 'success' : 'warning'}
+            source={mealDeal.source.name}
+            fetchedAt={mealDeal.source.fetchedAt}
+            tone={toneFromSourceState(sourceStates.mealDeals)}
           />
         </div>
       </section>
 
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <Card shadow="sm" radius="lg" className="lg:col-span-5 border border-[var(--color-border)]">
+      <section>
+        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
           <CardHeader className="flex items-center gap-3">
             <div className="space-y-1">
               <p className="font-semibold">Inflation calculator</p>
@@ -668,19 +1110,70 @@ export default function CostOfLivingClient() {
                   : `Adjusted from ${formatMonthYear(selectedInflationPoint.date)} to ${formatMonthYear(latestInflationPoint.date)} using the CPIH index series.`}
               </p>
             </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <Button
+                onPress={() =>
+                  setSubmittedSalaryAnalysis({
+                    salary: historicalSalaryValue,
+                    period: selectedSalaryPeriod,
+                  })
+                }
+                variant="solid"
+                color="primary"
+                isDisabled={historicalSalaryValue <= 0 || selectedInflationPoint === null}
+              >
+                Generate salary analysis
+              </Button>
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                Generate the salary graph and written summary from the salary and date you selected.
+              </p>
+            </div>
+            {salaryAnalysisStale && (
+              <Alert
+                color="warning"
+                variant="flat"
+                title="Inputs changed"
+                description="Regenerate the salary analysis to update the salary graph and summary."
+              />
+            )}
           </CardBody>
         </Card>
+      </section>
 
-        <Card shadow="sm" radius="lg" className="lg:col-span-7 border border-[var(--color-border)]">
+      <section>
+        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
           <CardHeader className="flex items-center gap-3">
             <div className="space-y-1">
               <p className="font-semibold">Location snapshots</p>
               <p className="text-sm text-[var(--color-muted-foreground)]">
-                Keep these as working benchmarks until the salary extractor lands.
+                {selectedRole === 'all-employees'
+                  ? 'Representative local-authority medians from ONS ASHE Table 7 full-time annual pay.'
+                  : 'Representative software-engineer medians from ONS ASHE Table 15 full-time annual pay.'}
               </p>
             </div>
           </CardHeader>
           <CardBody className="space-y-5">
+            <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+              {roleOptions.map((option) => {
+                const active = option.key === selectedRole;
+                return (
+                  <button
+                    key={option.key}
+                    type="button"
+                    onClick={() => setSelectedRole(option.key)}
+                    className={[
+                      'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                      active
+                        ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                    ].join(' ')}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+
             <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
               {benchmarkRows.map((row) => {
                 const active = row.key === activeBenchmark.key;
@@ -705,16 +1198,18 @@ export default function CostOfLivingClient() {
             <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-5 space-y-4">
               <div className="space-y-2">
                 <p className="text-lg font-semibold">{activeBenchmark.label}</p>
-                <p className="text-sm text-[var(--color-muted-foreground)]">{activeBenchmark.detail}</p>
+                <p className="text-sm text-[var(--color-muted-foreground)]">
+                  {activeBenchmark.notes} Source locality: {activeBenchmark.locality}.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
                   <p className="text-[11px] uppercase tracking-widest text-[var(--color-muted)]">
                     Annual salary
                   </p>
                   <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
-                    {formatMoney(activeBenchmark.value)}
+                    {formatMoney(activeBenchmark.annualMedian)}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
@@ -722,17 +1217,9 @@ export default function CostOfLivingClient() {
                     Monthly
                   </p>
                   <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
-                    {formatMoney(activeBenchmark.value / 12)}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                  <p className="text-[11px] uppercase tracking-widest text-[var(--color-muted)]">
-                    Today equivalent
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
-                    {inflationMultiplier === null
+                    {activeBenchmark.annualMedian === null
                       ? 'Unavailable'
-                      : formatMoney(activeBenchmark.value * inflationMultiplier)}
+                      : formatMoney(activeBenchmark.annualMedian / 12)}
                   </p>
                 </div>
               </div>
@@ -742,10 +1229,10 @@ export default function CostOfLivingClient() {
                   Versus your adjusted salary
                 </p>
                 <p className="mt-2 text-lg font-semibold text-[var(--color-foreground)]">
-                  {inflatedHistoricalSalary === null
+                  {inflatedHistoricalSalary === null || activeBenchmark.annualMedian === null
                     ? 'Unavailable'
-                    : `${inflatedHistoricalSalary >= activeBenchmark.value ? '+' : '-'}${formatMoney(
-                        Math.abs(inflatedHistoricalSalary - activeBenchmark.value)
+                    : `${inflatedHistoricalSalary >= activeBenchmark.annualMedian ? '+' : '-'}${formatMoney(
+                        Math.abs(inflatedHistoricalSalary - activeBenchmark.annualMedian)
                       )}`}
                 </p>
                 <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
@@ -770,13 +1257,18 @@ export default function CostOfLivingClient() {
           </CardHeader>
           <CardBody className="space-y-3 text-sm text-[var(--color-muted-foreground)]">
             <p>
-              Inflation is pulled from the ONS CPIH feed, salary availability from ASHE Table 7,
-              and meal-deal pricing from a public retailer page.
+              Inflation is pulled from the ONS CPIH feed, salary benchmarks from ASHE Table 7 and
+              ASHE Table 15, and meal-deal pricing from a public retailer page.
             </p>
             <div className="flex flex-wrap gap-2">
-              {sourceStatus.map(({ label, ok }) => (
-                <Chip key={label} color={ok ? 'success' : 'warning'} variant="flat" size="sm">
-                  {label}
+              {sourceHealthItems.map(({ label, mode }) => (
+                <Chip
+                  key={label}
+                  color={mode === 'live' ? 'success' : 'warning'}
+                  variant="flat"
+                  size="sm"
+                >
+                  {label}: {formatSourceState(mode)}
                 </Chip>
               ))}
             </div>
@@ -836,13 +1328,13 @@ export default function CostOfLivingClient() {
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
               Meal deal history
             </p>
-            <h2 className="text-2xl font-semibold">Tesco meal deal over time</h2>
+            <h2 className="text-2xl font-semibold">Tesco meal deal vs CPI</h2>
             <p className="text-sm text-[var(--color-muted-foreground)]">
-              Seeded from known price changes and then kept up to date by the scraper.
+              Clubcard meal-deal pricing compared with CPI on a normalized index basis.
             </p>
           </div>
           <p className="text-sm text-[var(--color-muted-foreground)] max-w-md md:text-right">
-            The trend line lets you compare Clubcard and regular pricing at a glance.
+            CPI can stretch back to January 1988, while Tesco begins in February 2022 from known public price changes and ongoing snapshots.
           </p>
         </div>
 
@@ -855,6 +1347,7 @@ export default function CostOfLivingClient() {
                 regularPrice: mealDeal.regularPrice,
                 fetchedAt: mealDeal.source.fetchedAt,
               }}
+              inflationHistory={inflation.history}
             />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
@@ -866,15 +1359,61 @@ export default function CostOfLivingClient() {
               </div>
               <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                 <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">
-                  Regular current
+                  CPI current
                 </p>
-                <p className="text-xl font-semibold">{formatCurrency(mealDeal.regularPrice)}</p>
-                <p className="text-[var(--color-muted-foreground)]">Non-Clubcard tracked Tesco price.</p>
+                <p className="text-xl font-semibold">{formatNumber(inflation.index, 1)}</p>
+                <p className="text-[var(--color-muted-foreground)]">Latest tracked CPI level.</p>
               </div>
             </div>
           </CardBody>
         </Card>
       </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div className="space-y-1">
+            <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
+              Salary history
+            </p>
+            <h2 className="text-2xl font-semibold">Your salary vs inflation</h2>
+            <p className="text-sm text-[var(--color-muted-foreground)]">
+              Actual pay in pounds compared against the inflation-adjusted level needed to keep the same buying power.
+            </p>
+          </div>
+          <p className="text-sm text-[var(--color-muted-foreground)] max-w-md md:text-right">
+            The benchmark line uses the currently selected location snapshot as a horizontal reference rather than a full historical series.
+          </p>
+        </div>
+
+        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)] overflow-hidden">
+          <CardBody className="space-y-4">
+            {salaryAnalysisReady && submittedSalaryAnalysis ? (
+              <SalaryHistoryChart
+                inflationHistory={inflation.history}
+                salaryValue={submittedSalaryAnalysis.salary}
+                salaryStartMonth={submittedInflationPoint?.date ?? null}
+                benchmarkLabel={`${activeBenchmark.label} benchmark`}
+                benchmarkValue={activeBenchmark.annualMedian}
+              />
+            ) : (
+              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-6 text-sm text-[var(--color-muted-foreground)]">
+                Enter your salary, year obtained, and month obtained above, then generate the salary analysis to view the salary graph.
+              </div>
+            )}
+          </CardBody>
+        </Card>
+      </section>
+
+      {salaryAnalysisReady && (
+        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 md:p-8">
+          <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
+            Plain-English Summary
+          </p>
+          <p className="text-[var(--color-muted-foreground)] leading-relaxed max-w-4xl">
+            {summaryParagraph}
+          </p>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 md:p-8">
         <h2 className="text-xl font-semibold mb-3">Next step</h2>
