@@ -105,6 +105,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Effect = "Allow"
         Action = [
           "s3:DeleteBucket",
+          "s3:GetBucketAcl",
           "s3:GetBucketLocation",
           "s3:ListBucket",
           "s3:GetBucketPolicy",
