@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { Alert, Button, Card, CardBody, CardHeader, Chip, Spinner } from '@heroui/react';
+import { Alert, Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
 import {
   Area,
   AreaChart as RechartsAreaChart,
@@ -16,6 +16,7 @@ import {
 } from 'recharts';
 import type { TooltipContentProps, TooltipValueType } from 'recharts';
 import { Activity } from '../components/icons';
+import { LoadingIndicator } from '../components/LoadingIndicator';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
 
 type SourceSnapshot = {
@@ -1140,9 +1141,8 @@ export default function CostOfLivingClient() {
   if (!data || isValidating) {
     return (
       <main className="min-h-screen px-6 md:px-12 lg:px-24 py-16 max-w-6xl mx-auto">
-        <div className="flex flex-col items-center justify-center gap-3 py-20 text-sm text-[var(--color-muted-foreground)]">
-          <Spinner size="sm" color="primary" />
-          <span>Loading cost-of-living data…</span>
+        <div className="py-20">
+          <LoadingIndicator label="Loading cost-of-living data..." />
         </div>
       </main>
     );

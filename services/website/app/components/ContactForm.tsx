@@ -4,6 +4,22 @@ import { Form, Input, Textarea, Alert, Progress, Button } from '@heroui/react';
 
 type FormState = { name: string; email: string; message: string };
 
+const fieldClassNames = {
+  base: 'w-full',
+  inputWrapper:
+    'min-h-14 rounded-xl border border-[var(--color-border)] bg-white/95 px-4 py-3 shadow-none transition-colors dark:bg-slate-900/70',
+  innerWrapper: 'items-center',
+  label: 'text-sm font-medium text-[var(--color-muted-foreground)]',
+  input: 'text-sm text-[var(--color-foreground)] placeholder:text-[var(--color-muted)]',
+} as const;
+
+const textareaClassNames = {
+  ...fieldClassNames,
+  inputWrapper:
+    'min-h-32 rounded-xl border border-[var(--color-border)] bg-white/95 px-4 py-3 shadow-none transition-colors dark:bg-slate-900/70',
+  innerWrapper: 'items-start',
+} as const;
+
 export default function ContactForm() {
   const [form, setForm] = useState<FormState>({ name: '', email: '', message: '' });
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
@@ -69,6 +85,7 @@ export default function ContactForm() {
         isRequired
         value={form.name}
         onChange={handleChange}
+        classNames={fieldClassNames}
       />
 
       <Input
@@ -78,6 +95,7 @@ export default function ContactForm() {
         isRequired
         value={form.email}
         onChange={handleChange}
+        classNames={fieldClassNames}
       />
 
       <Textarea
@@ -87,6 +105,7 @@ export default function ContactForm() {
         value={form.message}
         onChange={handleChange}
         minRows={4}
+        classNames={textareaClassNames}
       />
 
       <div className="text-right">
