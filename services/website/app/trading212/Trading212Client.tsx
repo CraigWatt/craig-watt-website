@@ -3,7 +3,8 @@
 import { useEffect } from 'react'
 import useSWR from 'swr'
 import PublicDashboard from '../components/PublicDashboard'
-import { Alert, Button, Spinner } from '@heroui/react'
+import { Alert, Button } from '@heroui/react'
+import { LoadingIndicator } from '../components/LoadingIndicator'
 
 import type {
   PublicMetrics,
@@ -61,10 +62,7 @@ export default function Trading212Client() {
 
   if (!data || isValidating) {
     return (
-      <div className="flex flex-col items-center justify-center gap-2 p-6 text-sm text-zinc-500">
-        <Spinner size="sm" color="primary" />
-        <span>Loading Trading212 data…</span>
-      </div>
+      <LoadingIndicator label="Loading Trading212 data…" />
     )
   }
 

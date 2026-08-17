@@ -1,10 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @plugin './hero.ts';
-/* Note: You may need to change the path to fit your project structure */
-@source '../../../node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}';
+/*
+ * HeroUI classes are compiled from package source files rather than our local components.
+ * Next.js builds this app from `services/website`, while some local tools resolve sources from
+ * the stylesheet path, so we include both paths to keep the generated utilities stable.
+ */
+@source '../../node_modules/@heroui/theme/dist/**/*.{js,mjs,ts,jsx,tsx}';
+@source '../../../node_modules/@heroui/theme/dist/**/*.{js,mjs,ts,jsx,tsx}';
 @custom-variant dark (&:is(.dark *));
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @theme inline {
   --font-sans: 'Inter', system-ui, sans-serif;
