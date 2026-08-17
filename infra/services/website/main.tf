@@ -339,7 +339,7 @@ resource "aws_apigatewayv2_integration" "cost_of_living" {
   api_id                 = aws_apigatewayv2_api.website.id
   integration_type       = "AWS_PROXY"
   integration_uri        = aws_lambda_function.cost_of_living.invoke_arn
-  integration_method     = "GET"
+  integration_method     = "POST"
   payload_format_version = "2.0"
   timeout_milliseconds   = 15000
 }
