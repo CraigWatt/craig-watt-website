@@ -41,16 +41,16 @@ export default function Trading212Client() {
 
   if (error) {
     return (
-      <div className="px-4 py-6 max-w-md mx-auto">
-        <div className="site-surface rounded-[1.75rem] px-5 py-4">
+      <div className="mx-auto max-w-6xl px-6 py-16 md:px-12 lg:px-24">
+        <div className="site-surface max-w-xl rounded-[2rem] px-6 py-6">
           <p className="font-medium text-[var(--color-foreground)]">Error loading data</p>
-          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
+          <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
             Could not load Trading212 metrics. Try again shortly.
           </p>
           <button
             type="button"
             onClick={() => mutate()}
-            className="mt-4 inline-flex rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            className="mt-5 inline-flex rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
           >
             Retry
           </button>

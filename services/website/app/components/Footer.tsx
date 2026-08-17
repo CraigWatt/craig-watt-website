@@ -30,10 +30,10 @@ const navLinks = [
 export function Footer() {
   return (
     <footer className="site-footer print:hidden border-t border-[var(--color-border)] bg-[var(--color-background)]">
-      <div className="mx-auto max-w-6xl px-6 md:px-12 lg:px-24 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-8 md:gap-12">
+      <div className="mx-auto max-w-6xl px-6 py-20 md:px-12 lg:px-24">
+        <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 md:grid-cols-12 md:gap-12">
           {/* Brand Column */}
-          <div className="sm:col-span-2 md:col-span-5 space-y-6">
+          <div className="space-y-6 sm:col-span-2 md:col-span-5">
             <a href={siteUrl('/')} className="inline-flex items-center gap-3 group">
               <div className="relative w-10 h-10 rounded-full overflow-hidden ring-1 ring-[var(--color-border)]">
                 <Image
@@ -82,7 +82,7 @@ export function Footer() {
                 as="a"
                 href={siteUrl('/cv')}
                 variant="flat"
-                className="border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-background)]"
+                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-background)] sm:w-auto"
               >
                 Export as CV
               </Button>
@@ -114,8 +114,8 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-[var(--color-border)]">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="mt-16 border-t border-[var(--color-border)] pt-8">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-[var(--color-muted)]">
               {new Date().getFullYear()} Craig Watt. All rights reserved.
             </p>

@@ -33,15 +33,15 @@ export const Navbar = () => {
 
   return (
     <header className="site-nav print:hidden">
-      <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-4 px-4 md:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[4.75rem] max-w-6xl items-center gap-4 px-4 md:px-6 lg:px-8">
         <div className="hidden md:flex">
           <a
             href={siteUrl('/')}
-            className="group flex items-center space-x-2 p-0"
+            className="group flex items-center space-x-3 p-0"
           >
             <div
               className={`
-                relative h-10 w-10 rounded-full overflow-hidden
+                relative h-10 w-10 overflow-hidden rounded-full ring-1 ring-[var(--color-border)]
                 transition-shadow transition-filter
                 group-hover:shadow-outline
                 group-hover:brightness-90
@@ -67,7 +67,7 @@ export const Navbar = () => {
               key={item.label}
               href={siteUrl(item.href)}
               className={`
-                px-4 py-2 ${itemRounded}
+                px-4 py-2.5 ${itemRounded}
                 text-sm font-medium text-[var(--color-foreground)]
                 transition-colors ${hoverBgClass}
               `}
@@ -79,7 +79,7 @@ export const Navbar = () => {
             <a
               href={siteUrl(writingItem.href)}
               className={`
-                px-4 py-2 ${itemRounded}
+                px-4 py-2.5 ${itemRounded}
                 text-sm font-medium text-[var(--color-foreground)]
                 transition-colors ${hoverBgClass}
               `}
@@ -99,7 +99,7 @@ export const Navbar = () => {
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
             onClick={() => setIsMenuOpen((open) => !open)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] shadow-sm transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
           >
             {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -107,9 +107,9 @@ export const Navbar = () => {
           <a
             href={siteUrl('/')}
             onClick={() => setIsMenuOpen(false)}
-            className="group flex items-center space-x-2"
+            className="group flex items-center space-x-3"
           >
-            <div className="relative h-11 w-11 overflow-hidden rounded-full">
+            <div className="relative h-11 w-11 overflow-hidden rounded-full ring-1 ring-[var(--color-border)]">
               <Image
                 src="/images/avatar.jpg"
                 alt="Craig Watt’s avatar"
@@ -128,7 +128,7 @@ export const Navbar = () => {
       </div>
 
       {isMenuOpen && (
-        <div className="border-t border-[var(--color-border)] bg-[var(--color-background)]/98 px-4 pb-5 pt-3 backdrop-blur md:hidden">
+        <div className="site-nav-panel border-t border-[var(--color-border)] px-4 pb-5 pt-3 backdrop-blur md:hidden">
           <nav className="mx-auto flex max-w-6xl flex-col gap-2">
             {primaryItems.map((item) => (
               <a
@@ -137,10 +137,10 @@ export const Navbar = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className={`
                   w-full flex items-center
-                  ${mobileItemPadding} ${itemRounded}
-                  text-[var(--color-foreground)] text-base
-                  transition-colors ${hoverBgClass}
-                `}
+                    ${mobileItemPadding} ${itemRounded}
+                    text-[var(--color-foreground)] text-base
+                    border border-transparent transition-colors ${hoverBgClass}
+                  `}
               >
                 {item.label}
               </a>
@@ -155,7 +155,7 @@ export const Navbar = () => {
                     w-full flex items-center
                     ${mobileItemPadding} ${itemRounded}
                     text-[var(--color-foreground)] text-base
-                    transition-colors ${hoverBgClass}
+                    border border-transparent transition-colors ${hoverBgClass}
                   `}
                 >
                   All writing
@@ -168,7 +168,7 @@ export const Navbar = () => {
                     w-full flex items-center justify-between
                     ${mobileItemPadding} ${itemRounded}
                     text-[var(--color-foreground)] text-base font-medium
-                    transition-colors ${hoverBgClass}
+                    border border-transparent transition-colors ${hoverBgClass}
                   `}
                 >
                   <span>Browse writing</span>
@@ -189,7 +189,7 @@ export const Navbar = () => {
                         onClick={() => setIsMenuOpen(false)}
                         className={`
                           flex w-full items-center gap-3
-                          ${itemRounded} ${mobileItemPadding} pl-8
+                          ${itemRounded} ${mobileItemPadding} border border-transparent pl-8
                           text-[var(--color-foreground)] transition-colors ${hoverBgClass}
                         `}
                       >
@@ -206,7 +206,7 @@ export const Navbar = () => {
               const hasThemeVariants = tool.lightSrc && tool.darkSrc;
               const bgClass = hasThemeVariants
                 ? 'bg-[var(--color-card)]'
-                : 'bg-white dark:bg-slate-200';
+                : 'bg-[var(--color-background)]';
               
               return (
                 <a

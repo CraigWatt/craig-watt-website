@@ -58,7 +58,7 @@ export default function ExperiencePage() {
   }, []);
 
   return (
-    <main className="px-6 md:px-12 lg:px-24 py-16">
+    <main className="px-6 py-16 md:px-12 lg:px-24">
       <div className="mx-auto max-w-7xl space-y-12">
         <section className="grid gap-8 md:gap-12 lg:grid-cols-[0.8fr,1.2fr] items-start">
           <div
@@ -69,7 +69,7 @@ export default function ExperiencePage() {
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
               XP
             </p>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-balance">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold leading-[1.02] text-balance">
               A scrollable timeline of the roles that shaped my platform engineering path
             </h1>
             <p className="text-lg leading-relaxed text-[var(--color-muted-foreground)] max-w-xl">
@@ -80,12 +80,12 @@ export default function ExperiencePage() {
 
             <div className="flex flex-wrap gap-3">
               <a href={siteUrl('/cv')}>
-                <Button as="span" className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
+                <Button as="span" className="rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)]">
                   Open CV
                 </Button>
               </a>
               <a href={siteUrl('/credentials')}>
-                <Button as="span" variant="flat">
+                <Button as="span" variant="flat" className="rounded-xl border border-transparent hover:border-[var(--color-border)]">
                   View Credentials
                 </Button>
               </a>
@@ -104,7 +104,7 @@ export default function ExperiencePage() {
                     data-timeline-item
                     data-timeline-id={entry.id}
                     id={entry.id}
-                    className={`relative rounded-3xl border p-6 md:p-8 pl-10 md:pl-12 transition-all ${
+                    className={`relative rounded-3xl border p-6 pl-10 transition-all md:p-8 md:pl-12 ${
                       active
                         ? 'border-[var(--color-accent)] bg-[var(--color-card)] shadow-lg'
                         : 'border-[var(--color-border)] bg-[var(--color-card)]/70'
@@ -130,7 +130,7 @@ export default function ExperiencePage() {
                               {entry.icon}
                             </div>
                             <div>
-                              <h2 className="text-2xl font-semibold">{entry.title}</h2>
+                              <h2 className="text-xl sm:text-2xl font-semibold">{entry.title}</h2>
                               <p className="text-sm text-[var(--color-muted-foreground)]">
                                 {entry.organisation}
                               </p>

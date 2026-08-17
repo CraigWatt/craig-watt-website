@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { Alert, Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
+import { Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
 import {
   Area,
   AreaChart as RechartsAreaChart,
@@ -432,6 +432,37 @@ function DataCard({
         {fetchedAt && <p className="text-xs text-[var(--color-muted)]">Updated {formatDisplayDate(fetchedAt)}</p>}
       </CardBody>
     </Card>
+  );
+}
+
+function StatusBanner({
+  title,
+  description,
+  tone = 'neutral',
+  action,
+}: {
+  title: string;
+  description: string;
+  tone?: 'neutral' | 'warning' | 'danger';
+  action?: React.ReactNode;
+}) {
+  const toneClasses =
+    tone === 'danger'
+      ? 'border-rose-500/25 bg-rose-500/10'
+      : tone === 'warning'
+        ? 'border-amber-500/25 bg-amber-500/10'
+        : 'border-[var(--color-border)] bg-[var(--color-card)]';
+
+  return (
+    <div className={`site-status-banner rounded-[1.75rem] border px-5 py-4 ${toneClasses}`}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold text-[var(--color-foreground)]">{title}</p>
+          <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">{description}</p>
+        </div>
+        {action ? <div className="shrink-0">{action}</div> : null}
+      </div>
+    </div>
   );
 }
 
@@ -1121,15 +1152,18 @@ export default function CostOfLivingClient() {
 
   if (error) {
     return (
-      <main className="min-h-screen px-6 md:px-12 lg:px-24 py-16 max-w-6xl mx-auto">
-        <Alert
+      <main className="mx-auto min-h-screen max-w-6xl px-6 py-16 md:px-12 lg:px-24">
+        <StatusBanner
           title="Could not load cost-of-living data"
           description="The page is up, but the live sources are temporarily unavailable. Try again in a moment."
-          color="danger"
-          variant="flat"
-          radius="lg"
-          endContent={
-            <Button size="sm" variant="flat" onPress={() => mutate()}>
+          tone="danger"
+          action={
+            <Button
+              size="sm"
+              variant="flat"
+              className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]"
+              onPress={() => mutate()}
+            >
               Retry
             </Button>
           }
@@ -1140,7 +1174,7 @@ export default function CostOfLivingClient() {
 
   if (!data || isValidating) {
     return (
-      <main className="min-h-screen px-6 md:px-12 lg:px-24 py-16 max-w-6xl mx-auto">
+      <main className="mx-auto min-h-screen max-w-6xl px-6 py-16 md:px-12 lg:px-24">
         <div className="py-20">
           <LoadingIndicator label="Loading cost-of-living data..." />
         </div>
@@ -1149,8 +1183,8 @@ export default function CostOfLivingClient() {
   }
 
   return (
-    <main className="min-h-screen px-6 md:px-12 lg:px-24 py-16 max-w-6xl mx-auto space-y-10">
-      <section className="space-y-6">
+    <main className="mx-auto min-h-screen max-w-6xl space-y-10 px-6 py-16 md:px-12 lg:px-24">
+      <section className="site-surface space-y-6 rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="space-y-4 max-w-3xl">
             <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
@@ -1168,7 +1202,7 @@ export default function CostOfLivingClient() {
           <Button
             onPress={() => mutate()}
             variant="flat"
-            className="border border-[var(--color-border)] bg-[var(--color-card)]"
+            className="rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]"
             startContent={<RefreshArrow className="h-4 w-4" />}
           >
             Refresh
@@ -1176,10 +1210,9 @@ export default function CostOfLivingClient() {
         </div>
 
         {(_meta.partial || _meta.stale) && (
-          <Alert
-            color={_meta.stale ? 'warning' : 'default'}
-            variant="flat"
+          <StatusBanner
             title={_meta.stale ? 'Showing cached data' : 'Partial data loaded'}
+            tone={_meta.stale ? 'warning' : 'neutral'}
             description={
               _meta.warnings.length > 0
                 ? _meta.warnings.join(' · ')
@@ -1324,11 +1357,10 @@ export default function CostOfLivingClient() {
               </p>
             </div>
             {salaryAnalysisStale && (
-              <Alert
-                color="warning"
-                variant="flat"
+              <StatusBanner
                 title="Inputs changed"
                 description="Regenerate the salary analysis to update the salary graph and summary."
+                tone="warning"
               />
             )}
           </CardBody>
@@ -1600,7 +1632,7 @@ export default function CostOfLivingClient() {
       </section>
 
       {salaryAnalysisReady && (
-        <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 md:p-8">
+        <section className="site-surface rounded-[2rem] p-6 md:p-8">
           <p className="text-sm uppercase tracking-widest text-[var(--color-muted)] mb-3">
             Plain-English Summary
           </p>
@@ -1610,7 +1642,7 @@ export default function CostOfLivingClient() {
         </section>
       )}
 
-      <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-6 md:p-8">
+      <section className="site-surface rounded-[2rem] p-6 md:p-8">
         <h2 className="text-xl font-semibold mb-3">Next step</h2>
         <p className="text-[var(--color-muted-foreground)] leading-relaxed max-w-3xl">
           This page is the foundation for comparing salary levels across places like central

@@ -36,7 +36,7 @@ export default function CvPage() {
         }
       `}</style>
 
-      <div className="cv-page-controls mx-auto max-w-6xl mb-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="cv-page-controls mx-auto mb-10 flex max-w-6xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
             CV export
@@ -46,18 +46,18 @@ export default function CvPage() {
         <div className="flex flex-wrap gap-2 sm:gap-3">
           <Button
             onPress={printPage}
-            className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)]"
+            className="w-full rounded-xl bg-[var(--color-accent)] text-[var(--color-accent-foreground)] sm:w-auto"
             startContent={<Printer className="h-4 w-4" />}
           >
             Save as PDF
           </Button>
-          <a href={siteUrl('/experience')}>
-            <Button as="span" variant="flat" startContent={<FileText className="h-4 w-4" />}>
+          <a href={siteUrl('/experience')} className="block sm:inline-block">
+            <Button as="span" variant="flat" className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] sm:w-auto" startContent={<FileText className="h-4 w-4" />}>
               Experience
             </Button>
           </a>
-          <a href={siteUrl('/credentials')}>
-            <Button as="span" variant="flat" startContent={<ShieldCheck className="h-4 w-4" />}>
+          <a href={siteUrl('/credentials')} className="block sm:inline-block">
+            <Button as="span" variant="flat" className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] sm:w-auto" startContent={<ShieldCheck className="h-4 w-4" />}>
               Credentials
             </Button>
           </a>
@@ -65,7 +65,7 @@ export default function CvPage() {
       </div>
 
       <div className="mx-auto max-w-5xl">
-        <Card className="cv-sheet border border-[var(--color-border)] bg-[var(--color-card)] p-5 sm:p-8 md:p-10">
+        <Card className="cv-sheet site-surface rounded-[2rem] border border-[var(--color-border)] bg-[var(--color-card)] p-5 sm:p-8 md:p-10">
           <header className="space-y-6">
             <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <div className="space-y-2">
@@ -82,19 +82,19 @@ export default function CvPage() {
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-              <Card className="border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+              <Card className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                 <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">Focus</p>
                 <p className="mt-2 text-sm leading-relaxed">
                   Observability, automation, Kubernetes, Terraform, and reliable delivery.
                 </p>
               </Card>
-              <Card className="border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+              <Card className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                 <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">Format</p>
                 <p className="mt-2 text-sm leading-relaxed">
                   Use this page when a recruiter wants a clean PDF copy of the same story.
                 </p>
               </Card>
-              <Card className="border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+              <Card className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                 <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">Version</p>
                 <p className="mt-2 text-sm leading-relaxed">
                   Website first, PDF second, so the online version stays the source of truth.
@@ -161,7 +161,7 @@ export default function CvPage() {
                 {experienceTimeline.map((entry) => (
                   <Card
                     key={entry.id}
-                    className="border border-[var(--color-border)] bg-[var(--color-background)] p-5"
+                    className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-5"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>

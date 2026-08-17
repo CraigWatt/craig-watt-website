@@ -43,7 +43,7 @@ export function NavbarRightIcons() {
     <div className="hidden items-center gap-2 md:flex">
       <a
         href={siteUrl('/cost-of-living')}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white transition hover:border-[var(--color-accent)] hover:-translate-y-0.5 dark:bg-slate-200"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5"
         aria-label="Cost of living"
       >
         <Image
@@ -58,7 +58,7 @@ export function NavbarRightIcons() {
 
       {externalTools.map((tool) => {
         const hasThemeVariants = tool.lightSrc && tool.darkSrc;
-        const bgClass = hasThemeVariants ? 'bg-[var(--color-card)]' : 'bg-white dark:bg-slate-200';
+        const bgClass = hasThemeVariants ? 'bg-[var(--color-card)]' : 'bg-[var(--color-background)]';
 
         const Icon = hasThemeVariants ? (
           <>
@@ -95,7 +95,7 @@ export function NavbarRightIcons() {
             href={tool.internal ? siteUrl(tool.href) : tool.href}
             target={tool.internal ? undefined : '_blank'}
             rel={tool.internal ? undefined : 'noopener noreferrer'}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] ${bgClass} transition hover:border-[var(--color-accent)] hover:-translate-y-0.5`}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] ${bgClass} shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5`}
             aria-label={tool.ariaLabel}
           >
             {Icon}

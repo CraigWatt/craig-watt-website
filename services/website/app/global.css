@@ -63,6 +63,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
 /* Typography refinements */
@@ -117,10 +118,17 @@ a.accent-link:hover {
   position: sticky;
   top: 0;
   z-index: 60;
-  background: color-mix(in srgb, var(--color-background) 84%, transparent);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 80%, transparent);
+  isolation: isolate;
+  background: color-mix(in srgb, var(--color-background) 94%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 14px 40px -34px rgba(15, 23, 42, 0.55);
+}
+
+.site-nav-panel {
+  background: color-mix(in srgb, var(--color-background) 97%, transparent);
+  box-shadow: 0 22px 60px -40px rgba(15, 23, 42, 0.6);
 }
 
 /* Improve dropdown/menu background contrast */
@@ -142,6 +150,16 @@ a.accent-link:hover {
   border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
   background: color-mix(in srgb, var(--color-background) 96%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.site-status-banner {
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  background: color-mix(in srgb, var(--color-card) 96%, transparent);
+  box-shadow: 0 18px 42px -30px rgba(15, 23, 42, 0.4);
+}
+
+html {
+  scroll-padding-top: 6rem;
 }
 
 .grecaptcha-badge {

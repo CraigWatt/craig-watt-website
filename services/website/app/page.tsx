@@ -19,7 +19,7 @@ export default function App() {
   return (
     <main className="min-h-screen">
       {/* Hero Section - minimal, left-aligned aesthetic */}
-      <section className="relative min-h-[80vh] sm:min-h-[85vh] flex items-center px-6 md:px-12 lg:px-24 py-12 sm:py-0">
+      <section className="relative flex min-h-[72vh] items-start px-6 py-16 sm:min-h-[78vh] sm:py-20 md:min-h-[85vh] md:items-center md:px-12 md:py-0 lg:px-24">
         {/* This div is a placeholder for your future Three.js background */}
         <div className="absolute inset-0 -z-10" id="hero-canvas-container" />
         
@@ -39,11 +39,11 @@ export default function App() {
             <span className="text-[var(--color-accent)] font-medium">Terraform</span>.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row">
             <a href="#contact">
               <Button 
                 as="span" 
-                className="bg-[var(--color-accent)] text-[var(--color-accent-foreground)] font-medium px-8 py-3 rounded-lg hover:opacity-90 transition-opacity"
+                className="w-full rounded-xl bg-[var(--color-accent)] px-8 py-3 font-medium text-[var(--color-accent-foreground)] transition-opacity hover:opacity-90 sm:w-auto"
               >
                 Get in touch
               </Button>
@@ -52,14 +52,14 @@ export default function App() {
               <Button 
                 as="span"
                 variant="ghost"
-                className="border border-[var(--color-border)] text-[var(--color-foreground)] font-medium px-8 py-3 rounded-lg hover:bg-[var(--color-card)] transition-colors"
+                className="w-full rounded-xl border border-[var(--color-border)] px-8 py-3 font-medium text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-card)] sm:w-auto"
               >
                 View Projects
               </Button>
             </a>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
+          <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--color-muted-foreground)]">
             <span className="uppercase tracking-widest text-[var(--color-muted)]">More</span>
             <a href={siteUrl('/experience')} className="hover:text-[var(--color-accent)] transition-colors">
               Experience
@@ -75,7 +75,7 @@ export default function App() {
       </section>
 
       {/* About Section */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 border-t border-[var(--color-border)]">
+      <section className="border-t border-[var(--color-border)] px-6 py-24 md:px-12 lg:px-24">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
             {/* Left column - Label */}
@@ -118,7 +118,7 @@ export default function App() {
       </section>
 
       {/* Featured Projects */}
-      <section className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-card)]">
+      <section className="bg-[var(--color-card)] px-6 py-24 md:px-12 lg:px-24">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-16">
             <div className="section-divider" />
@@ -155,7 +155,7 @@ export default function App() {
       </section>
 
       {/* Blog Section */}
-      <section className="py-24 px-6 md:px-12 lg:px-24">
+      <section className="px-6 py-24 md:px-12 lg:px-24">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-4 mb-16">
             <div className="section-divider" />
@@ -197,7 +197,7 @@ export default function App() {
       {/* Contact Section */}
       <section
         id="contact"
-        className="py-24 px-6 md:px-12 lg:px-24 bg-[var(--color-card)] border-t border-[var(--color-border)]"
+        className="border-t border-[var(--color-border)] bg-[var(--color-card)] px-6 py-24 md:px-12 lg:px-24"
       >
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
