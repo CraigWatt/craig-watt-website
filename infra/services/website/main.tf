@@ -262,7 +262,7 @@ resource "aws_iam_role_policy" "lambda_cost_of_living_history" {
 resource "aws_lambda_function" "contact" {
   function_name    = "${replace(var.domain, ".", "-")}-contact"
   role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   handler          = "index.handler"
   filename         = data.archive_file.contact_lambda.output_path
   source_code_hash = data.archive_file.contact_lambda.output_base64sha256
@@ -281,7 +281,7 @@ resource "aws_lambda_function" "contact" {
 resource "aws_lambda_function" "cost_of_living" {
   function_name    = "${replace(var.domain, ".", "-")}-cost-of-living"
   role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   handler          = "index.handler"
   filename         = data.archive_file.cost_of_living_lambda.output_path
   source_code_hash = data.archive_file.cost_of_living_lambda.output_base64sha256
@@ -299,7 +299,7 @@ resource "aws_lambda_function" "cost_of_living" {
 resource "aws_lambda_function" "trading212" {
   function_name    = "${replace(var.domain, ".", "-")}-trading212"
   role             = aws_iam_role.lambda.arn
-  runtime          = "nodejs20.x"
+  runtime          = "nodejs22.x"
   handler          = "index.handler"
   filename         = data.archive_file.trading212_lambda.output_path
   source_code_hash = data.archive_file.trading212_lambda.output_base64sha256

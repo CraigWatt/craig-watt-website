@@ -614,47 +614,13 @@ async function loadMealDealHistory(
   return merged;
 }
 
-function parseTescoSnapshot(html: string) {
-  const priceMatch =
-    html.match(
-      /£([0-9]+(?:\.[0-9]{2})?)\s+Meal Deal (?:Main|Drink)s?\s+Clubcard Price\s+£([0-9]+(?:\.[0-9]{2})?)\s+Meal Deal (?:Main|Drink)s?\s+Regular Price/i
-    ) ??
-    html.match(
-      /£([0-9]+(?:\.[0-9]{2})?)\s+Meal Deal .*? Clubcard Price\s+£([0-9]+(?:\.[0-9]{2})?)\s+Meal Deal .*? Regular Price/i
-    );
-
-  return {
-    clubcardPrice: parseNumber(priceMatch?.[1] ?? null),
-    regularPrice: parseNumber(priceMatch?.[2] ?? null),
-  };
-}
-
 async function loadFreshPayload(): Promise<CostOfLivingPayload> {
-  const [inflation, tescoHtml] = await Promise.all([
-    loadCpihSnapshot(),
-    fetchText(TESCO_MEAL_DEAL_URL).catch((error) => {
-      console.warn(
-        'Tesco meal-deal live snapshot unavailable; using stored fallback snapshot',
-        error instanceof Error ? error.message : error
-      );
-      return null;
-    }),
-  ]);
+  const inflation = await loadCpihSnapshot();
 
   const salaries = await loadSalarySnapshot();
   const salaryStatus: SourceMode = salaries.sourceMode;
-  const parsedMealDeal = tescoHtml ? parseTescoSnapshot(tescoHtml) : null;
-  const mealDeal =
-    parsedMealDeal &&
-    (parsedMealDeal.clubcardPrice !== null || parsedMealDeal.regularPrice !== null)
-      ? parsedMealDeal
-      : MEAL_DEAL_FALLBACK_SNAPSHOT;
-  const mealDealStatus: SourceMode =
-    mealDeal.clubcardPrice === null && mealDeal.regularPrice === null
-      ? 'unavailable'
-      : mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
-        ? 'fallback'
-        : 'live';
+  const mealDeal = MEAL_DEAL_FALLBACK_SNAPSHOT;
+  const mealDealStatus: SourceMode = 'fallback';
   const sourceStatus: SourceStatuses = {
     inflation: getInflationStatus(inflation),
     salaries: salaryStatus,
@@ -670,12 +636,9 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
     clubcardPrice: mealDeal.clubcardPrice,
     regularPrice: mealDeal.regularPrice,
     source: {
-      name: mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT ? MEAL_DEAL_FALLBACK_SNAPSHOT.source.name : 'Tesco lunch meal deals page',
+      name: MEAL_DEAL_FALLBACK_SNAPSHOT.source.name,
       url: TESCO_MEAL_DEAL_URL,
-      fetchedAt:
-        mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
-          ? MEAL_DEAL_FALLBACK_SNAPSHOT.source.fetchedAt
-          : new Date().toISOString(),
+      fetchedAt: MEAL_DEAL_FALLBACK_SNAPSHOT.source.fetchedAt,
     },
   });
 
@@ -695,20 +658,12 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
       clubcardPrice: mealDeal.clubcardPrice,
       regularPrice: mealDeal.regularPrice,
       source: {
-        name:
-          mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
-            ? MEAL_DEAL_FALLBACK_SNAPSHOT.source.name
-            : 'Tesco lunch meal deals page',
+        name: MEAL_DEAL_FALLBACK_SNAPSHOT.source.name,
         url: TESCO_MEAL_DEAL_URL,
-        fetchedAt:
-          mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
-            ? MEAL_DEAL_FALLBACK_SNAPSHOT.source.fetchedAt
-            : new Date().toISOString(),
+        fetchedAt: MEAL_DEAL_FALLBACK_SNAPSHOT.source.fetchedAt,
       },
       notes:
-        mealDeal === MEAL_DEAL_FALLBACK_SNAPSHOT
-          ? 'Tesco is currently blocking automated AWS fetches, so the page is using the latest stored Tesco snapshot.'
-          : 'Public retailer page used to snapshot meal-deal pricing.',
+        'Tesco meal-deal pricing is intentionally served from a stored snapshot because Tesco blocks automated AWS fetches.',
       history: mealDealHistory,
     },
     _meta: buildMeta(sourceStatus),
