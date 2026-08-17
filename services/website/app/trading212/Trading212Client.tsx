@@ -3,7 +3,6 @@
 import { useEffect } from 'react'
 import useSWR from 'swr'
 import PublicDashboard from '../components/PublicDashboard'
-import { Alert, Button } from '@heroui/react'
 import { LoadingIndicator } from '../components/LoadingIndicator'
 
 import type {
@@ -43,19 +42,19 @@ export default function Trading212Client() {
   if (error) {
     return (
       <div className="px-4 py-6 max-w-md mx-auto">
-        <Alert
-          title="Error loading data"
-          description="Could not load Trading212 metrics. Try again shortly."
-          color="danger"
-          variant="flat"
-          radius="md"
-          isClosable
-          endContent={
-            <Button size="sm" onPress={() => mutate()} variant="flat">
-              Retry
-            </Button>
-          }
-        />
+        <div className="site-surface rounded-[1.75rem] px-5 py-4">
+          <p className="font-medium text-[var(--color-foreground)]">Error loading data</p>
+          <p className="mt-1 text-sm text-[var(--color-muted-foreground)]">
+            Could not load Trading212 metrics. Try again shortly.
+          </p>
+          <button
+            type="button"
+            onClick={() => mutate()}
+            className="mt-4 inline-flex rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }

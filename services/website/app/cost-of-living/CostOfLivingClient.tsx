@@ -419,7 +419,7 @@ function DataCard({
         : 'text-[var(--color-foreground)]';
 
   return (
-    <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
+    <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
       <CardHeader className="flex items-center justify-between gap-4">
         <span className="text-sm uppercase tracking-widest text-[var(--color-muted)]">
           {title}
@@ -1231,7 +1231,7 @@ export default function CostOfLivingClient() {
       </section>
 
       <section>
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
           <CardHeader className="flex items-center gap-3">
             <div className="space-y-1">
               <p className="font-semibold">Inflation calculator</p>
@@ -1336,7 +1336,7 @@ export default function CostOfLivingClient() {
       </section>
 
       <section>
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
           <CardHeader className="flex items-center gap-3">
             <div className="space-y-1">
               <p className="font-semibold">Location snapshots</p>
@@ -1440,7 +1440,7 @@ export default function CostOfLivingClient() {
       </section>
 
       <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
           <CardHeader className="flex items-center gap-3">
             <Activity className="h-5 w-5 text-[var(--color-accent)]" />
             <div>
@@ -1470,7 +1470,7 @@ export default function CostOfLivingClient() {
           </CardBody>
         </Card>
 
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)]">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
           <CardHeader>
             <div>
               <p className="font-semibold">Sources</p>
@@ -1533,7 +1533,7 @@ export default function CostOfLivingClient() {
           </p>
         </div>
 
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)] overflow-hidden">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem] overflow-hidden">
           <CardBody className="space-y-4">
             <MealDealHistoryChart
               history={mealDeal.history}
@@ -1580,7 +1580,7 @@ export default function CostOfLivingClient() {
           </p>
         </div>
 
-        <Card shadow="sm" radius="lg" className="border border-[var(--color-border)] overflow-hidden">
+        <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem] overflow-hidden">
           <CardBody className="space-y-4">
             {salaryAnalysisReady && submittedSalaryAnalysis ? (
               <SalaryHistoryChart

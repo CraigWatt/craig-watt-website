@@ -1,19 +1,10 @@
 // app/components/Navbar.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import {
-  Navbar as HeroNavbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  NavbarMenuToggle,
-  NavbarMenu,
-  NavbarMenuItem,
-  Button,
-} from '@heroui/react';
 import { ChevronDown } from './icons';
+import { Menu, X } from 'lucide-react';
 import { navItems } from '../config/nav.config';
 import { NavbarRightIcons, externalTools } from './NavbarRightIcons';
 import { ThemeSwitcher } from './ThemeSwitcher';
@@ -32,232 +23,185 @@ export const Navbar = () => {
     }
   }, [isMenuOpen]);
 
-  // Common classes
-  const hoverBgClass = 'hover:bg-default/20 dark:hover:bg-default/30';
-  const itemRounded = 'rounded-medium';
-  const mobileItemPadding = 'px-4 py-3'; // approx 48px height for fat-finger
-  const iconBtnSizeClass = 'h-11 w-11'; // ~44px square for icon buttons
+  const hoverBgClass = 'hover:bg-black/5 dark:hover:bg-white/8';
+  const itemRounded = 'rounded-2xl';
+  const mobileItemPadding = 'px-4 py-3';
+  const iconBtnSizeClass = 'h-11 w-11';
+
+  const writingItem = navItems.find((item) => Array.isArray(item.children) && item.label === 'Writing');
+  const primaryItems = navItems.filter((item) => !Array.isArray(item.children));
 
   return (
-    // Controlled open state. Use `open` prop per HeroUI API.
-    <HeroNavbar
-      className="site-nav print:hidden"
-      classNames={{
-        base: 'min-h-16',
-        wrapper: 'min-h-16 h-16 max-w-6xl px-4 md:px-6 lg:px-8',
-      }}
-      height="4rem"
-      isMenuOpen={isMenuOpen}
-      onMenuOpenChange={setIsMenuOpen}
-    >
-      {/* ===== Mobile Header: toggle, centered brand, theme switcher ===== */}
-      <NavbarContent className="md:hidden flex justify-between items-center w-full px-4">
-        {/* Menu toggle on left */}
-        <NavbarMenuToggle
-          aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
-          className="p-2"
-        />
-        {/* Center: Brand */}
-        <NavbarBrand className="flex-1 flex justify-center">
-          <NavbarItem>
-            <a
-              href={siteUrl('/')}
-              onClick={() => setIsMenuOpen(false)}
-              className="group flex items-center space-x-2 p-0"
-            >
-              <div
-                className={`
-                  relative h-11 w-11 rounded-full overflow-hidden
-                  transition-shadow transition-filter
-                  group-hover:shadow-outline
-                  group-hover:brightness-90
-                `}
-              >
-                <Image
-                  src="/images/avatar.jpg"
-                  alt="Craig Watt’s avatar"
-                  fill
-                  sizes="44px"
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
-                Craig Watt
-              </span>
-            </a>
-          </NavbarItem>
-        </NavbarBrand>
-        {/* Right: theme switcher */}
-        <NavbarItem>
-          <ThemeSwitcher />
-        </NavbarItem>
-      </NavbarContent>
-
-      {/* ===== Desktop Left: Logo / Home (avatar + name) ===== */}
-      <NavbarContent className="hidden md:flex items-center">
-        <NavbarBrand>
-          <NavbarItem>
-            <a
-              href={siteUrl('/')}
-              className="group flex items-center space-x-2 p-0"
-            >
-              <div
-                className={`
-                  relative h-10 w-10 rounded-full overflow-hidden
-                  transition-shadow transition-filter
-                  group-hover:shadow-outline
-                  group-hover:brightness-90
-                `}
-              >
-                <Image
-                  src="/images/avatar.jpg"
-                  alt="Craig Watt’s avatar"
-                  fill
-                  sizes="40px"
-                  style={{ objectFit: 'cover' }}
-                />
-              </div>
-              <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
-                Craig Watt
-              </span>
-            </a>
-          </NavbarItem>
-        </NavbarBrand>
-      </NavbarContent>
-
-      {/* ===== Desktop Center: Menu Items ===== */}
-      <NavbarContent className="hidden md:flex gap-4" justify="center">
-        {navItems.map((item) => {
-          if (Array.isArray(item.children)) {
-            return (
-              <NavbarItem key={item.label}>
-                <Button
-                  as="a"
-                  href={siteUrl(item.href)}
-                  variant="light"
-                  className={`
-                    px-4 py-2 ${itemRounded}
-                    text-base !text-[var(--color-foreground)]
-                    ${hoverBgClass}
-                  `}
-                >
-                  {item.label}
-                </Button>
-              </NavbarItem>
-            );
-          }
-
-          return (
-            <NavbarItem key={item.label}>
-              <Button
-                as="a"
-                href={siteUrl(item.href)}
-                variant="light"
-                className={`
-              px-4 py-2 ${itemRounded}
-              text-base !text-[var(--color-foreground)]
-              ${hoverBgClass}
+    <header className="site-nav print:hidden">
+      <div className="mx-auto flex min-h-16 max-w-6xl items-center gap-4 px-4 md:px-6 lg:px-8">
+        <div className="hidden md:flex">
+          <a
+            href={siteUrl('/')}
+            className="group flex items-center space-x-2 p-0"
+          >
+            <div
+              className={`
+                relative h-10 w-10 rounded-full overflow-hidden
+                transition-shadow transition-filter
+                group-hover:shadow-outline
+                group-hover:brightness-90
               `}
-                onPress={() => setIsMenuOpen(false)}
+            >
+              <Image
+                src="/images/avatar.jpg"
+                alt="Craig Watt’s avatar"
+                fill
+                sizes="40px"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+            <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
+              Craig Watt
+            </span>
+          </a>
+        </div>
+
+        <nav className="hidden flex-1 items-center justify-center gap-2 md:flex">
+          {primaryItems.map((item) => (
+            <a
+              key={item.label}
+              href={siteUrl(item.href)}
+              className={`
+                px-4 py-2 ${itemRounded}
+                text-sm font-medium text-[var(--color-foreground)]
+                transition-colors ${hoverBgClass}
+              `}
+            >
+              {item.label}
+            </a>
+          ))}
+          {writingItem && (
+            <a
+              href={siteUrl(writingItem.href)}
+              className={`
+                px-4 py-2 ${itemRounded}
+                text-sm font-medium text-[var(--color-foreground)]
+                transition-colors ${hoverBgClass}
+              `}
+            >
+              {writingItem.label}
+            </a>
+          )}
+        </nav>
+
+        <div className="hidden md:ml-auto md:flex">
+          <NavbarRightIcons />
+        </div>
+
+        <div className="flex w-full items-center justify-between md:hidden">
+          <button
+            type="button"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
+            onClick={() => setIsMenuOpen((open) => !open)}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+          >
+            {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+
+          <a
+            href={siteUrl('/')}
+            onClick={() => setIsMenuOpen(false)}
+            className="group flex items-center space-x-2"
+          >
+            <div className="relative h-11 w-11 overflow-hidden rounded-full">
+              <Image
+                src="/images/avatar.jpg"
+                alt="Craig Watt’s avatar"
+                fill
+                sizes="44px"
+                style={{ objectFit: 'cover' }}
+              />
+            </div>
+            <span className="font-bold text-base text-[var(--color-foreground)] transition-opacity group-hover:opacity-80">
+              Craig Watt
+            </span>
+          </a>
+
+          <ThemeSwitcher />
+        </div>
+      </div>
+
+      {isMenuOpen && (
+        <div className="border-t border-[var(--color-border)] bg-[var(--color-background)]/98 px-4 pb-5 pt-3 backdrop-blur md:hidden">
+          <nav className="mx-auto flex max-w-6xl flex-col gap-2">
+            {primaryItems.map((item) => (
+              <a
+                key={item.label}
+                href={siteUrl(item.href)}
+                onClick={() => setIsMenuOpen(false)}
+                className={`
+                  w-full flex items-center
+                  ${mobileItemPadding} ${itemRounded}
+                  text-[var(--color-foreground)] text-base
+                  transition-colors ${hoverBgClass}
+                `}
               >
                 {item.label}
-              </Button>
-            </NavbarItem>
-          );
-        })}
-      </NavbarContent>
+              </a>
+            ))}
 
-      {/* ===== Desktop Right: External tools + theme + framework ===== */}
-      <NavbarRightIcons />
-
-      {/* ===== Mobile Menu Panel ===== */}
-      <NavbarMenu>
-        {/* 1) Projects (top-level links without children) */}
-        {navItems.map((item) => {
-          if (!Array.isArray(item.children)) {
-            return (
-              <NavbarMenuItem key={item.label}>
+            {writingItem && (
+              <>
                 <a
-                  href={siteUrl(item.href)}
+                  href={siteUrl(writingItem.href)}
                   onClick={() => setIsMenuOpen(false)}
                   className={`
                     w-full flex items-center
                     ${mobileItemPadding} ${itemRounded}
-                    text-foreground text-base
-                    ${hoverBgClass}
+                    text-[var(--color-foreground)] text-base
+                    transition-colors ${hoverBgClass}
                   `}
                 >
-                  {item.label}
+                  All writing
                 </a>
-              </NavbarMenuItem>
-            );
-          }
-          return null;
-        })}
 
-        {/* 2) Writing collapsible section */}
-        {navItems.map((item) => {
-          if (Array.isArray(item.children) && item.label === 'Writing') {
-            return (
-              <React.Fragment key={item.label}>
-                <NavbarMenuItem>
-                  <button
-                    type="button"
-                      onClick={() => setMobileBlogOpen((prev) => !prev)}
-                    className={`
-                      w-full flex items-center justify-between
-                      ${mobileItemPadding} ${itemRounded}
-                      text-foreground text-base font-medium
-                      ${hoverBgClass}
-                    `}
-                  >
-                    <span>Writing</span>
-                    <ChevronDown
-                      size={16}
-                      fill="currentColor"
-                      className={`transform transition-transform ${
-                        mobileBlogOpen ? 'rotate-180' : 'rotate-0'
-                      }`}
-                    />
-                  </button>
-                </NavbarMenuItem>
-                    {mobileBlogOpen &&
-                  item.children.map((child) => {
+                <button
+                  type="button"
+                  onClick={() => setMobileBlogOpen((prev) => !prev)}
+                  className={`
+                    w-full flex items-center justify-between
+                    ${mobileItemPadding} ${itemRounded}
+                    text-[var(--color-foreground)] text-base font-medium
+                    transition-colors ${hoverBgClass}
+                  `}
+                >
+                  <span>Browse writing</span>
+                  <ChevronDown
+                    size={16}
+                    fill="currentColor"
+                    className={`transform transition-transform ${mobileBlogOpen ? 'rotate-180' : 'rotate-0'}`}
+                  />
+                </button>
+
+                {mobileBlogOpen &&
+                  writingItem.children?.map((child) => {
                     const childExternal = child.href.startsWith('http');
-                    const isCurrent = false; // optionally detect current route
                     return (
-                      <NavbarMenuItem key={child.label}>
-                        <a
-                          href={childExternal ? child.href : siteUrl(child.href)}
-                          onClick={() => setIsMenuOpen(false)}
-                          className={`
-                            w-full flex items-center gap-2
-                            pl-8 ${mobileItemPadding}
-                            ${itemRounded}
-                            ${
-                              isCurrent
-                                ? 'font-semibold bg-default/20 dark:bg-default/30'
-                                : hoverBgClass
-                            }
-                            text-foreground text-base
-                          `}
-                          aria-current={isCurrent ? 'page' : undefined}
-                        >
-                          <span className="flex-shrink-0">{child.icon}</span>
-                          <span>{child.label}</span>
-                        </a>
-                      </NavbarMenuItem>
+                      <a
+                        key={child.label}
+                        href={childExternal ? child.href : siteUrl(child.href)}
+                        onClick={() => setIsMenuOpen(false)}
+                        className={`
+                          flex w-full items-center gap-3
+                          ${itemRounded} ${mobileItemPadding} pl-8
+                          text-[var(--color-foreground)] transition-colors ${hoverBgClass}
+                        `}
+                      >
+                        <span className="flex-shrink-0">{child.icon}</span>
+                        <span>{child.label}</span>
+                      </a>
                     );
                   })}
-              </React.Fragment>
-            );
-          }
-          return null;
-        })}
+              </>
+            )}
 
-        {/* 3) External tool icons row */}
-        <NavbarMenuItem>
-          <div className="px-4 py-3 flex items-center space-x-4">
+            <div className="mt-2 flex items-center gap-4 px-4 py-3">
             {externalTools.map((tool) => {
               const hasThemeVariants = tool.lightSrc && tool.darkSrc;
               const bgClass = hasThemeVariants
@@ -272,10 +216,10 @@ export const Navbar = () => {
                   rel={tool.internal ? undefined : 'noopener noreferrer'}
                   onClick={() => setIsMenuOpen(false)}
                   className={`
-                    flex items-center justify-center
+                    inline-flex items-center justify-center
                     ${iconBtnSizeClass} ${itemRounded}
                     ${bgClass} border border-[var(--color-border)]
-                    hover:opacity-80
+                    transition hover:border-[var(--color-accent)] hover:-translate-y-0.5
                   `}
                   aria-label={tool.ariaLabel}
                 >
@@ -310,9 +254,10 @@ export const Navbar = () => {
                 </a>
               );
             })}
-          </div>
-        </NavbarMenuItem>
-      </NavbarMenu>
-    </HeroNavbar>
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
   );
 };
