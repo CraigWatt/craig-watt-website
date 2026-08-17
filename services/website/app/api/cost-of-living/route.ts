@@ -225,6 +225,7 @@ const MEAL_DEAL_HISTORY_SEED: MealDealHistoryPoint[] = [
 
 const TTL_MS = 15 * 60 * 1000;
 const RETRIES = 2;
+const REQUEST_TIMEOUT_MS = 5000;
 
 export const dynamic = 'force-static';
 export const revalidate = 900;
@@ -262,6 +263,7 @@ function summariseFetchFailureBody(body: string) {
 async function fetchJson<T>(url: string): Promise<T> {
   for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         accept: 'application/json',
         'user-agent': 'craigwatt-cost-of-living-dev/1.0',
@@ -288,6 +290,7 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function fetchText(url: string): Promise<string> {
   for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'user-agent': 'craigwatt-cost-of-living-dev/1.0',
@@ -314,6 +317,7 @@ async function fetchText(url: string): Promise<string> {
 async function fetchBuffer(url: string): Promise<Buffer> {
   for (let attempt = 0; attempt <= RETRIES; attempt += 1) {
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         accept: 'application/zip,application/octet-stream;q=0.9,*/*;q=0.8',
         'user-agent': 'craigwatt-cost-of-living-dev/1.0',
@@ -659,28 +663,26 @@ function parseTescoSnapshot(html: string) {
 }
 
 async function loadFreshPayload(): Promise<CostOfLivingPayload> {
-  const inflation = await loadCpihSnapshot();
-
-  let asheHtml: string | null = null;
-  try {
-    asheHtml = await fetchText(ONS_ASHE_TABLE_7_URL);
-  } catch (error) {
-    console.error('ASHE snapshot failed', error);
-  }
-
-  let asheOccupationHtml: string | null = null;
-  try {
-    asheOccupationHtml = await fetchText(ONS_ASHE_TABLE_15_URL);
-  } catch (error) {
-    console.error('ASHE occupation snapshot failed', error);
-  }
-
-  let tescoHtml: string | null = null;
-  try {
-    tescoHtml = await fetchText(TESCO_MEAL_DEAL_URL);
-  } catch (error) {
-    console.error('Tesco meal-deal snapshot failed', error);
-  }
+  const [
+    inflation,
+    asheHtml,
+    asheOccupationHtml,
+    tescoHtml,
+  ] = await Promise.all([
+    loadCpihSnapshot(),
+    fetchText(ONS_ASHE_TABLE_7_URL).catch((error) => {
+      console.error('ASHE snapshot failed', error);
+      return null;
+    }),
+    fetchText(ONS_ASHE_TABLE_15_URL).catch((error) => {
+      console.error('ASHE occupation snapshot failed', error);
+      return null;
+    }),
+    fetchText(TESCO_MEAL_DEAL_URL).catch((error) => {
+      console.error('Tesco meal-deal snapshot failed', error);
+      return null;
+    }),
+  ]);
 
   const salaries = await loadSalarySnapshot(asheHtml, asheOccupationHtml);
   const salaryStatus: SourceMode = salaries.sourceMode;
