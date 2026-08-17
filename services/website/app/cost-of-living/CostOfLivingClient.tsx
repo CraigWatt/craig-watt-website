@@ -4,8 +4,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
 import { Button, Card, CardBody, Chip } from '@heroui/react';
 import {
-  Area,
-  AreaChart as RechartsAreaChart,
   CartesianGrid,
   Line,
   LineChart as RechartsLineChart,
@@ -26,7 +24,6 @@ type SourceSnapshot = {
 
 type SourceMode = 'live' | 'fallback' | 'unavailable';
 type SalaryRole = 'all-employees' | 'software-engineer';
-type InsightView = 'everyday-prices' | 'sources';
 
 type SalaryBenchmark = {
   role: SalaryRole;
@@ -96,18 +93,13 @@ type InflationHistoryPoint = {
 
 type HistoryRange = '1y' | '5y' | '10y' | '20y' | '40y';
 
-type MealDealSnapshot = {
-  clubcardPrice: number | null;
-  regularPrice: number | null;
-  fetchedAt: string;
-};
-
 type ChartDatum = Record<string, string | number | null | undefined>;
 type SalaryHistoryDatum = ChartDatum & {
   date: string;
   monthKey: string;
   'Your salary': number;
-  'Inflation-adjusted salary': number;
+  'Required salary': number;
+  'Projected required salary': number | null;
 };
 
 type CustomTooltipProps = Pick<TooltipContentProps<TooltipValueType, string | number>, 'active' | 'label' | 'payload'>;
@@ -141,14 +133,6 @@ function formatCurrency(value: number | null) {
   }).format(value);
 }
 
-function formatNumber(value: number | null, fractionDigits = 2) {
-  if (value === null) return 'Unavailable';
-  return new Intl.NumberFormat('en-GB', {
-    maximumFractionDigits: fractionDigits,
-    minimumFractionDigits: fractionDigits,
-  }).format(value);
-}
-
 function formatMonthYear(date: string) {
   const parsed = new Date(`${date}-01T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
@@ -169,11 +153,6 @@ function formatMoney(value: number | null) {
     currency: 'GBP',
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatPercent(value: number | null, fractionDigits = 1) {
-  if (value === null) return 'Unavailable';
-  return `${formatNumber(value, fractionDigits)}%`;
 }
 
 function parseSalaryInput(value: string) {
@@ -247,90 +226,6 @@ function renderTooltip(
     });
 }
 
-function AreaChart({
-  className,
-  data,
-  index,
-  categories,
-  colors,
-  valueFormatter,
-  showGridLines,
-  showYAxis,
-  showXAxis,
-  autoMinValue,
-  connectNulls,
-  curveType,
-  showGradient,
-  yAxisWidth,
-  customTooltip,
-}: {
-  className?: string;
-  data: ChartDatum[];
-  index: string;
-  categories: readonly string[];
-  colors: string[];
-  valueFormatter?: (value: number) => string;
-  showGridLines?: boolean;
-  showYAxis?: boolean;
-  showXAxis?: boolean;
-  autoMinValue?: boolean;
-  connectNulls?: boolean;
-  curveType?: 'monotone' | 'linear' | 'step';
-  showGradient?: boolean;
-  yAxisWidth?: number;
-  customTooltip?: (props: CustomTooltipProps) => React.ReactNode;
-}) {
-  return (
-    <div className={className}>
-      <ResponsiveContainer width="100%" height="100%">
-        <RechartsAreaChart data={data}>
-          {showGridLines && <CartesianGrid stroke="rgba(148, 163, 184, 0.18)" vertical={false} />}
-          <XAxis dataKey={index} hide={showXAxis === false} tickLine={false} axisLine={false} />
-          {showYAxis && (
-            <YAxis
-              width={yAxisWidth ?? 56}
-              tickLine={false}
-              axisLine={false}
-              domain={autoMinValue ? ['auto', 'auto'] : undefined}
-              tickFormatter={valueFormatter}
-            />
-          )}
-          <RechartsTooltip content={renderTooltip(customTooltip)} />
-          {showGradient &&
-            categories.map((category, idx) => {
-              const color = toChartColor(colors[idx] ?? colors[0] ?? '#06b6d4');
-              return (
-                <defs key={category}>
-                  <linearGradient id={`gradient-${category}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.28} />
-                    <stop offset="95%" stopColor={color} stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-              );
-            })}
-          {categories.map((category, idx) => {
-            const color = toChartColor(colors[idx] ?? colors[0] ?? '#06b6d4');
-            return (
-              <Area
-                key={category}
-                type={curveType ?? 'monotone'}
-                dataKey={category}
-                connectNulls={connectNulls}
-                stroke={color}
-                fill={showGradient ? `url(#gradient-${category})` : color}
-                fillOpacity={showGradient ? 1 : 0.18}
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4 }}
-              />
-            );
-          })}
-        </RechartsAreaChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
 function LineChart({
   className,
   data,
@@ -346,6 +241,7 @@ function LineChart({
   curveType,
   yAxisWidth,
   customTooltip,
+  strokeDasharrayMap,
 }: {
   className?: string;
   data: ChartDatum[];
@@ -361,6 +257,7 @@ function LineChart({
   curveType?: 'monotone' | 'linear' | 'step';
   yAxisWidth?: number;
   customTooltip?: (props: CustomTooltipProps) => React.ReactNode;
+  strokeDasharrayMap?: Partial<Record<string, string>>;
 }) {
   return (
     <div className={className}>
@@ -385,6 +282,7 @@ function LineChart({
               dataKey={category}
               connectNulls={connectNulls}
               stroke={toChartColor(colors[idx] ?? colors[0] ?? '#71717a')}
+              strokeDasharray={strokeDasharrayMap?.[category]}
               strokeWidth={2}
               dot={false}
               activeDot={{ r: 4 }}
@@ -483,273 +381,6 @@ function toneFromSourceState(mode: SourceMode): 'success' | 'warning' {
   return mode === 'live' ? 'success' : 'warning';
 }
 
-function MealDealTooltip({ active, payload, label }: CustomTooltipProps) {
-  if (!active || !payload || payload.length === 0) {
-    return null;
-  }
-
-  const point = payload[0]?.payload as
-    | {
-        monthKey?: string;
-        clubcardRaw?: number | null;
-        cpiRaw?: number | null;
-      }
-    | undefined;
-
-  const dateLabel =
-    point?.monthKey
-      ? formatMonthYear(point.monthKey)
-      : typeof label === 'string'
-        ? new Intl.DateTimeFormat('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          }).format(new Date(label))
-        : String(label ?? '');
-
-  return (
-    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 shadow-lg backdrop-blur">
-      <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-muted)]">{dateLabel}</p>
-      <div className="mt-3 space-y-2">
-        {payload.map((entry) => {
-          const value =
-            typeof entry.value === 'number' ? `${formatNumber(entry.value, 1)} index` : 'Unavailable';
-          return (
-            <div key={String(entry.dataKey)} className="flex items-center justify-between gap-6">
-              <span className="inline-flex items-center gap-2 text-sm text-[var(--color-foreground)]">
-                <span
-                  className="h-2.5 w-2.5 rounded-full"
-                  style={{ backgroundColor: String(entry.color ?? 'currentColor') }}
-                />
-                {String(entry.name ?? entry.dataKey)}
-              </span>
-              <span className="text-sm font-semibold text-[var(--color-foreground)]">{value}</span>
-            </div>
-          );
-        })}
-        {point && (
-          <>
-            <div className="mt-3 h-px bg-[var(--color-border)]" />
-            <div className="flex items-center justify-between gap-6 text-sm">
-              <span className="text-[var(--color-muted-foreground)]">Clubcard price</span>
-              <span className="font-semibold text-[var(--color-foreground)]">
-                {formatCurrency(point.clubcardRaw ?? null)}
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-6 text-sm">
-              <span className="text-[var(--color-muted-foreground)]">CPI level</span>
-              <span className="font-semibold text-[var(--color-foreground)]">
-                {formatNumber(point.cpiRaw ?? null, 1)}
-              </span>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function MealDealHistoryChart({
-  history,
-  currentSnapshot,
-  inflationHistory,
-}: {
-  history: MealDealHistoryPoint[];
-  currentSnapshot: MealDealSnapshot;
-  inflationHistory: InflationHistoryPoint[];
-}) {
-  const [historyRange, setHistoryRange] = useState<HistoryRange>('40y');
-  const points = [...history].sort((a, b) => a.date.localeCompare(b.date));
-
-  const chartData = useMemo(() => {
-    const now = new Date();
-    const rangeYears: Record<HistoryRange, number> = {
-      '1y': 1,
-      '5y': 5,
-      '10y': 10,
-      '20y': 20,
-      '40y': 40,
-    };
-
-    const cutoff = new Date(
-      now.getFullYear() - rangeYears[historyRange],
-      now.getMonth(),
-      now.getDate()
-    );
-
-    const mealEvents = points
-      .map((point) => ({
-        monthKey: monthKeyFromValue(point.date),
-        clubcardPrice: point.clubcardPrice,
-      }))
-      .filter((point) => point.clubcardPrice !== null);
-
-    const currentMonthKey = currentSnapshot.fetchedAt
-      ? monthKeyFromValue(currentSnapshot.fetchedAt.slice(0, 10))
-      : '';
-    if (currentMonthKey && currentSnapshot.clubcardPrice !== null) {
-      mealEvents.push({
-        monthKey: currentMonthKey,
-        clubcardPrice: currentSnapshot.clubcardPrice,
-      });
-    }
-
-    const dedupedMealEvents = Array.from(
-      new Map(mealEvents.map((point) => [point.monthKey, point])).values()
-    ).sort((a, b) => a.monthKey.localeCompare(b.monthKey));
-
-    const cpiLookup = new Map(inflationHistory.map((point) => [point.date, point.index]));
-    const cpiMonths = inflationHistory.map((point) => point.date).sort(compareMonthKeys);
-    const mealMonths = dedupedMealEvents.map((point) => point.monthKey).sort(compareMonthKeys);
-
-    if (cpiMonths.length === 0) {
-      return [];
-    }
-
-    const earliestCpiMonth = cpiMonths[0];
-    const earliestMealMonth = mealMonths[0] ?? null;
-    const latestCpiMonth = cpiMonths[cpiMonths.length - 1];
-    const latestMealMonth = mealMonths[mealMonths.length - 1] ?? latestCpiMonth;
-    const overallEnd =
-      compareMonthKeys(latestMealMonth, latestCpiMonth) > 0 ? latestMealMonth : latestCpiMonth;
-    const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
-    const filteredStart =
-      compareMonthKeys(rangeStartMonth, earliestCpiMonth) > 0 ? rangeStartMonth : earliestCpiMonth;
-    const months = enumerateMonthKeys(filteredStart, overallEnd);
-    let latestClubcard: number | null = null;
-    let mealIndex = 0;
-    let clubcardBase: number | null = null;
-    let cpiBase: number | null = null;
-
-    return months
-      .map((monthKey) => {
-        while (mealIndex < dedupedMealEvents.length && dedupedMealEvents[mealIndex].monthKey <= monthKey) {
-          latestClubcard = dedupedMealEvents[mealIndex].clubcardPrice;
-          mealIndex += 1;
-        }
-
-        const cpiRaw = cpiLookup.get(monthKey) ?? null;
-        if (cpiBase === null && cpiRaw !== null) {
-          cpiBase = cpiRaw;
-        }
-
-        const clubcardRaw =
-          earliestMealMonth !== null && compareMonthKeys(monthKey, earliestMealMonth) >= 0
-            ? latestClubcard
-            : null;
-        if (clubcardBase === null && clubcardRaw !== null) {
-          clubcardBase = clubcardRaw;
-        }
-
-        return {
-          date: `${monthKey}-01`,
-          monthKey,
-          Clubcard:
-            clubcardRaw !== null && clubcardBase !== null && clubcardBase !== 0
-              ? (clubcardRaw / clubcardBase) * 100
-              : null,
-          CPI:
-            cpiRaw !== null && cpiBase !== null && cpiBase !== 0 ? (cpiRaw / cpiBase) * 100 : null,
-          clubcardRaw,
-          cpiRaw,
-        };
-      })
-      .filter((point) => point.Clubcard !== null || point.CPI !== null);
-  }, [currentSnapshot.clubcardPrice, currentSnapshot.fetchedAt, historyRange, inflationHistory, points]);
-
-  if (chartData.length === 0) {
-    return (
-      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-6 text-sm text-[var(--color-muted-foreground)]">
-        Clubcard and CPI comparison is unavailable right now.
-      </div>
-    );
-  }
-
-  const rangeButtons: { label: string; value: HistoryRange }[] = [
-    { label: '1Y', value: '1y' },
-    { label: '5Y', value: '5y' },
-    { label: '10Y', value: '10y' },
-    { label: '20Y', value: '20y' },
-    { label: '40Y', value: '40y' },
-  ];
-  const firstPoint = chartData[0];
-  const lastPoint = chartData[chartData.length - 1];
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-cyan-500" />
-            Clubcard
-          </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-500" />
-            CPI
-          </span>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            CPI from Jan 1988
-          </span>
-          <span className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-            Tesco from Feb 2022
-          </span>
-          <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
-            {rangeButtons.map((button) => {
-              const active = historyRange === button.value;
-              return (
-                <button
-                  key={button.value}
-                  type="button"
-                  onClick={() => setHistoryRange(button.value)}
-                  className={[
-                    'rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors',
-                    active
-                      ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-                  ].join(' ')}
-                >
-                  {button.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 md:p-5 shadow-sm">
-        <AreaChart
-          className="h-80"
-          data={chartData}
-          index="date"
-          categories={['Clubcard', 'CPI']}
-          colors={['cyan', 'rose']}
-          valueFormatter={(value: number) => `${formatNumber(value, 1)} index`}
-          showGridLines
-          showYAxis
-          showXAxis={false}
-          autoMinValue
-          connectNulls
-          curveType="monotone"
-          showGradient
-          yAxisWidth={56}
-          customTooltip={MealDealTooltip}
-        />
-        <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-          <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
-          <span>Last {historyRange.toUpperCase()} · Each series starts at 100 from its own visible baseline</span>
-          <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
-        </div>
-        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
-          Clubcard and CPI are normalized independently from the first visible month so you can
-          compare rate of change rather than absolute units.
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function SalaryTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) {
     return null;
@@ -787,16 +418,14 @@ function SalaryHistoryChart({
   inflationHistory,
   salaryValue,
   salaryStartMonth,
-  benchmarkLabel,
-  benchmarkValue,
+  latestInflationRate,
 }: {
   inflationHistory: InflationHistoryPoint[];
   salaryValue: number;
   salaryStartMonth: string | null;
-  benchmarkLabel: string;
-  benchmarkValue: number | null;
+  latestInflationRate: number | null;
 }) {
-  const [historyRange, setHistoryRange] = useState<HistoryRange>('10y');
+  const [historyRange, setHistoryRange] = useState<HistoryRange>('5y');
 
   const chartData = useMemo(() => {
     if (!salaryStartMonth || salaryValue <= 0) {
@@ -825,12 +454,16 @@ function SalaryHistoryChart({
     const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
     const firstMonth =
       compareMonthKeys(rangeStartMonth, salaryStartMonth) > 0 ? rangeStartMonth : salaryStartMonth;
-    const lastMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
-    if (compareMonthKeys(firstMonth, lastMonth) > 0) {
+    const latestHistoricalMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
+    if (compareMonthKeys(firstMonth, latestHistoricalMonth) > 0) {
       return [];
     }
 
-    return enumerateMonthKeys(firstMonth, lastMonth)
+    const annualRate = latestInflationRate !== null ? latestInflationRate / 100 : null;
+    const monthlyGrowth =
+      annualRate !== null && annualRate > -1 ? Math.pow(1 + annualRate, 1 / 12) - 1 : null;
+
+    const historicalData = enumerateMonthKeys(firstMonth, latestHistoricalMonth)
       .map((monthKey) => {
         const cpiIndex = cpiLookup.get(monthKey);
         if (cpiIndex === undefined) {
@@ -841,14 +474,49 @@ function SalaryHistoryChart({
           date: `${monthKey}-01`,
           monthKey,
           'Your salary': salaryValue,
-          'Inflation-adjusted salary': salaryValue * (cpiIndex / salaryBaseIndex),
-          [benchmarkLabel]: benchmarkValue,
+          'Required salary': salaryValue * (cpiIndex / salaryBaseIndex),
+          'Projected required salary': null,
         };
 
         return point;
       })
       .filter((point): point is SalaryHistoryDatum => point !== null);
-  }, [benchmarkLabel, benchmarkValue, historyRange, inflationHistory, salaryStartMonth, salaryValue]);
+
+    if (historicalData.length === 0 || monthlyGrowth === null) {
+      return historicalData;
+    }
+
+    const lastHistoricalPoint = historicalData[historicalData.length - 1];
+    const projectedMonths = enumerateMonthKeys(
+      latestHistoricalMonth,
+      monthKeyFromValue(
+        new Date(
+          Number(latestHistoricalMonth.slice(0, 4)),
+          Number(latestHistoricalMonth.slice(5, 7)) - 1 + 12,
+          1
+        )
+          .toISOString()
+          .slice(0, 10)
+      )
+    ).slice(1);
+
+    const projectedData = projectedMonths.map((monthKey, index) => ({
+      date: `${monthKey}-01`,
+      monthKey,
+      'Your salary': salaryValue,
+      'Required salary': null as number | null,
+      'Projected required salary': lastHistoricalPoint['Required salary'] * Math.pow(1 + monthlyGrowth, index + 1),
+    }));
+
+    return [
+      ...historicalData,
+      {
+        ...lastHistoricalPoint,
+        'Projected required salary': lastHistoricalPoint['Required salary'],
+      },
+      ...projectedData,
+    ];
+  }, [historyRange, inflationHistory, latestInflationRate, salaryStartMonth, salaryValue]);
 
   if (chartData.length === 0) {
     return (
@@ -867,10 +535,7 @@ function SalaryHistoryChart({
   ];
   const firstPoint = chartData[0] as { monthKey?: string };
   const lastPoint = chartData[chartData.length - 1] as { monthKey?: string };
-  const categories =
-    benchmarkValue === null
-      ? (['Your salary', 'Inflation-adjusted salary'] as const)
-      : (['Your salary', 'Inflation-adjusted salary', benchmarkLabel] as const);
+  const categories = ['Your salary', 'Required salary', 'Projected required salary'] as const;
 
   return (
     <div className="space-y-4">
@@ -882,14 +547,12 @@ function SalaryHistoryChart({
           </span>
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-            Inflation-adjusted salary
+            Required salary
           </span>
-          {benchmarkValue !== null && (
-            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
-              <span className="h-2.5 w-2.5 rounded-full bg-amber-500" />
-              {benchmarkLabel}
-            </span>
-          )}
+          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
+            <span className="h-2.5 w-2.5 rounded-full border border-dashed border-sky-400" />
+            12-month projection
+          </span>
         </div>
         <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
           {rangeButtons.map((button) => {
@@ -919,7 +582,7 @@ function SalaryHistoryChart({
           data={chartData}
           index="date"
           categories={[...categories]}
-          colors={benchmarkValue === null ? ['gray', 'emerald'] : ['gray', 'emerald', 'amber']}
+          colors={['gray', 'emerald', '#38bdf8']}
           valueFormatter={(value: number) => formatCurrency(value)}
           showGridLines
           showYAxis
@@ -929,16 +592,18 @@ function SalaryHistoryChart({
           curveType="monotone"
           yAxisWidth={72}
           customTooltip={SalaryTooltip}
+          strokeDasharrayMap={{
+            'Projected required salary': '7 7',
+          }}
         />
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
           <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
-          <span>Last {historyRange.toUpperCase()} · Actual GBP values</span>
+          <span>Last {historyRange.toUpperCase()} · GBP only</span>
           <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
         </div>
         <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
-          Your salary stays flat from the month you selected. The inflation-adjusted line shows
-          what that salary would need to become over time to preserve the same buying power. The
-          benchmark line is the current selected location benchmark, shown as a horizontal reference.
+          The solid green line shows what your salary needed to become over time to preserve the same buying power.
+          The dotted blue line extends that idea 12 months forward using the latest annual CPI rate as a projection.
         </p>
       </div>
     </div>
@@ -951,7 +616,7 @@ export default function CostOfLivingClient() {
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
   );
-  const [activeInsightView, setActiveInsightView] = useState<InsightView>('everyday-prices');
+  const [entryStage, setEntryStage] = useState<0 | 1 | 2>(0);
   const [submittedSalaryAnalysis, setSubmittedSalaryAnalysis] = useState<{
     salary: number;
     period: string;
@@ -1072,14 +737,9 @@ export default function CostOfLivingClient() {
   const activeBenchmark =
     benchmarkRows.find((row) => row.key === resolvedSelectedLocation) ?? benchmarkRows[0] ?? FALLBACK_BENCHMARK;
   const activeBenchmarkAnnualMedian = activeBenchmark.annualMedian;
-  const activeBenchmarkLabel = activeBenchmark.label;
   const roleOptions: Array<{ key: SalaryRole; label: string }> = [
     { key: 'all-employees', label: 'All employees' },
     { key: 'software-engineer', label: 'Software engineer' },
-  ];
-  const insightViews: Array<{ key: InsightView; label: string }> = [
-    { key: 'everyday-prices', label: 'Everyday prices' },
-    { key: 'sources', label: 'Sources' },
   ];
 
   const inflatedHistoricalSalary =
@@ -1087,6 +747,10 @@ export default function CostOfLivingClient() {
   const submittedAdjustedSalary =
     submittedSalaryAnalysis && submittedInflationMultiplier !== null
       ? submittedSalaryAnalysis.salary * submittedInflationMultiplier
+      : null;
+  const projectedRequiredSalaryInOneYear =
+    submittedAdjustedSalary !== null && inflation.rate12m !== null
+      ? submittedAdjustedSalary * (1 + inflation.rate12m / 100)
       : null;
   const salaryAnalysisReady = submittedSalaryAnalysis !== null && submittedInflationPoint !== null;
   const salaryAnalysisStale =
@@ -1096,42 +760,28 @@ export default function CostOfLivingClient() {
   const submittedSalaryPeriodLabel = submittedInflationPoint
     ? formatMonthYear(submittedInflationPoint.date)
     : null;
-  const latestInflationPeriodLabel = latestInflationPoint
-    ? formatMonthYear(latestInflationPoint.date)
-    : null;
-  const mealDealStartPoint =
-    [...mealDeal.history]
-      .filter((point) => point.clubcardPrice !== null)
-      .sort((a, b) => a.date.localeCompare(b.date))[0] ?? null;
-  const mealDealPercentChange =
-    mealDealStartPoint?.clubcardPrice && mealDeal.clubcardPrice
-      ? ((mealDeal.clubcardPrice - mealDealStartPoint.clubcardPrice) / mealDealStartPoint.clubcardPrice) * 100
-      : null;
-  const salaryRequiredGrowthPct =
-    submittedSalaryAnalysis && submittedAdjustedSalary !== null
-      ? ((submittedAdjustedSalary - submittedSalaryAnalysis.salary) / submittedSalaryAnalysis.salary) * 100
-      : null;
   const benchmarkDelta =
     submittedAdjustedSalary !== null && activeBenchmarkAnnualMedian !== null
       ? submittedAdjustedSalary - activeBenchmarkAnnualMedian
       : null;
-  const roleLabel = selectedRole === 'software-engineer' ? 'software engineer' : 'all-employee';
-  const salarySentence =
-    submittedSalaryAnalysis &&
-    submittedSalaryPeriodLabel &&
-    latestInflationPeriodLabel &&
-    submittedAdjustedSalary !== null
-      ? `A salary of ${formatMoney(submittedSalaryAnalysis.salary)} from ${submittedSalaryPeriodLabel} would need to be ${formatMoney(submittedAdjustedSalary)} by ${latestInflationPeriodLabel} to preserve the same buying power, a required increase of ${formatPercent(salaryRequiredGrowthPct)}.`
-      : 'Salary purchasing-power adjustment is currently unavailable because the inflation history needed for that calculation is missing.';
-  const benchmarkSentence =
-    benchmarkDelta !== null && activeBenchmarkAnnualMedian !== null
-      ? `Against the current ${activeBenchmarkLabel} ${roleLabel} benchmark of ${formatMoney(activeBenchmarkAnnualMedian)}, that leaves you ${benchmarkDelta >= 0 ? formatMoney(benchmarkDelta) : formatMoney(Math.abs(benchmarkDelta))} ${benchmarkDelta >= 0 ? 'above' : 'below'} the benchmark today.`
-      : `The current ${activeBenchmarkLabel} ${roleLabel} benchmark is ${formatMoney(activeBenchmarkAnnualMedian)}.`;
-  const mealDealSentence =
-    mealDealStartPoint?.clubcardPrice !== null && mealDeal.clubcardPrice !== null
-      ? `Over the same broader period, the Tesco Clubcard meal deal moved from ${formatCurrency(mealDealStartPoint.clubcardPrice)} in ${formatDisplayDate(mealDealStartPoint.date)} to ${formatCurrency(mealDeal.clubcardPrice)} now, a change of ${formatPercent(mealDealPercentChange)}.`
-      : 'The Tesco meal-deal series is currently unavailable, so the everyday-cost comparison is paused.';
-  const _summaryParagraph = `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
+  const currentEntryTitle =
+    entryStage === 0
+      ? 'Enter your most recently obtained salary'
+      : entryStage === 1
+        ? 'What year did you obtain it?'
+        : 'What month did you obtain it?';
+  const currentEntryHint =
+    entryStage === 0
+      ? 'Use your annual salary.'
+      : entryStage === 1
+        ? 'We use this to anchor the inflation comparison.'
+        : 'This lets us compare the same salary against today.';
+  const canAdvanceEntryStage =
+    entryStage === 0
+      ? historicalSalaryValue > 0
+      : entryStage === 1
+        ? Boolean(selectedSalaryYearValue)
+        : selectedInflationPoint !== null;
 
   if (error) {
     return (
@@ -1221,13 +871,141 @@ export default function CostOfLivingClient() {
         </div>
       </section>
 
-      <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="space-y-5">
+      {!salaryAnalysisReady ? (
+        <section className="site-surface rounded-[2rem] px-6 py-8 md:px-10 md:py-10">
+          <div className="mx-auto flex max-w-3xl flex-col gap-8">
+            <div className="space-y-3 text-center">
+              <p className="text-xs uppercase tracking-[0.32em] text-[var(--color-muted)]">
+                Step {entryStage + 1} of 3
+              </p>
+              <h2 className="text-3xl font-semibold text-[var(--color-foreground)] md:text-4xl">
+                {currentEntryTitle}
+              </h2>
+              <p className="text-sm text-[var(--color-muted-foreground)] md:text-base">
+                {currentEntryHint}
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {entryStage === 0 && (
+                <label className="block space-y-3">
+                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                    Annual salary
+                  </span>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min="0"
+                    step="1000"
+                    value={historicalSalary}
+                    onChange={(event) => setHistoricalSalary(event.target.value)}
+                    className="site-input-surface site-select w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
+                  />
+                </label>
+              )}
+
+              {entryStage === 1 && (
+                <label className="block space-y-3">
+                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                    Year obtained
+                  </span>
+                  <select
+                    value={selectedSalaryYearValue}
+                    onChange={(event) => {
+                      setSelectedSalaryYear(event.target.value);
+                      setSelectedSalaryMonth('');
+                    }}
+                    className="site-input-surface site-select w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
+                  >
+                    {availableYears.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {entryStage === 2 && (
+                <label className="block space-y-3">
+                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                    Month obtained
+                  </span>
+                  <select
+                    value={selectedSalaryMonthValue}
+                    onChange={(event) => setSelectedSalaryMonth(event.target.value)}
+                    className="site-input-surface w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
+                  >
+                    {monthOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              <div className="grid grid-cols-3 gap-2">
+                {[0, 1, 2].map((step) => (
+                  <div
+                    key={step}
+                    className={[
+                      'h-2 rounded-full transition-colors',
+                      step <= entryStage ? 'bg-[var(--color-accent)]' : 'bg-[var(--color-border)]/50',
+                    ].join(' ')}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Button
+                type="button"
+                variant="flat"
+                className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]"
+                onPress={() => setEntryStage((stage) => (stage > 0 ? ((stage - 1) as 0 | 1 | 2) : stage))}
+                isDisabled={entryStage === 0}
+              >
+                Back
+              </Button>
+
+              {entryStage < 2 ? (
+                <Button
+                  type="button"
+                  variant="solid"
+                  color="primary"
+                  className="rounded-2xl"
+                  onPress={() => setEntryStage((stage) => (stage < 2 ? ((stage + 1) as 0 | 1 | 2) : stage))}
+                  isDisabled={!canAdvanceEntryStage}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  onPress={() => {
+                    setSubmittedSalaryAnalysis({
+                      salary: historicalSalaryValue,
+                      period: selectedSalaryPeriod,
+                    });
+                  }}
+                  variant="solid"
+                  color="primary"
+                  className="rounded-2xl"
+                  isDisabled={!canAdvanceEntryStage}
+                >
+                  Show analysis
+                </Button>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-7">
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <label className="block space-y-2 md:col-span-1">
+              <label className="block space-y-2">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Most recent salary
+                  Salary
                 </span>
                 <input
                   type="number"
@@ -1236,13 +1014,13 @@ export default function CostOfLivingClient() {
                   step="1000"
                   value={historicalSalary}
                   onChange={(event) => setHistoricalSalary(event.target.value)}
-                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 />
               </label>
 
               <label className="block space-y-2">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Year obtained
+                  Year
                 </span>
                 <select
                   value={selectedSalaryYearValue}
@@ -1250,7 +1028,7 @@ export default function CostOfLivingClient() {
                     setSelectedSalaryYear(event.target.value);
                     setSelectedSalaryMonth('');
                   }}
-                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 >
                   {availableYears.map((year) => (
                     <option key={year} value={year}>
@@ -1262,12 +1040,12 @@ export default function CostOfLivingClient() {
 
               <label className="block space-y-2">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Month obtained
+                  Month
                 </span>
                 <select
                   value={selectedSalaryMonthValue}
                   onChange={(event) => setSelectedSalaryMonth(event.target.value)}
-                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 >
                   {monthOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -1278,73 +1056,34 @@ export default function CostOfLivingClient() {
               </label>
             </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 lg:items-end">
               <Button
                 onPress={() => {
                   setSubmittedSalaryAnalysis({
                     salary: historicalSalaryValue,
                     period: selectedSalaryPeriod,
                   });
-                  setActiveInsightView('everyday-prices');
                 }}
                 variant="solid"
                 color="primary"
                 className="rounded-2xl"
                 isDisabled={historicalSalaryValue <= 0 || selectedInflationPoint === null}
               >
-                Generate analysis
+                Update analysis
               </Button>
-              <p className="text-sm text-[var(--color-muted-foreground)]">
-                You can edit these at any time.
-              </p>
-            </div>
-
-            {salaryAnalysisStale && (
-              <StatusBanner
-                title="Inputs changed"
-                description="Generate analysis again to refresh the graph and comparison."
-                tone="warning"
-              />
-            )}
-          </div>
-
-          <div className="site-input-surface rounded-[1.75rem] p-6">
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Inflation-adjusted today
+              {salaryAnalysisStale && (
+                <p className="text-sm text-[var(--color-muted-foreground)]">
+                  Inputs changed. Update to refresh the graph.
                 </p>
-                <p className="mt-3 text-4xl font-semibold text-[var(--color-foreground)]">
-                  {inflatedHistoricalSalary === null ? 'Unavailable' : formatMoney(inflatedHistoricalSalary)}
-                </p>
-              </div>
-              <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                {inflationMultiplier === null || !selectedInflationPoint || !latestInflationPoint
-                  ? 'CPIH history is unavailable right now.'
-                  : `${formatMonthYear(selectedInflationPoint.date)} to ${formatMonthYear(latestInflationPoint.date)} using CPIH.`}
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                    CPI
-                  </p>
-                  <p className="mt-2 text-xl font-semibold">{formatNumber(inflation.index, 1)}</p>
-                </div>
-                <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                    12m
-                  </p>
-                  <p className="mt-2 text-xl font-semibold">{formatPercent(inflation.rate12m, 2)}</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {salaryAnalysisReady ? (
         <>
-          <section className="grid gap-4 md:grid-cols-3">
+          <section className="grid gap-4 md:grid-cols-4">
             <div className="site-input-surface rounded-[1.75rem] p-5">
               <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                 Selected period
@@ -1359,6 +1098,14 @@ export default function CostOfLivingClient() {
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
                 {formatMoney(submittedAdjustedSalary)}
+              </p>
+            </div>
+            <div className="site-input-surface rounded-[1.75rem] p-5">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                In 12 months
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                {formatMoney(projectedRequiredSalaryInOneYear)}
               </p>
             </div>
             <div className="site-input-surface rounded-[1.75rem] p-5">
@@ -1389,8 +1136,7 @@ export default function CostOfLivingClient() {
                   inflationHistory={inflation.history}
                   salaryValue={submittedSalaryAnalysis.salary}
                   salaryStartMonth={submittedInflationPoint?.date ?? null}
-                  benchmarkLabel={`${activeBenchmark.label} benchmark`}
-                  benchmarkValue={activeBenchmark.annualMedian}
+                  latestInflationRate={inflation.rate12m}
                 />
               </CardBody>
             </Card>
@@ -1493,93 +1239,37 @@ export default function CostOfLivingClient() {
           </section>
 
           <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-            <div className="mb-5 inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
-              {insightViews.map((view) => {
-                const active = activeInsightView === view.key;
-                return (
-                  <button
-                    key={view.key}
-                    type="button"
-                    onClick={() => setActiveInsightView(view.key)}
-                    className={[
-                      'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-                    ].join(' ')}
-                  >
-                    {view.label}
-                  </button>
-                );
-              })}
+            <div className="mb-5 flex flex-col gap-2">
+              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                Sources
+              </p>
+              <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
+                Live feed status
+              </h2>
             </div>
-
-            {activeInsightView === 'everyday-prices' && (
-              <div className="space-y-5">
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Everyday prices
-                  </p>
-                  <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-                    Tesco meal deal vs CPI
-                  </h2>
-                </div>
-
-                <Card shadow="sm" radius="lg" className="site-surface overflow-hidden rounded-[1.75rem]">
-                  <CardBody className="space-y-4">
-                    <MealDealHistoryChart
-                      history={mealDeal.history}
-                      currentSnapshot={{
-                        clubcardPrice: mealDeal.clubcardPrice,
-                        regularPrice: mealDeal.regularPrice,
-                        fetchedAt: mealDeal.source.fetchedAt,
-                      }}
-                      inflationHistory={inflation.history}
-                    />
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 text-sm">
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                          Clubcard current
-                        </p>
-                        <p className="text-xl font-semibold">{formatCurrency(mealDeal.clubcardPrice)}</p>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
-                        <p className="text-xs uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                          CPI current
-                        </p>
-                        <p className="text-xl font-semibold">{formatNumber(inflation.index, 1)}</p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              </div>
-            )}
-
-            {activeInsightView === 'sources' && (
-              <div className="grid gap-4 md:grid-cols-3">
-                <DataCard
-                  title="Inflation"
-                  value={formatSourceState(sourceStates.inflation)}
-                  detail={inflation.source.name}
-                  fetchedAt={inflation.source.fetchedAt}
-                  tone={toneFromSourceState(sourceStates.inflation)}
-                />
-                <DataCard
-                  title="Salaries"
-                  value={formatSourceState(sourceStates.salaries)}
-                  detail={salaries.source.name}
-                  fetchedAt={salaries.source.fetchedAt}
-                  tone={toneFromSourceState(sourceStates.salaries)}
-                />
-                <DataCard
-                  title="Everyday prices"
-                  value={formatSourceState(sourceStates.mealDeals)}
-                  detail={mealDeal.source.name}
-                  fetchedAt={mealDeal.source.fetchedAt}
-                  tone={toneFromSourceState(sourceStates.mealDeals)}
-                />
-              </div>
-            )}
+            <div className="grid gap-4 md:grid-cols-3">
+              <DataCard
+                title="Inflation"
+                value={formatSourceState(sourceStates.inflation)}
+                detail={inflation.source.name}
+                fetchedAt={inflation.source.fetchedAt}
+                tone={toneFromSourceState(sourceStates.inflation)}
+              />
+              <DataCard
+                title="Salaries"
+                value={formatSourceState(sourceStates.salaries)}
+                detail={salaries.source.name}
+                fetchedAt={salaries.source.fetchedAt}
+                tone={toneFromSourceState(sourceStates.salaries)}
+              />
+              <DataCard
+                title="Everyday prices"
+                value={formatSourceState(sourceStates.mealDeals)}
+                detail={mealDeal.source.name}
+                fetchedAt={mealDeal.source.fetchedAt}
+                tone={toneFromSourceState(sourceStates.mealDeals)}
+              />
+            </div>
           </section>
         </>
       ) : (

@@ -146,7 +146,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
               <select
                 value={sortKey}
                 onChange={(event) => setSortKey(event.target.value as SortKey)}
-                className="site-input-surface min-w-[10rem] rounded-2xl px-4 py-2 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-accent)]"
+                className="site-input-surface site-select min-w-[10rem] rounded-2xl px-4 py-2 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-accent)]"
               >
                 <option value="value">Value</option>
                 <option value="pct">Gain %</option>
