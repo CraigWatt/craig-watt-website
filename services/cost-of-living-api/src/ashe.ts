@@ -41,6 +41,9 @@ type Table15Target = {
 const TABLE_7_FULL_TIME_SHEET = 'Full-Time';
 const TABLE_15_FULL_TIME_SHEET = 'Full-Time';
 const SOFTWARE_ENGINEER_OCCUPATION_CODE = '2134';
+const TABLE_7_ANNUAL_PAY_WORKBOOK_PATTERN = /Table 7\.7a\s+Annual pay - Gross .*\.xlsx$/i;
+const TABLE_15_ANNUAL_PAY_WORKBOOK_PATTERN =
+  /Table 15 \(4\)\.7a\s+Annual pay - Gross .*\.xlsx$/i;
 
 const TABLE_7_TARGETS: Table7Target[] = [
   {
@@ -368,8 +371,26 @@ function parseWorkbookRows(zipBuffer: Buffer, sheetName: string) {
   return parseSheetRows(sheetXml, sharedStrings);
 }
 
+function resolveWorkbookZipBuffer(zipBuffer: Buffer, workbookPattern: RegExp) {
+  const directEntries = parseZipEntries(zipBuffer);
+  if (directEntries.has('xl/workbook.xml')) {
+    return zipBuffer;
+  }
+
+  const workbookEntryName = Array.from(directEntries.keys()).find((name) =>
+    workbookPattern.test(name)
+  );
+
+  if (!workbookEntryName) {
+    throw new Error(`Could not find nested ASHE workbook matching ${workbookPattern}`);
+  }
+
+  return unzipEntry(directEntries, workbookEntryName);
+}
+
 export function extractSalaryBenchmarksFromAsheTable7Zip(zipBuffer: Buffer): SalaryBenchmark[] {
-  const rows = parseWorkbookRows(zipBuffer, TABLE_7_FULL_TIME_SHEET);
+  const workbookZipBuffer = resolveWorkbookZipBuffer(zipBuffer, TABLE_7_ANNUAL_PAY_WORKBOOK_PATTERN);
+  const rows = parseWorkbookRows(workbookZipBuffer, TABLE_7_FULL_TIME_SHEET);
 
   return TABLE_7_TARGETS.map((target) => {
     const row =
@@ -396,7 +417,11 @@ export function extractSalaryBenchmarksFromAsheTable7Zip(zipBuffer: Buffer): Sal
 }
 
 export function extractSalaryBenchmarksFromAsheTable15Zip(zipBuffer: Buffer): SalaryBenchmark[] {
-  const rows = parseWorkbookRows(zipBuffer, TABLE_15_FULL_TIME_SHEET);
+  const workbookZipBuffer = resolveWorkbookZipBuffer(
+    zipBuffer,
+    TABLE_15_ANNUAL_PAY_WORKBOOK_PATTERN
+  );
+  const rows = parseWorkbookRows(workbookZipBuffer, TABLE_15_FULL_TIME_SHEET);
 
   return TABLE_15_TARGETS.map((target) => {
     const row =
