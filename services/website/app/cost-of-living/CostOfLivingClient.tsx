@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { Button, Card, CardBody, CardHeader, Chip } from '@heroui/react';
+import { Button, Card, CardBody, Chip } from '@heroui/react';
 import {
   Area,
   AreaChart as RechartsAreaChart,
@@ -15,7 +15,6 @@ import {
   YAxis,
 } from 'recharts';
 import type { TooltipContentProps, TooltipValueType } from 'recharts';
-import { Activity } from '../components/icons';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
 
@@ -27,7 +26,7 @@ type SourceSnapshot = {
 
 type SourceMode = 'live' | 'fallback' | 'unavailable';
 type SalaryRole = 'all-employees' | 'software-engineer';
-type InsightView = 'summary' | 'everyday-prices' | 'salary-trend' | 'sources';
+type InsightView = 'everyday-prices' | 'sources';
 
 type SalaryBenchmark = {
   role: SalaryRole;
@@ -466,49 +465,6 @@ function StatusBanner({
         {action ? <div className="shrink-0">{action}</div> : null}
       </div>
     </div>
-  );
-}
-
-function StepSection({
-  step,
-  title,
-  description,
-  children,
-  action,
-}: {
-  step: string;
-  title: string;
-  description: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) {
-  return (
-    <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl space-y-3">
-            <div className="inline-flex items-center gap-3">
-              <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-muted-foreground)]">
-                {step}
-              </span>
-              <p className="text-xs uppercase tracking-[0.35em] text-[var(--color-muted)]">
-                Guided Flow
-              </p>
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl">
-                {title}
-              </h2>
-              <p className="max-w-2xl text-sm leading-relaxed text-[var(--color-muted-foreground)] md:text-base">
-                {description}
-              </p>
-            </div>
-          </div>
-          {action ? <div className="shrink-0">{action}</div> : null}
-        </div>
-        {children}
-      </div>
-    </section>
   );
 }
 
@@ -995,7 +951,7 @@ export default function CostOfLivingClient() {
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
   );
-  const [activeInsightView, setActiveInsightView] = useState<InsightView>('summary');
+  const [activeInsightView, setActiveInsightView] = useState<InsightView>('everyday-prices');
   const [submittedSalaryAnalysis, setSubmittedSalaryAnalysis] = useState<{
     salary: number;
     period: string;
@@ -1122,9 +1078,7 @@ export default function CostOfLivingClient() {
     { key: 'software-engineer', label: 'Software engineer' },
   ];
   const insightViews: Array<{ key: InsightView; label: string }> = [
-    { key: 'summary', label: 'Summary' },
     { key: 'everyday-prices', label: 'Everyday prices' },
-    { key: 'salary-trend', label: 'Salary trend' },
     { key: 'sources', label: 'Sources' },
   ];
 
@@ -1177,9 +1131,7 @@ export default function CostOfLivingClient() {
     mealDealStartPoint?.clubcardPrice !== null && mealDeal.clubcardPrice !== null
       ? `Over the same broader period, the Tesco Clubcard meal deal moved from ${formatCurrency(mealDealStartPoint.clubcardPrice)} in ${formatDisplayDate(mealDealStartPoint.date)} to ${formatCurrency(mealDeal.clubcardPrice)} now, a change of ${formatPercent(mealDealPercentChange)}.`
       : 'The Tesco meal-deal series is currently unavailable, so the everyday-cost comparison is paused.';
-  const summaryParagraph = `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
-  const sourceHealthSummary =
-    sourceHealthItems.map(({ label, mode }) => `${label}: ${formatSourceState(mode)}`).join(' · ');
+  const _summaryParagraph = `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
 
   if (error) {
     return (
@@ -1214,24 +1166,21 @@ export default function CostOfLivingClient() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-6xl space-y-8 px-6 py-16 md:px-12 lg:px-24">
-      <section className="site-surface relative overflow-hidden rounded-[2.5rem] px-6 py-8 md:px-8 md:py-9">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.22),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.16),transparent_28%)]" />
-        <div className="relative flex flex-col gap-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div className="max-w-3xl space-y-4">
+    <main className="mx-auto min-h-screen max-w-6xl space-y-6 px-6 py-16 md:px-12 lg:px-24">
+      <section className="site-surface relative overflow-hidden rounded-[2.5rem] px-6 py-7 md:px-8 md:py-8">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.18),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.14),transparent_28%)]" />
+        <div className="relative flex flex-col gap-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="max-w-3xl space-y-2">
               <p className="text-sm uppercase tracking-[0.35em] text-[var(--color-muted)]">
                 Cost of living
               </p>
-              <div className="space-y-3">
-                <h1 className="text-4xl font-semibold leading-tight text-balance md:text-5xl">
-                  Live signals for salary, inflation, and everyday prices
-                </h1>
-                <p className="max-w-2xl text-base leading-relaxed text-[var(--color-muted-foreground)]">
-                  A calmer, guided view of the data that matters when you want to talk about pay,
-                  purchasing power, and how everyday costs are moving around you.
-                </p>
-              </div>
+              <h1 className="text-4xl font-semibold leading-tight text-balance md:text-5xl">
+                Salary first. Context second.
+              </h1>
+              <p className="text-sm text-[var(--color-muted-foreground)] md:text-base">
+                Enter the salary you most recently obtained and when you got it.
+              </p>
             </div>
 
             <Button
@@ -1272,83 +1221,13 @@ export default function CostOfLivingClient() {
         </div>
       </section>
 
-      <StepSection
-        step="01"
-        title="Check the live feeds first"
-        description="Start with the data health. This keeps the page honest before you use any of the comparisons further down."
-      >
-        <div className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="site-input-surface rounded-[1.75rem] p-6">
-            <div className="space-y-4">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1 text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                <Activity className="h-3.5 w-3.5 text-[var(--color-accent)]" />
-                Live status
-              </div>
-              <h3 className="text-2xl font-semibold text-[var(--color-foreground)]">
-                What is working right now
-              </h3>
-              <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                Inflation comes from the ONS CPIH feed, salary benchmarks from ASHE Table 7 and
-                Table 15, and the Tesco signal is used as a lightweight everyday-price reference.
-              </p>
-              <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                Current status: {sourceHealthSummary}.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-3">
-            <DataCard
-              title="Inflation"
-              value={formatSourceState(sourceStates.inflation)}
-              detail={
-                inflation.rate12m === null
-                  ? 'Monthly CPIH history for salary adjustment is unavailable right now.'
-                  : `Latest CPIH reading ${formatNumber(inflation.index, 2)} with ${formatNumber(inflation.rate12m, 2)}% year-on-year inflation.`
-              }
-              source={inflation.source.name}
-              fetchedAt={inflation.source.fetchedAt}
-              tone={toneFromSourceState(sourceStates.inflation)}
-            />
-            <DataCard
-              title="Salaries"
-              value={formatSourceState(sourceStates.salaries)}
-              detail={
-                salaries.downloadUrl
-                  ? 'ONS ASHE Table 7 and Table 15 are reachable for locality and software-engineer benchmarks.'
-                  : 'The salary source is currently unavailable.'
-              }
-              source={salaries.source.name}
-              fetchedAt={salaries.source.fetchedAt}
-              tone={toneFromSourceState(sourceStates.salaries)}
-            />
-            <DataCard
-              title="Everyday prices"
-              value={formatSourceState(sourceStates.mealDeals)}
-              detail={
-                mealDeal.clubcardPrice === null && mealDeal.regularPrice === null
-                  ? `Tracked from ${mealDeal.retailer} as a lightweight everyday-cost signal.`
-                  : `${mealDeal.retailer}: ${formatCurrency(mealDeal.clubcardPrice)} Clubcard / ${formatCurrency(mealDeal.regularPrice)} regular.`
-              }
-              source={mealDeal.source.name}
-              fetchedAt={mealDeal.source.fetchedAt}
-              tone={toneFromSourceState(sourceStates.mealDeals)}
-            />
-          </div>
-        </div>
-      </StepSection>
-
-      <StepSection
-        step="02"
-        title="Enter your salary and the month it started"
-        description="This is the anchor point for the rest of the page. Once you set the amount and date, we can translate it into today’s buying power."
-      >
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="site-input-surface rounded-[1.75rem] p-6">
+      <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
+        <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="space-y-5">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <label className="block space-y-2 md:col-span-1">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Salary
+                  Most recent salary
                 </span>
                 <input
                   type="number"
@@ -1363,7 +1242,7 @@ export default function CostOfLivingClient() {
 
               <label className="block space-y-2">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Year earned
+                  Year obtained
                 </span>
                 <select
                   value={selectedSalaryYearValue}
@@ -1383,7 +1262,7 @@ export default function CostOfLivingClient() {
 
               <label className="block space-y-2">
                 <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Month earned
+                  Month obtained
                 </span>
                 <select
                   value={selectedSalaryMonthValue}
@@ -1399,35 +1278,33 @@ export default function CostOfLivingClient() {
               </label>
             </div>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <Button
                 onPress={() => {
                   setSubmittedSalaryAnalysis({
                     salary: historicalSalaryValue,
                     period: selectedSalaryPeriod,
                   });
-                  setActiveInsightView('summary');
+                  setActiveInsightView('everyday-prices');
                 }}
                 variant="solid"
                 color="primary"
                 className="rounded-2xl"
                 isDisabled={historicalSalaryValue <= 0 || selectedInflationPoint === null}
               >
-                Continue to analysis
+                Generate analysis
               </Button>
-              <p className="max-w-md text-sm text-[var(--color-muted-foreground)]">
-                This unlocks the written summary and the chart views below.
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                You can edit these at any time.
               </p>
             </div>
 
             {salaryAnalysisStale && (
-              <div className="mt-5">
-                <StatusBanner
-                  title="Inputs changed"
-                  description="Regenerate the analysis to refresh the benchmark comparison and chart views."
-                  tone="warning"
-                />
-              </div>
+              <StatusBanner
+                title="Inputs changed"
+                description="Generate analysis again to refresh the graph and comparison."
+                tone="warning"
+              />
             )}
           </div>
 
@@ -1443,19 +1320,19 @@ export default function CostOfLivingClient() {
               </div>
               <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
                 {inflationMultiplier === null || !selectedInflationPoint || !latestInflationPoint
-                  ? 'The CPIH history is unavailable right now, so this calculation is paused.'
-                  : `Adjusted from ${formatMonthYear(selectedInflationPoint.date)} to ${formatMonthYear(latestInflationPoint.date)} using the CPIH index series.`}
+                  ? 'CPIH history is unavailable right now.'
+                  : `${formatMonthYear(selectedInflationPoint.date)} to ${formatMonthYear(latestInflationPoint.date)} using CPIH.`}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
                   <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                    Current CPI
+                    CPI
                   </p>
                   <p className="mt-2 text-xl font-semibold">{formatNumber(inflation.index, 1)}</p>
                 </div>
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
                   <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                    12m inflation
+                    12m
                   </p>
                   <p className="mt-2 text-xl font-semibold">{formatPercent(inflation.rate12m, 2)}</p>
                 </div>
@@ -1463,124 +1340,160 @@ export default function CostOfLivingClient() {
             </div>
           </div>
         </div>
-      </StepSection>
+      </section>
 
-      <StepSection
-        step="03"
-        title="Choose the benchmark you want to compare against"
-        description="Pick the lens first, then the place. This keeps the salary comparison focused instead of showing too many benchmark cards at once."
-      >
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="space-y-4">
-            <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
-              {roleOptions.map((option) => {
-                const active = option.key === selectedRole;
-                return (
-                  <button
-                    key={option.key}
-                    type="button"
-                    onClick={() => setSelectedRole(option.key)}
-                    className={[
-                      'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-                    ].join(' ')}
-                  >
-                    {option.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
-              {benchmarkRows.map((row) => {
-                const active = row.key === activeBenchmark.key;
-                return (
-                  <button
-                    key={row.key}
-                    type="button"
-                    onClick={() => setSelectedLocation(row.key)}
-                    className={[
-                      'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
-                      active
-                        ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                        : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-                    ].join(' ')}
-                  >
-                    {row.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="site-input-surface rounded-[1.75rem] p-6">
-              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                Selected benchmark
-              </p>
-              <h3 className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
-                {activeBenchmark.label}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                {selectedRole === 'all-employees'
-                  ? 'Representative local-authority medians from ONS ASHE Table 7 full-time annual pay.'
-                  : 'Representative software-engineer medians from ONS ASHE Table 15 full-time annual pay.'}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                {activeBenchmark.notes} Source locality: {activeBenchmark.locality}.
-              </p>
-            </div>
-          </div>
-
-          <div className="site-input-surface rounded-[1.75rem] p-6">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                  Annual salary
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
-                  {formatMoney(activeBenchmark.annualMedian)}
-                </p>
-              </div>
-              <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5">
-                <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                  Monthly
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
-                  {activeBenchmark.annualMedian === null
-                    ? 'Unavailable'
-                    : formatMoney(activeBenchmark.annualMedian / 12)}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
+      {salaryAnalysisReady ? (
+        <>
+          <section className="grid gap-4 md:grid-cols-3">
+            <div className="site-input-surface rounded-[1.75rem] p-5">
               <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                Versus your adjusted salary
+                Selected period
               </p>
-              <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
-                {inflatedHistoricalSalary === null || activeBenchmark.annualMedian === null
-                  ? 'Unavailable'
-                  : `${inflatedHistoricalSalary >= activeBenchmark.annualMedian ? '+' : '-'}${formatMoney(
-                      Math.abs(inflatedHistoricalSalary - activeBenchmark.annualMedian)
-                    )}`}
-              </p>
-              <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                Compares your selected salary period against the current benchmark for {activeBenchmark.label}.
+              <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                {submittedSalaryPeriodLabel ?? 'Unavailable'}
               </p>
             </div>
-          </div>
-        </div>
-      </StepSection>
+            <div className="site-input-surface rounded-[1.75rem] p-5">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                Today equivalent
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                {formatMoney(submittedAdjustedSalary)}
+              </p>
+            </div>
+            <div className="site-input-surface rounded-[1.75rem] p-5">
+              <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                Benchmark delta
+              </p>
+              <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                {benchmarkDelta === null
+                  ? 'Unavailable'
+                  : `${benchmarkDelta >= 0 ? '+' : '-'}${formatMoney(Math.abs(benchmarkDelta))}`}
+              </p>
+            </div>
+          </section>
 
-      <StepSection
-        step="04"
-        title="Open the deeper views when you are ready"
-        description="This last stage keeps the detailed graphs and source links behind a simple switcher so the page stays focused instead of overwhelming."
-      >
-        {salaryAnalysisReady ? (
-          <div className="space-y-6">
-            <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
+            <div className="mb-5 flex flex-col gap-2">
+              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                Salary graph
+              </p>
+              <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
+                Your salary vs inflation
+              </h2>
+            </div>
+
+            <Card shadow="sm" radius="lg" className="site-surface overflow-hidden rounded-[1.75rem]">
+              <CardBody className="space-y-4">
+                <SalaryHistoryChart
+                  inflationHistory={inflation.history}
+                  salaryValue={submittedSalaryAnalysis.salary}
+                  salaryStartMonth={submittedInflationPoint?.date ?? null}
+                  benchmarkLabel={`${activeBenchmark.label} benchmark`}
+                  benchmarkValue={activeBenchmark.annualMedian}
+                />
+              </CardBody>
+            </Card>
+          </section>
+
+          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
+            <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+              <div className="space-y-4">
+                <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+                  {roleOptions.map((option) => {
+                    const active = option.key === selectedRole;
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        onClick={() => setSelectedRole(option.key)}
+                        className={[
+                          'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                          active
+                            ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                            : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                        ].join(' ')}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+                  {benchmarkRows.map((row) => {
+                    const active = row.key === activeBenchmark.key;
+                    return (
+                      <button
+                        key={row.key}
+                        type="button"
+                        onClick={() => setSelectedLocation(row.key)}
+                        className={[
+                          'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                          active
+                            ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                            : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                        ].join(' ')}
+                      >
+                        {row.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className="site-input-surface rounded-[1.75rem] p-6">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                    Selected benchmark
+                  </p>
+                  <h3 className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                    {activeBenchmark.label}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                    {activeBenchmark.notes}
+                  </p>
+                </div>
+              </div>
+
+              <div className="site-input-surface rounded-[1.75rem] p-6">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                      Annual
+                    </p>
+                    <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
+                      {formatMoney(activeBenchmark.annualMedian)}
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                      Monthly
+                    </p>
+                    <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
+                      {activeBenchmark.annualMedian === null
+                        ? 'Unavailable'
+                        : formatMoney(activeBenchmark.annualMedian / 12)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
+                  <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                    Versus your adjusted salary
+                  </p>
+                  <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                    {inflatedHistoricalSalary === null || activeBenchmark.annualMedian === null
+                      ? 'Unavailable'
+                      : `${inflatedHistoricalSalary >= activeBenchmark.annualMedian ? '+' : '-'}${formatMoney(
+                          Math.abs(inflatedHistoricalSalary - activeBenchmark.annualMedian)
+                        )}`}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
+            <div className="mb-5 inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
               {insightViews.map((view) => {
                 const active = activeInsightView === view.key;
                 return (
@@ -1601,68 +1514,15 @@ export default function CostOfLivingClient() {
               })}
             </div>
 
-            {activeInsightView === 'summary' && (
-              <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-                <div className="site-input-surface rounded-[1.75rem] p-6">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Plain-English summary
-                  </p>
-                  <p className="mt-4 max-w-3xl text-base leading-relaxed text-[var(--color-muted-foreground)]">
-                    {summaryParagraph}
-                  </p>
-                </div>
-
-                <div className="site-input-surface rounded-[1.75rem] p-6">
-                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Snapshot
-                  </p>
-                  <div className="mt-4 grid gap-3">
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                        Selected period
-                      </p>
-                      <p className="mt-2 text-xl font-semibold text-[var(--color-foreground)]">
-                        {submittedSalaryPeriodLabel ?? 'Unavailable'}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                        Today equivalent
-                      </p>
-                      <p className="mt-2 text-xl font-semibold text-[var(--color-foreground)]">
-                        {formatMoney(submittedAdjustedSalary)}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                        Benchmark delta
-                      </p>
-                      <p className="mt-2 text-xl font-semibold text-[var(--color-foreground)]">
-                        {benchmarkDelta === null
-                          ? 'Unavailable'
-                          : `${benchmarkDelta >= 0 ? '+' : '-'}${formatMoney(Math.abs(benchmarkDelta))}`}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {activeInsightView === 'everyday-prices' && (
               <div className="space-y-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                      Everyday prices
-                    </p>
-                    <h3 className="text-2xl font-semibold">Tesco meal deal vs CPI</h3>
-                    <p className="text-sm text-[var(--color-muted-foreground)]">
-                      Clubcard meal-deal pricing compared with CPI on a normalized index basis.
-                    </p>
-                  </div>
-                  <p className="max-w-md text-sm text-[var(--color-muted-foreground)] md:text-right">
-                    CPI stretches back to January 1988, while Tesco begins in February 2022 from known public price changes and ongoing snapshots.
+                <div className="flex flex-col gap-2">
+                  <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                    Everyday prices
                   </p>
+                  <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
+                    Tesco meal deal vs CPI
+                  </h2>
                 </div>
 
                 <Card shadow="sm" radius="lg" className="site-surface overflow-hidden rounded-[1.75rem]">
@@ -1682,14 +1542,12 @@ export default function CostOfLivingClient() {
                           Clubcard current
                         </p>
                         <p className="text-xl font-semibold">{formatCurrency(mealDeal.clubcardPrice)}</p>
-                        <p className="text-[var(--color-muted-foreground)]">Current tracked Tesco price.</p>
                       </div>
                       <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
                         <p className="text-xs uppercase tracking-[0.25em] text-[var(--color-muted)]">
                           CPI current
                         </p>
                         <p className="text-xl font-semibold">{formatNumber(inflation.index, 1)}</p>
-                        <p className="text-[var(--color-muted-foreground)]">Latest tracked CPI level.</p>
                       </div>
                     </div>
                   </CardBody>
@@ -1697,132 +1555,40 @@ export default function CostOfLivingClient() {
               </div>
             )}
 
-            {activeInsightView === 'salary-trend' && (
-              <div className="space-y-5">
-                <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-                  <div className="space-y-2">
-                    <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                      Salary trend
-                    </p>
-                    <h3 className="text-2xl font-semibold">Your salary vs inflation</h3>
-                    <p className="text-sm text-[var(--color-muted-foreground)]">
-                      Actual pay in pounds compared against the inflation-adjusted level needed to keep the same buying power.
-                    </p>
-                  </div>
-                  <p className="max-w-md text-sm text-[var(--color-muted-foreground)] md:text-right">
-                    The benchmark line uses the current selected location snapshot as a horizontal reference rather than a full historical series.
-                  </p>
-                </div>
-
-                <Card shadow="sm" radius="lg" className="site-surface overflow-hidden rounded-[1.75rem]">
-                  <CardBody className="space-y-4">
-                    <SalaryHistoryChart
-                      inflationHistory={inflation.history}
-                      salaryValue={submittedSalaryAnalysis.salary}
-                      salaryStartMonth={submittedInflationPoint?.date ?? null}
-                      benchmarkLabel={`${activeBenchmark.label} benchmark`}
-                      benchmarkValue={activeBenchmark.annualMedian}
-                    />
-                  </CardBody>
-                </Card>
-              </div>
-            )}
-
             {activeInsightView === 'sources' && (
-              <div className="grid gap-6 lg:grid-cols-2">
-                <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
-                  <CardHeader className="flex items-center gap-3">
-                    <Activity className="h-5 w-5 text-[var(--color-accent)]" />
-                    <div>
-                      <p className="font-semibold">What’s live</p>
-                      <p className="text-sm text-[var(--color-muted-foreground)]">
-                        The page keeps working even when one source is down.
-                      </p>
-                    </div>
-                  </CardHeader>
-                  <CardBody className="space-y-3 text-sm text-[var(--color-muted-foreground)]">
-                    <p>
-                      Inflation is pulled from the ONS CPIH feed, salary benchmarks from ASHE Table 7 and
-                      ASHE Table 15, and meal-deal pricing from a public retailer page.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {sourceHealthItems.map(({ label, mode }) => (
-                        <Chip
-                          key={label}
-                          color={mode === 'live' ? 'success' : 'warning'}
-                          variant="flat"
-                          size="sm"
-                        >
-                          {label}: {formatSourceState(mode)}
-                        </Chip>
-                      ))}
-                    </div>
-                  </CardBody>
-                </Card>
-
-                <Card shadow="sm" radius="lg" className="site-surface rounded-[1.75rem]">
-                  <CardHeader>
-                    <div>
-                      <p className="font-semibold">Sources</p>
-                      <p className="text-sm text-[var(--color-muted-foreground)]">
-                        Snapshots used to power the page and the calculator flow.
-                      </p>
-                    </div>
-                  </CardHeader>
-                  <CardBody className="space-y-4 text-sm">
-                    <div>
-                      <p className="font-medium">Inflation source</p>
-                      <a
-                        href={inflation.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-[var(--color-accent)] hover:underline"
-                      >
-                        {inflation.source.name}
-                      </a>
-                    </div>
-                    <div>
-                      <p className="font-medium">Salary source</p>
-                      <a
-                        href={salaries.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-[var(--color-accent)] hover:underline"
-                      >
-                        {salaries.source.name}
-                      </a>
-                    </div>
-                    <div>
-                      <p className="font-medium">Meal-deal source</p>
-                      <a
-                        href={mealDeal.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="break-all text-[var(--color-accent)] hover:underline"
-                      >
-                        {mealDeal.source.name}
-                      </a>
-                    </div>
-                  </CardBody>
-                </Card>
+              <div className="grid gap-4 md:grid-cols-3">
+                <DataCard
+                  title="Inflation"
+                  value={formatSourceState(sourceStates.inflation)}
+                  detail={inflation.source.name}
+                  fetchedAt={inflation.source.fetchedAt}
+                  tone={toneFromSourceState(sourceStates.inflation)}
+                />
+                <DataCard
+                  title="Salaries"
+                  value={formatSourceState(sourceStates.salaries)}
+                  detail={salaries.source.name}
+                  fetchedAt={salaries.source.fetchedAt}
+                  tone={toneFromSourceState(sourceStates.salaries)}
+                />
+                <DataCard
+                  title="Everyday prices"
+                  value={formatSourceState(sourceStates.mealDeals)}
+                  detail={mealDeal.source.name}
+                  fetchedAt={mealDeal.source.fetchedAt}
+                  tone={toneFromSourceState(sourceStates.mealDeals)}
+                />
               </div>
             )}
-          </div>
-        ) : (
-          <div className="site-input-surface rounded-[1.75rem] p-8 text-center">
-            <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-              Deep-dive locked for now
-            </p>
-            <h3 className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
-              Generate your salary analysis first
-            </h3>
-            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-              Once you confirm your salary and start date above, this stage unlocks the plain-English summary,
-              the normalized Tesco vs CPI chart, the salary trend view, and the source breakdown.
-            </p>
-          </div>
-        )}
-      </StepSection>
+          </section>
+        </>
+      ) : (
+        <section className="site-input-surface rounded-[1.75rem] p-8 text-center">
+          <p className="text-sm text-[var(--color-muted-foreground)]">
+            Generate analysis to see the graph and comparisons.
+          </p>
+        </section>
+      )}
     </main>
   );
 }

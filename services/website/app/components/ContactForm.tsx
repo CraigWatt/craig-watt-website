@@ -82,6 +82,8 @@ export default function ContactForm() {
       <Input
         name="name"
         label="Name"
+        labelPlacement="outside"
+        placeholder="Your name"
         isRequired
         value={form.name}
         onChange={handleChange}
@@ -91,7 +93,9 @@ export default function ContactForm() {
       <Input
         name="email"
         label="Email"
+        labelPlacement="outside"
         type="email"
+        placeholder="you@example.com"
         isRequired
         value={form.email}
         onChange={handleChange}
@@ -101,6 +105,8 @@ export default function ContactForm() {
       <Textarea
         name="message"
         label="Message"
+        labelPlacement="outside"
+        placeholder="Tell me a bit about what you need"
         isRequired
         value={form.message}
         onChange={handleChange}
