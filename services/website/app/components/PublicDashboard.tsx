@@ -48,7 +48,7 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
     <main className="max-w-4xl mx-auto px-6 md:px-12 lg:px-24 py-16 space-y-6">
       <div className="space-y-8">
         <div className="space-y-3">
-          <p className="text-sm uppercase tracking-[0.24em] text-[var(--color-muted)]">Trading212</p>
+          <p className="text-sm uppercase tracking-widest text-[var(--color-muted)]">Trading212</p>
           <h1 className="text-4xl font-semibold tracking-tight">Trading212 Dashboard</h1>
           <p className="max-w-2xl text-[var(--color-muted-foreground)]">
             A compact view of portfolio value, cash, returns, and current holdings with a cleaner public-facing surface.
@@ -107,14 +107,16 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
             { label: 'Simple Return', value: metrics.simpleReturnPct },
           ].map(({ label, value, extra, isPositive }) => (
             <article key={label} className="site-surface rounded-[1.75rem] px-5 py-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+              <p className="text-xs uppercase tracking-widest text-[var(--color-muted)]">{label}</p>
               <div
                 className={
                   label === 'Profit / Loss'
                     ? `text-xl font-semibold ${
-                        isPositive ? 'text-green-600' : 'text-red-600'
+                        isPositive
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-rose-600 dark:text-rose-400'
                       }`
-                    : 'text-xl font-semibold'
+                    : 'text-xl font-semibold text-[var(--color-foreground)]'
                 }
               >
                 <p className="mt-3">{value}</p>
@@ -125,9 +127,9 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
         </section>
 
         <section className="w-full space-y-4">
-          <h4 className="text-lg font-medium mb-4 text-left">
+          <h4 className="text-lg font-medium text-left text-[var(--color-foreground)]">
             Craig’s Holdings
-          </h4>   
+          </h4>
 
           <div className="flex justify-end">
             <label className="flex items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
@@ -149,12 +151,18 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
               <article key={symbol} className="site-surface rounded-[1.75rem] px-5 py-4">
                 <p className="text-lg font-semibold text-[var(--color-foreground)]">{symbol}</p>
                 <div className="mt-4 flex items-center justify-between">
-                  <span>{marketValue}</span>
-                  <span className={pct.startsWith('+') ? 'text-green-600' : 'text-red-600'}>
+                  <span className="text-[var(--color-foreground)]">{marketValue}</span>
+                  <span
+                    className={
+                      pct.startsWith('+')
+                        ? 'font-medium text-emerald-600 dark:text-emerald-400'
+                        : 'font-medium text-rose-600 dark:text-rose-400'
+                    }
+                  >
                     {pct}
                   </span>
                 </div>
-                <p className="mt-4 text-xs text-zinc-600 dark:text-zinc-400">
+                <p className="mt-4 text-xs text-[var(--color-muted)]">
                   Purchased {purchaseDate}
                 </p>
               </article>
