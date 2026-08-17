@@ -511,14 +511,19 @@ function getInflationStatus(
 }
 
 async function loadAsheBenchmarks() {
-  const [table7Result, table15Result] = await Promise.allSettled([
-    fetchBuffer(ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL).then((zipBuffer) =>
-      extractSalaryBenchmarksFromAsheTable7Zip(zipBuffer)
-    ),
-    fetchBuffer(ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL).then((zipBuffer) =>
-      extractSalaryBenchmarksFromAsheTable15Zip(zipBuffer)
-    ),
-  ]);
+  const table7Result = await fetchBuffer(ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL)
+    .then((zipBuffer) => extractSalaryBenchmarksFromAsheTable7Zip(zipBuffer))
+    .then(
+      (value) => ({ status: 'fulfilled', value } as const),
+      (reason) => ({ status: 'rejected', reason } as const)
+    );
+
+  const table15Result = await fetchBuffer(ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL)
+    .then((zipBuffer) => extractSalaryBenchmarksFromAsheTable15Zip(zipBuffer))
+    .then(
+      (value) => ({ status: 'fulfilled', value } as const),
+      (reason) => ({ status: 'rejected', reason } as const)
+    );
 
   if (table7Result.status === 'rejected') {
     console.error('ASHE Table 7 benchmark extraction failed', table7Result.reason);

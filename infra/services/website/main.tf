@@ -286,7 +286,7 @@ resource "aws_lambda_function" "cost_of_living" {
   filename         = data.archive_file.cost_of_living_lambda.output_path
   source_code_hash = data.archive_file.cost_of_living_lambda.output_base64sha256
   timeout          = 29
-  memory_size      = 256
+  memory_size      = 512
 
   environment {
     variables = {
