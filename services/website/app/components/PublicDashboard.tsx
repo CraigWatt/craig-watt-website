@@ -1,19 +1,6 @@
 // app/components/PublicDashboard.tsx
 'use client'
 import React from 'react'
-import {
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  Dropdown,
-  DropdownTrigger,
-  DropdownMenu,
-  DropdownItem,
-  Button,
-  Alert
-} from '@heroui/react'
-import { ChevronDown } from 'lucide-react'
 import type { PublicApiStatus, PublicMetrics, PublicPos } from '../trading212/types'
 import { RefreshArrow } from './icons/RefreshArrow'
 
@@ -60,44 +47,49 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
   return (
     <main className="max-w-4xl mx-auto px-6 md:px-12 lg:px-24 py-16 space-y-6">
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold">Trading212 Dashboard</h1>
+        <div className="space-y-3">
+          <p className="text-sm uppercase tracking-[0.24em] text-[var(--color-muted)]">Trading212</p>
+          <h1 className="text-4xl font-semibold tracking-tight">Trading212 Dashboard</h1>
+          <p className="max-w-2xl text-[var(--color-muted-foreground)]">
+            A compact view of portfolio value, cash, returns, and current holdings with a cleaner public-facing surface.
+          </p>
+        </div>
 
         {data._meta?.cold && (
-          <Alert
-            color="default"
-            title="Loading from scratch"
-            description="First-time load — please wait while data is fetched..."
-          />
+          <div className="site-surface rounded-[1.75rem] px-5 py-4 text-sm text-[var(--color-muted-foreground)]">
+            <p className="font-medium text-[var(--color-foreground)]">Loading from scratch</p>
+            <p>First-time load. Please wait while data is fetched.</p>
+          </div>
         )}
 
         {data._meta?.stale && (
           <section className="grid grid-cols-1 gap-4">
-            <Alert color="warning">
-              <div className="w-full flex items-center justify-between">
-                <div className="flex flex-col">
-                  <span className="text-small font-medium">Stale Data</span>
-                  <span>Showing cached data — live update in progress…</span>
-                </div>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  onPress={() => location.reload()}
-                  className="shrink-0"
-                  radius="full"
-                >
-                  <RefreshArrow className="w-4 h-4" />
-                </Button>
+            <div className="site-surface flex w-full items-center justify-between gap-4 rounded-[1.75rem] px-5 py-4">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium text-[var(--color-foreground)]">Stale data</span>
+                <span className="text-sm text-[var(--color-muted-foreground)]">Showing cached data while a live refresh is in progress.</span>
               </div>
-            </Alert>
+              <button
+                type="button"
+                onClick={() => location.reload()}
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-background)] text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+              >
+                  <RefreshArrow className="w-4 h-4" />
+              </button>
+            </div>
           </section>
         )}
 
         <section className="grid grid-cols-1 gap-4">
-          <Alert
-            color={apiStatus.t212 ? 'success' : 'danger'}
-            title="T212 API"
-            description={apiStatus.t212 ? 'Online' : 'Offline'}
-          />
+          <div className="site-surface flex items-center justify-between rounded-[1.75rem] px-5 py-4">
+            <div>
+              <p className="text-sm font-medium text-[var(--color-foreground)]">T212 API</p>
+              <p className="text-sm text-[var(--color-muted-foreground)]">{apiStatus.t212 ? 'Online' : 'Offline'}</p>
+            </div>
+            <span className={`rounded-full px-3 py-1 text-xs font-semibold ${apiStatus.t212 ? 'bg-emerald-500/15 text-emerald-500' : 'bg-rose-500/15 text-rose-500'}`}>
+              {apiStatus.t212 ? 'Live' : 'Down'}
+            </span>
+          </div>
         </section>
 
         <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -114,9 +106,9 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
             },
             { label: 'Simple Return', value: metrics.simpleReturnPct },
           ].map(({ label, value, extra, isPositive }) => (
-            <Card key={label} shadow="sm" radius="md" fullWidth>
-              <CardHeader>{label}</CardHeader>
-              <CardBody
+            <article key={label} className="site-surface rounded-[1.75rem] px-5 py-4">
+              <p className="text-xs uppercase tracking-[0.22em] text-[var(--color-muted)]">{label}</p>
+              <div
                 className={
                   label === 'Profit / Loss'
                     ? `text-xl font-semibold ${
@@ -125,10 +117,10 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
                     : 'text-xl font-semibold'
                 }
               >
-                {value}
-                {extra && <div className="text-sm mt-1">{extra}</div>}
-              </CardBody>
-            </Card>
+                <p className="mt-3">{value}</p>
+                {extra && <div className="mt-1 text-sm">{extra}</div>}
+              </div>
+            </article>
           ))}
         </section>
 
@@ -138,46 +130,34 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
           </h4>   
 
           <div className="flex justify-end">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button size="sm" variant="flat" className="flex items-center gap-1">
-                  Sort by:{' '}
-                  {sortKey === 'value'
-                    ? 'Value'
-                    : sortKey === 'pct'
-                    ? 'Gain %'
-                    : 'Date'}
-                  <ChevronDown size={14} />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort positions">
-                <DropdownItem key="value" onClick={() => setSortKey('value')}>
-                  Value
-                </DropdownItem>
-                <DropdownItem key="pct" onClick={() => setSortKey('pct')}>
-                  Gain %
-                </DropdownItem>
-                <DropdownItem key="date" onClick={() => setSortKey('date')}>
-                  Date
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
+            <label className="flex items-center gap-3 text-sm text-[var(--color-muted-foreground)]">
+              <span>Sort by</span>
+              <select
+                value={sortKey}
+                onChange={(event) => setSortKey(event.target.value as SortKey)}
+                className="site-input-surface rounded-2xl px-4 py-2 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-accent)]"
+              >
+                <option value="value">Value</option>
+                <option value="pct">Gain %</option>
+                <option value="date">Date</option>
+              </select>
+            </label>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {sorted.map(({ symbol, marketValue, pct, purchaseDate }) => (
-              <Card key={symbol} shadow="sm" radius="md" fullWidth>
-                <CardHeader>{symbol}</CardHeader>
-                <CardBody className="flex justify-between items-center">
+              <article key={symbol} className="site-surface rounded-[1.75rem] px-5 py-4">
+                <p className="text-lg font-semibold text-[var(--color-foreground)]">{symbol}</p>
+                <div className="mt-4 flex items-center justify-between">
                   <span>{marketValue}</span>
                   <span className={pct.startsWith('+') ? 'text-green-600' : 'text-red-600'}>
                     {pct}
                   </span>
-                </CardBody>
-                <CardFooter className="text-xs text-zinc-600 dark:text-zinc-400">
+                </div>
+                <p className="mt-4 text-xs text-zinc-600 dark:text-zinc-400">
                   Purchased {purchaseDate}
-                </CardFooter>
-              </Card>
+                </p>
+              </article>
             ))}
           </div>
         </section>

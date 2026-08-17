@@ -1,11 +1,6 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
-import {
-  NavbarContent,
-  NavbarItem,
-  Button,
-} from '@heroui/react';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { siteUrl } from '../data/site';
 
@@ -45,36 +40,26 @@ export const externalTools: ExternalTool[] = [
 
 export function NavbarRightIcons() {
   return (
-    <NavbarContent justify="end" className="hidden md:flex gap-2">
-      <NavbarItem>
-        <Button
-          as="a"
-          href={siteUrl('/cost-of-living')}
-          variant="flat"
-          isIconOnly
-          className="h-10 w-10 min-w-10 p-0 rounded-medium bg-white dark:bg-slate-200 border border-[var(--color-border)] hover:opacity-80"
-          aria-label="Cost of living"
-        >
-          <Image
-            src="/icons/pound-coin.png"
-            alt="Cost of living"
-            width={28}
-            height={28}
-            className="object-contain"
-            priority={false}
-          />
-        </Button>
-      </NavbarItem>
+    <div className="hidden items-center gap-2 md:flex">
+      <a
+        href={siteUrl('/cost-of-living')}
+        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-white transition hover:border-[var(--color-accent)] hover:-translate-y-0.5 dark:bg-slate-200"
+        aria-label="Cost of living"
+      >
+        <Image
+          src="/icons/pound-coin.png"
+          alt="Cost of living"
+          width={28}
+          height={28}
+          className="object-contain"
+          priority={false}
+        />
+      </a>
 
       {externalTools.map((tool) => {
         const hasThemeVariants = tool.lightSrc && tool.darkSrc;
-        
-        // Icons with theme variants use card background, single-src icons need light bg for visibility
-        const bgClass = hasThemeVariants
-          ? 'bg-[var(--color-card)]'
-          : 'bg-white dark:bg-slate-200';
-        
-        // build the icon markup
+        const bgClass = hasThemeVariants ? 'bg-[var(--color-card)]' : 'bg-white dark:bg-slate-200';
+
         const Icon = hasThemeVariants ? (
           <>
             <Image
@@ -104,48 +89,23 @@ export function NavbarRightIcons() {
           />
         );
 
-        if (tool.internal) {
-          // internal: use NextLink directly on the Button
-          return (
-            <NavbarItem key={tool.alt}>
-              <Button
-                as="a"
-                href={siteUrl(tool.href)}
-                variant="flat"
-                isIconOnly
-                className={`h-10 w-10 min-w-10 p-0 rounded-medium ${bgClass} border border-[var(--color-border)] hover:opacity-80`}
-                aria-label={tool.ariaLabel}
-              >
-                {Icon}
-              </Button>
-            </NavbarItem>
-          );
-        } else {
-          // external: normal anchor with new-tab
-          return (
-            <NavbarItem key={tool.alt}>
-              <Button
-                as="a"
-                href={tool.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                variant="flat"
-                isIconOnly
-                className={`h-10 w-10 min-w-10 p-0 rounded-medium ${bgClass} border border-[var(--color-border)] hover:opacity-80`}
-                aria-label={tool.ariaLabel}
-              >
-                {Icon}
-              </Button>
-            </NavbarItem>
-          );
-        }
+        return (
+          <a
+            key={tool.alt}
+            href={tool.internal ? siteUrl(tool.href) : tool.href}
+            target={tool.internal ? undefined : '_blank'}
+            rel={tool.internal ? undefined : 'noopener noreferrer'}
+            className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] ${bgClass} transition hover:border-[var(--color-accent)] hover:-translate-y-0.5`}
+            aria-label={tool.ariaLabel}
+          >
+            {Icon}
+          </a>
+        );
       })}
 
-      {/* Theme switcher */}
-      <NavbarItem className="hidden md:flex">
+      <div className="hidden md:flex">
         <ThemeSwitcher />
-      </NavbarItem>
-
-    </NavbarContent>
+      </div>
+    </div>
   );
 }
