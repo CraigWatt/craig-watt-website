@@ -1,7 +1,7 @@
 // app/components/Navbar.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { ChevronDown } from './icons';
 import { Menu, X } from 'lucide-react';
@@ -13,15 +13,6 @@ import { siteUrl } from '../data/site';
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileBlogOpen, setMobileBlogOpen] = useState(false);
-
-  // When mobile menu opens/closes, auto-expand/collapse sections
-  useEffect(() => {
-    if (isMenuOpen) {
-      setMobileBlogOpen(true);
-    } else {
-      setMobileBlogOpen(false);
-    }
-  }, [isMenuOpen]);
 
   const hoverBgClass = 'hover:bg-black/5 dark:hover:bg-white/8';
   const itemRounded = 'rounded-2xl';
@@ -98,7 +89,13 @@ export const Navbar = () => {
             type="button"
             aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen((open) => !open)}
+            onClick={() => {
+              setIsMenuOpen((open) => {
+                const nextOpen = !open;
+                setMobileBlogOpen(nextOpen);
+                return nextOpen;
+              });
+            }}
             className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] shadow-sm transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
           >
             {isMenuOpen ? <X size={18} /> : <Menu size={18} />}
@@ -134,10 +131,13 @@ export const Navbar = () => {
               <a
                 key={item.label}
                 href={siteUrl(item.href)}
-                onClick={() => setIsMenuOpen(false)}
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  setMobileBlogOpen(false);
+                }}
                 className={`
                   w-full flex items-center
-                    ${mobileItemPadding} ${itemRounded}
+                  ${mobileItemPadding} ${itemRounded}
                     text-[var(--color-foreground)] text-base
                     border border-transparent transition-colors ${hoverBgClass}
                   `}
@@ -150,7 +150,10 @@ export const Navbar = () => {
               <>
                 <a
                   href={siteUrl(writingItem.href)}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setMobileBlogOpen(false);
+                  }}
                   className={`
                     w-full flex items-center
                     ${mobileItemPadding} ${itemRounded}
@@ -186,7 +189,10 @@ export const Navbar = () => {
                       <a
                         key={child.label}
                         href={childExternal ? child.href : siteUrl(child.href)}
-                        onClick={() => setIsMenuOpen(false)}
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          setMobileBlogOpen(false);
+                        }}
                         className={`
                           flex w-full items-center gap-3
                           ${itemRounded} ${mobileItemPadding} border border-transparent pl-8
@@ -214,7 +220,10 @@ export const Navbar = () => {
                   href={tool.internal ? siteUrl(tool.href) : tool.href}
                   target={tool.internal ? undefined : '_blank'}
                   rel={tool.internal ? undefined : 'noopener noreferrer'}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setMobileBlogOpen(false);
+                  }}
                   className={`
                     inline-flex items-center justify-center
                     ${iconBtnSizeClass} ${itemRounded}

@@ -13,6 +13,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '^next/image$': '<rootDir>/test/mocks/next-image.cjs',
+    '^@heroui/react$': '<rootDir>/test/mocks/heroui-react.cjs',
     '^@platform/(.*)$': '<rootDir>/platform/$1',
     '^content-collections$': '<rootDir>/test/mocks/content-collections.cjs',
     '^content-collections/generated/allPosts$':

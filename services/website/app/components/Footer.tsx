@@ -1,20 +1,33 @@
 import Image from 'next/image';
-import { Github, Linkedin, ExternalLink } from 'lucide-react';
-import { Button } from '@heroui/react';
+import { BriefcaseBusiness, ExternalLink, type LucideIcon } from 'lucide-react';
 import { siteTechStack } from '../data/profile';
 import { TechIconRow } from './TechIconRow';
 import { siteUrl } from '../data/site';
 
-const socialLinks = [
+type SocialLink =
+  | {
+      label: string;
+      href: string;
+      icon: LucideIcon;
+    }
+  | {
+      label: string;
+      href: string;
+      lightSrc: string;
+      darkSrc: string;
+    };
+
+const socialLinks: SocialLink[] = [
   {
     label: 'GitHub',
     href: 'https://github.com/CraigWatt',
-    icon: Github,
+    lightSrc: '/icons/github-dark.svg',
+    darkSrc: '/icons/github-light.svg',
   },
   {
     label: 'LinkedIn',
     href: 'https://www.linkedin.com/in/craigwatt-dev/',
-    icon: Linkedin,
+    icon: BriefcaseBusiness,
   },
 ];
 
@@ -78,14 +91,12 @@ export function Footer() {
               ))}
             </ul>
             <div className="mt-6">
-              <Button
-                as="a"
+              <a
                 href={siteUrl('/cv')}
-                variant="flat"
-                className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] hover:bg-[var(--color-background)] sm:w-auto"
+                className="inline-flex w-full items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] px-4 py-2.5 text-sm font-medium text-[var(--color-foreground)] transition-colors hover:bg-[var(--color-background)] sm:w-auto"
               >
                 Export as CV
-              </Button>
+              </a>
             </div>
           </div>
 
@@ -103,7 +114,31 @@ export function Footer() {
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-sm text-[var(--color-muted-foreground)] hover:text-[var(--color-accent)] transition-colors group"
                   >
-                    <link.icon className="w-4 h-4" />
+                    {'icon' in link
+                      ? (() => {
+                          const Icon = link.icon;
+                          return <Icon className="h-4 w-4" />;
+                        })()
+                      : (
+                        <>
+                          <Image
+                            src={link.lightSrc}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="block dark:hidden"
+                            aria-hidden="true"
+                          />
+                          <Image
+                            src={link.darkSrc}
+                            alt=""
+                            width={16}
+                            height={16}
+                            className="hidden dark:block"
+                            aria-hidden="true"
+                          />
+                        </>
+                      )}
                     <span>{link.label}</span>
                     <ExternalLink className="w-3 h-3 opacity-50" />
                   </a>

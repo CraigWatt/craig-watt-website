@@ -1017,39 +1017,31 @@ export default function CostOfLivingClient() {
     new Set(inflationHistory.map((point) => point.date.slice(0, 4)))
   ).sort((a, b) => b.localeCompare(a));
   const defaultPeriod = latestInflationPoint?.date ?? '';
-  const [selectedSalaryYear, setSelectedSalaryYear] = useState(defaultPeriod.slice(0, 4) || '2026');
-  const [selectedSalaryMonth, setSelectedSalaryMonth] = useState(defaultPeriod.slice(5, 7) || '06');
-
-  useEffect(() => {
-    if (!latestInflationPoint) {
-      return;
-    }
-
-    const [year, month] = latestInflationPoint.date.split('-');
-    setSelectedSalaryYear((current) => (current ? current : year));
-    setSelectedSalaryMonth((current) => (current ? current : month));
-  }, [latestInflationPoint]);
+  const defaultSalaryYear = defaultPeriod.slice(0, 4) || '2026';
+  const defaultSalaryMonth = defaultPeriod.slice(5, 7) || '06';
+  const [selectedSalaryYear, setSelectedSalaryYear] = useState('');
+  const [selectedSalaryMonth, setSelectedSalaryMonth] = useState('');
+  const selectedSalaryYearValue = selectedSalaryYear || defaultSalaryYear;
 
   const monthOptions = inflationHistory
-    .filter((point) => point.date.startsWith(`${selectedSalaryYear}-`))
+    .filter((point) => point.date.startsWith(`${selectedSalaryYearValue}-`))
     .map((point) => ({
       value: point.date.slice(5, 7),
       label: formatMonthYear(point.date).split(' ')[0],
     }));
-
-  useEffect(() => {
-    if (!monthOptions.some((option) => option.value === selectedSalaryMonth) && monthOptions[0]) {
-      setSelectedSalaryMonth(monthOptions[0].value);
-    }
-  }, [monthOptions, selectedSalaryMonth]);
+  const selectedSalaryMonthValue = monthOptions.some((option) => option.value === selectedSalaryMonth)
+    ? selectedSalaryMonth
+    : (monthOptions[0]?.value ?? defaultSalaryMonth);
 
   const selectedInflationPoint =
-    inflationHistory.find((point) => point.date === `${selectedSalaryYear}-${selectedSalaryMonth}`) ?? null;
+    inflationHistory.find(
+      (point) => point.date === `${selectedSalaryYearValue}-${selectedSalaryMonthValue}`
+    ) ?? null;
   const inflationMultiplier =
     latestInflationPoint && selectedInflationPoint && selectedInflationPoint.index !== 0
       ? latestInflationPoint.index / selectedInflationPoint.index
       : null;
-  const selectedSalaryPeriod = `${selectedSalaryYear}-${selectedSalaryMonth}`;
+  const selectedSalaryPeriod = `${selectedSalaryYearValue}-${selectedSalaryMonthValue}`;
   const submittedInflationPoint =
     submittedSalaryAnalysis
       ? inflationHistory.find((point) => point.date === submittedSalaryAnalysis.period) ?? null
@@ -1072,16 +1064,12 @@ export default function CostOfLivingClient() {
   });
   const activeBenchmark =
     benchmarkRows.find((row) => row.key === selectedLocation) ?? benchmarkRows[0] ?? FALLBACK_BENCHMARK;
+  const activeBenchmarkAnnualMedian = activeBenchmark.annualMedian;
+  const activeBenchmarkLabel = activeBenchmark.label;
   const roleOptions: Array<{ key: SalaryRole; label: string }> = [
     { key: 'all-employees', label: 'All employees' },
     { key: 'software-engineer', label: 'Software engineer' },
   ];
-
-  useEffect(() => {
-    if (!benchmarkRows.some((row) => row.key === selectedLocation) && benchmarkRows[0]) {
-      setSelectedLocation(benchmarkRows[0].key);
-    }
-  }, [benchmarkRows, selectedLocation]);
 
   const inflatedHistoricalSalary =
     inflationMultiplier === null ? null : historicalSalaryValue * inflationMultiplier;
@@ -1113,42 +1101,26 @@ export default function CostOfLivingClient() {
       ? ((submittedAdjustedSalary - submittedSalaryAnalysis.salary) / submittedSalaryAnalysis.salary) * 100
       : null;
   const benchmarkDelta =
-    submittedAdjustedSalary !== null && activeBenchmark.annualMedian !== null
-      ? submittedAdjustedSalary - activeBenchmark.annualMedian
+    submittedAdjustedSalary !== null && activeBenchmarkAnnualMedian !== null
+      ? submittedAdjustedSalary - activeBenchmarkAnnualMedian
       : null;
-  const summaryParagraph = useMemo(() => {
-    const roleLabel = selectedRole === 'software-engineer' ? 'software engineer' : 'all-employee';
-    const salarySentence =
-      submittedSalaryAnalysis &&
-      submittedSalaryPeriodLabel &&
-      latestInflationPeriodLabel &&
-      submittedAdjustedSalary !== null
-        ? `A salary of ${formatMoney(submittedSalaryAnalysis.salary)} from ${submittedSalaryPeriodLabel} would need to be ${formatMoney(submittedAdjustedSalary)} by ${latestInflationPeriodLabel} to preserve the same buying power, a required increase of ${formatPercent(salaryRequiredGrowthPct)}.`
-        : 'Salary purchasing-power adjustment is currently unavailable because the inflation history needed for that calculation is missing.';
-    const benchmarkSentence =
-      benchmarkDelta !== null && activeBenchmark.annualMedian !== null
-        ? `Against the current ${activeBenchmark.label} ${roleLabel} benchmark of ${formatMoney(activeBenchmark.annualMedian)}, that leaves you ${benchmarkDelta >= 0 ? formatMoney(benchmarkDelta) : formatMoney(Math.abs(benchmarkDelta))} ${benchmarkDelta >= 0 ? 'above' : 'below'} the benchmark today.`
-        : `The current ${activeBenchmark.label} ${roleLabel} benchmark is ${formatMoney(activeBenchmark.annualMedian)}.`;
-    const mealDealSentence =
-      mealDealStartPoint?.clubcardPrice !== null && mealDeal.clubcardPrice !== null
-        ? `Over the same broader period, the Tesco Clubcard meal deal moved from ${formatCurrency(mealDealStartPoint.clubcardPrice)} in ${formatDisplayDate(mealDealStartPoint.date)} to ${formatCurrency(mealDeal.clubcardPrice)} now, a change of ${formatPercent(mealDealPercentChange)}.`
-        : 'The Tesco meal-deal series is currently unavailable, so the everyday-cost comparison is paused.';
-
-    return `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
-  }, [
-    activeBenchmark.annualMedian,
-    activeBenchmark.label,
-    benchmarkDelta,
-    latestInflationPeriodLabel,
-    mealDeal.clubcardPrice,
-    mealDealPercentChange,
-    mealDealStartPoint,
-    salaryRequiredGrowthPct,
-    selectedRole,
-    submittedAdjustedSalary,
-    submittedSalaryAnalysis,
-    submittedSalaryPeriodLabel,
-  ]);
+  const roleLabel = selectedRole === 'software-engineer' ? 'software engineer' : 'all-employee';
+  const salarySentence =
+    submittedSalaryAnalysis &&
+    submittedSalaryPeriodLabel &&
+    latestInflationPeriodLabel &&
+    submittedAdjustedSalary !== null
+      ? `A salary of ${formatMoney(submittedSalaryAnalysis.salary)} from ${submittedSalaryPeriodLabel} would need to be ${formatMoney(submittedAdjustedSalary)} by ${latestInflationPeriodLabel} to preserve the same buying power, a required increase of ${formatPercent(salaryRequiredGrowthPct)}.`
+      : 'Salary purchasing-power adjustment is currently unavailable because the inflation history needed for that calculation is missing.';
+  const benchmarkSentence =
+    benchmarkDelta !== null && activeBenchmarkAnnualMedian !== null
+      ? `Against the current ${activeBenchmarkLabel} ${roleLabel} benchmark of ${formatMoney(activeBenchmarkAnnualMedian)}, that leaves you ${benchmarkDelta >= 0 ? formatMoney(benchmarkDelta) : formatMoney(Math.abs(benchmarkDelta))} ${benchmarkDelta >= 0 ? 'above' : 'below'} the benchmark today.`
+      : `The current ${activeBenchmarkLabel} ${roleLabel} benchmark is ${formatMoney(activeBenchmarkAnnualMedian)}.`;
+  const mealDealSentence =
+    mealDealStartPoint?.clubcardPrice !== null && mealDeal.clubcardPrice !== null
+      ? `Over the same broader period, the Tesco Clubcard meal deal moved from ${formatCurrency(mealDealStartPoint.clubcardPrice)} in ${formatDisplayDate(mealDealStartPoint.date)} to ${formatCurrency(mealDeal.clubcardPrice)} now, a change of ${formatPercent(mealDealPercentChange)}.`
+      : 'The Tesco meal-deal series is currently unavailable, so the everyday-cost comparison is paused.';
+  const summaryParagraph = `${salarySentence} ${benchmarkSentence} ${mealDealSentence}`;
 
   if (error) {
     return (
@@ -1295,8 +1267,11 @@ export default function CostOfLivingClient() {
                   Year earned
                 </span>
                 <select
-                  value={selectedSalaryYear}
-                  onChange={(event) => setSelectedSalaryYear(event.target.value)}
+                  value={selectedSalaryYearValue}
+                  onChange={(event) => {
+                    setSelectedSalaryYear(event.target.value);
+                    setSelectedSalaryMonth('');
+                  }}
                   className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-3 text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 >
                   {availableYears.map((year) => (
@@ -1312,7 +1287,7 @@ export default function CostOfLivingClient() {
                   Month earned
                 </span>
                 <select
-                  value={selectedSalaryMonth}
+                  value={selectedSalaryMonthValue}
                   onChange={(event) => setSelectedSalaryMonth(event.target.value)}
                   className="w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-background)] px-4 py-3 text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 >

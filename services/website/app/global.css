@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
-@plugin './hero.ts';
 /*
  * HeroUI classes are compiled from package source files rather than our local components.
  * Next.js builds this app from `services/website`, while some local tools resolve sources from
@@ -13,7 +11,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
   --color-background: #0f172a;
   --color-foreground: #e2e8f0;
   --color-muted: #64748b;

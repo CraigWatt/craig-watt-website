@@ -1,10 +1,8 @@
-// app/layout.tsx
 import './global.css';
 import { Providers } from './providers';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import Script from 'next/script';
-
 
 export const metadata = {
   title: 'Craig Watt — Platform Engineer focused on Observability',
@@ -70,7 +68,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="bg-[var(--color-background)] text-[var(--color-foreground)] min-h-screen">
+      <body className="min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)]">
         <Providers>
           <Navbar />
           {children}

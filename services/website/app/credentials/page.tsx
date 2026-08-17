@@ -1,3 +1,5 @@
+'use client';
+
 import { Button, Card } from '@heroui/react';
 import { Award, ArrowRight, BadgeCheck, Medal, ShieldCheck } from 'lucide-react';
 import { siteUrl } from '../data/site';

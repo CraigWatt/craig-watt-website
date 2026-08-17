@@ -90,5 +90,5 @@ const posts = defineCollection({
 })
 
 export default defineConfig({
-  collections: [projects, posts], // <- this must be present and correct
+  content: [projects, posts],
 });

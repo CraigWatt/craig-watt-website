@@ -1,15 +1,10 @@
 /** @type {import('next').NextConfig} */
 module.exports = (async () => {
   const path = await import("node:path");
-  // ESM-only modules via dynamic import
   const [
-    { default: remarkFrontmatter },
-    { default: remarkMdxFrontmatter },
     mdxMod,
     ccMod,
   ] = await Promise.all([
-    import("remark-frontmatter"),
-    import("remark-mdx-frontmatter"),
     import("@next/mdx"),
     import("@content-collections/next"),
   ]);
@@ -26,8 +21,8 @@ module.exports = (async () => {
     extension: /\.mdx?$/,
     options: {
       remarkPlugins: [
-        remarkFrontmatter,
-        [remarkMdxFrontmatter, { name: "frontMatter" }],
+        'remark-frontmatter',
+        ['remark-mdx-frontmatter', { name: 'frontMatter' }],
       ],
       rehypePlugins: [],
     },
@@ -41,6 +36,10 @@ module.exports = (async () => {
       unoptimized: true,
     },
     outputFileTracingRoot: path.join(__dirname, "../.."),
+    webpack: (config) => {
+      config.cache = false;
+      return config;
+    },
   };
 
   return withContentCollections(withMDX(nextConfig));

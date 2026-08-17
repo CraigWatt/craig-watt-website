@@ -93,8 +93,6 @@ const ONS_CPIH_INDEX_SERIES_URL =
 const ONS_CPIH_INDEX_LINECHART_CONFIG_URL = `${ONS_CPIH_INDEX_SERIES_URL}/linechartconfig`;
 const ONS_ASHE_TABLE_7_URL =
   'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7';
-const ONS_ASHE_TABLE_15_URL =
-  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional';
 const ONS_INFLATION_TOPIC_URL = 'https://www.ons.gov.uk/economy/inflationandpriceindices?os=0';
 const ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7/2025provisional/ashetable72025provisional.zip';
@@ -333,15 +331,6 @@ async function fetchBuffer(url: string, timeoutMs = BINARY_REQUEST_TIMEOUT_MS): 
   }
 
   throw new Error(`Fetch failed for ${url} after retries`);
-}
-
-function parseNumber(value: string | null | undefined): number | null {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number(value.replace(/,/g, ''));
-  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function todayKey() {

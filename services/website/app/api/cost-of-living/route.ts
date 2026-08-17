@@ -75,8 +75,6 @@ const ONS_CPIH_INDEX_SERIES_URL =
 const ONS_CPIH_INDEX_LINECHART_CONFIG_URL = `${ONS_CPIH_INDEX_SERIES_URL}/linechartconfig`;
 const ONS_ASHE_TABLE_7_URL =
   'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7';
-const ONS_ASHE_TABLE_15_URL =
-  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional';
 const ONS_INFLATION_TOPIC_URL = 'https://www.ons.gov.uk/economy/inflationandpriceindices?os=0';
 const ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7/2025provisional/ashetable72025provisional.zip';
@@ -226,6 +224,7 @@ const TTL_MS = 15 * 60 * 1000;
 const RETRIES = 2;
 const REQUEST_TIMEOUT_MS = 5000;
 const BINARY_REQUEST_TIMEOUT_MS = 15000;
+const IS_PRODUCTION_EXPORT = process.env.NODE_ENV === 'production';
 
 export const dynamic = 'force-static';
 export const revalidate = 900;
@@ -314,18 +313,56 @@ async function fetchBuffer(url: string, timeoutMs = BINARY_REQUEST_TIMEOUT_MS): 
   throw new Error(`Fetch failed for ${url} after retries`);
 }
 
-function parseNumber(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const parsed = Number(value.replace(/,/g, ''));
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
 function todayKey() {
   return new Date().toISOString().slice(0, 10);
 }
 
 function sortHistory(points: MealDealHistoryPoint[]) {
   return [...points].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+function buildStaticFallbackPayload(): CostOfLivingPayload {
+  const sourceStatus: SourceStatuses = {
+    inflation: 'fallback',
+    salaries: 'fallback',
+    mealDeals: 'fallback',
+  };
+
+  return {
+    apiStatus: {
+      inflation: true,
+      salaries: true,
+      mealDeals: true,
+    },
+    sourceStatus,
+    inflation: INFLATION_FALLBACK_SNAPSHOT,
+    salaries: {
+      dataset: 'ASHE Table 7 + 15',
+      downloadUrl: SALARY_FALLBACK_SNAPSHOT.table7DownloadUrl,
+      source: SALARY_FALLBACK_SNAPSHOT.source,
+      notes:
+        'Public sources used to derive representative local-authority and software-engineer salary benchmarks.',
+      benchmarks: SALARY_BENCHMARK_FALLBACKS,
+    },
+    mealDeal: {
+      retailer: 'Tesco',
+      clubcardPrice: MEAL_DEAL_FALLBACK_SNAPSHOT.clubcardPrice,
+      regularPrice: MEAL_DEAL_FALLBACK_SNAPSHOT.regularPrice,
+      source: {
+        name: MEAL_DEAL_FALLBACK_SNAPSHOT.source.name,
+        url: TESCO_MEAL_DEAL_URL,
+        fetchedAt: MEAL_DEAL_FALLBACK_SNAPSHOT.source.fetchedAt,
+      },
+      notes:
+        'Tesco meal-deal pricing is intentionally served from a stored snapshot because Tesco blocks automated AWS fetches.',
+      history: MEAL_DEAL_HISTORY_SEED,
+    },
+    _meta: buildMeta(sourceStatus, {
+      cold: false,
+      stale: false,
+      local: true,
+    }),
+  };
 }
 
 function upsertHistoryPoint(
@@ -648,6 +685,10 @@ async function loadFreshPayload(): Promise<CostOfLivingPayload> {
 }
 
 export async function GET() {
+  if (IS_PRODUCTION_EXPORT) {
+    return response(buildStaticFallbackPayload());
+  }
+
   const now = Date.now();
 
   if (cachedPayload && now - lastFetchedAt < TTL_MS) {
