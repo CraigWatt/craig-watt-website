@@ -3,11 +3,12 @@ provider "aws" {
 }
 
 locals {
-  repo_short   = replace(var.github_repo, "/", "-")
-  provider_id  = replace(var.github_oidc_provider_url, "https://", "")
-  domain_slug  = replace(var.domain, ".", "-")
-  site_bucket  = "${local.domain_slug}-site"
-  state_bucket = var.state_bucket_name
+  repo_short                         = replace(var.github_repo, "/", "-")
+  provider_id                        = replace(var.github_oidc_provider_url, "https://", "")
+  domain_slug                        = replace(var.domain, ".", "-")
+  site_bucket                        = "${local.domain_slug}-site"
+  cost_of_living_history_bucket_wild = "${local.domain_slug}-cost-of-living-history*"
+  state_bucket                       = var.state_bucket_name
 }
 
 data "aws_iam_openid_connect_provider" "github" {
@@ -100,7 +101,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = "*"
       },
       {
-        Sid    = "StaticSiteBucketManage"
+        Sid    = "WebsiteBucketsManage"
         Effect = "Allow"
         Action = [
           "s3:DeleteBucket",
@@ -119,7 +120,9 @@ resource "aws_iam_role_policy" "github_actions" {
         ]
         Resource = [
           "arn:aws:s3:::${local.site_bucket}",
-          "arn:aws:s3:::${local.site_bucket}/*"
+          "arn:aws:s3:::${local.site_bucket}/*",
+          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}",
+          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}/*"
         ]
       },
       {
