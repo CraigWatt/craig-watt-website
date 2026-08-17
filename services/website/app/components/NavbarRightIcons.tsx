@@ -43,7 +43,7 @@ export function NavbarRightIcons() {
     <div className="hidden items-center gap-2 md:flex">
       <a
         href={siteUrl('/cost-of-living')}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5"
         aria-label="Cost of living"
       >
         <Image

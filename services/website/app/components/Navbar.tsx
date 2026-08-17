@@ -208,6 +208,29 @@ export const Navbar = () => {
             )}
 
             <div className="mt-2 flex items-center gap-4 px-4 py-3">
+            <a
+              href={siteUrl('/cost-of-living')}
+              onClick={() => {
+                setIsMenuOpen(false);
+                setMobileBlogOpen(false);
+              }}
+              className={`
+                inline-flex items-center justify-center
+                ${iconBtnSizeClass} ${itemRounded}
+                bg-[var(--color-card)] border border-[var(--color-border)]
+                transition hover:border-[var(--color-accent)] hover:-translate-y-0.5
+              `}
+              aria-label="Cost of living"
+            >
+              <Image
+                src="/icons/pound-coin.png"
+                alt="Cost of living"
+                width={28}
+                height={28}
+                className="object-contain"
+                priority={false}
+              />
+            </a>
             {externalTools.map((tool) => {
               const hasThemeVariants = tool.lightSrc && tool.darkSrc;
               const bgClass = hasThemeVariants
