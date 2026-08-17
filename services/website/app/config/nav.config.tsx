@@ -45,14 +45,6 @@ export const navItems: NavItem[] = [
     href: '/experience',
   },
   {
-    label: 'Cost of Living',
-    href: '/cost-of-living',
-  },
-  {
-    label: 'Trading 212',
-    href: '/trading212',
-  },
-  {
     label: 'Writing',
     href: '/blog',
     children: [
