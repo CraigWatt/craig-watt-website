@@ -12,8 +12,9 @@ terraform {
 }
 
 locals {
-  bucket_name = "${replace(var.domain, ".", "-")}-site"
-  site_files  = fileset(var.site_build_dir, "**")
+  bucket_name                  = "${replace(var.domain, ".", "-")}-site"
+  cost_of_living_history_name = "${replace(var.domain, ".", "-")}-cost-of-living-history-v2"
+  site_files                  = fileset(var.site_build_dir, "**")
   mime_types = {
     css  = "text/css; charset=utf-8"
     html = "text/html; charset=utf-8"
@@ -86,7 +87,7 @@ resource "aws_s3_bucket" "site" {
 }
 
 resource "aws_s3_bucket" "cost_of_living_history" {
-  bucket = "${replace(var.domain, ".", "-")}-cost-of-living-history"
+  bucket = local.cost_of_living_history_name
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {
