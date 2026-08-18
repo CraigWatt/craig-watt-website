@@ -905,7 +905,7 @@ export default function CostOfLivingClient() {
                   onValueChange={setHistoricalSalary}
                   classNames={{
                     ...siteInputClassNames,
-                    input: 'text-2xl font-semibold text-[var(--color-foreground)] placeholder:text-transparent md:text-3xl',
+                    input: 'text-xl font-semibold leading-none text-[var(--color-foreground)] placeholder:text-transparent md:text-2xl',
                   }}
                 />
               )}
@@ -922,7 +922,7 @@ export default function CostOfLivingClient() {
                   }}
                   classNames={{
                     ...siteSelectClassNames,
-                    value: 'text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl',
+                    value: 'self-end text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
                   }}
                 >
                   {availableYears.map((year) => (
@@ -940,7 +940,7 @@ export default function CostOfLivingClient() {
                   onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
                   classNames={{
                     ...siteSelectClassNames,
-                    value: 'text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl',
+                    value: 'self-end text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
                   }}
                 >
                   {monthOptions.map((option) => (
