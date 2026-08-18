@@ -7,6 +7,7 @@ locals {
   provider_id                        = replace(var.github_oidc_provider_url, "https://", "")
   domain_slug                        = replace(var.domain, ".", "-")
   site_bucket                        = "${local.domain_slug}-site"
+  cost_of_living_history_bucket_wild = "${local.domain_slug}-cost-of-living-history*"
   salary_inflation_checker_history_bucket_wild = "${local.domain_slug}-salary-inflation-checker-history*"
   state_bucket                       = var.state_bucket_name
 }
@@ -114,6 +115,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Action = [
           "s3:DeleteBucket",
           "s3:GetBucketAcl",
+          "s3:GetBucketCors",
           "s3:GetBucketLocation",
           "s3:ListBucket",
           "s3:GetBucketPolicy",
@@ -130,6 +132,8 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = [
           "arn:aws:s3:::${local.site_bucket}",
           "arn:aws:s3:::${local.site_bucket}/*",
+          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}",
+          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}/*",
           "arn:aws:s3:::${local.salary_inflation_checker_history_bucket_wild}",
           "arn:aws:s3:::${local.salary_inflation_checker_history_bucket_wild}/*"
         ]
@@ -247,6 +251,7 @@ resource "aws_iam_role_policy" "github_actions" {
           "acm:DeleteCertificate",
           "acm:DescribeCertificate",
           "acm:ListCertificates",
+          "acm:ListTagsForCertificate",
           "acm:AddTagsToCertificate",
           "acm:RemoveTagsFromCertificate",
           "route53:CreateHostedZone",
