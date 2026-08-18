@@ -214,8 +214,7 @@ export default function ContactForm() {
           <Textarea
             key={currentStep.key}
             name="message"
-            label="Message"
-            labelPlacement="outside"
+            aria-label="Message"
             isRequired
             value={form.message}
             onValueChange={handleChange}
@@ -227,8 +226,7 @@ export default function ContactForm() {
             key={currentStep.key}
             name={currentStep.key}
             type={currentStep.key === 'email' ? 'email' : 'text'}
-            label={currentStep.title}
-            labelPlacement="outside"
+            aria-label={currentStep.key === 'name' ? 'Name' : 'Email'}
             isRequired
             value={form[currentStep.key]}
             onValueChange={handleChange}

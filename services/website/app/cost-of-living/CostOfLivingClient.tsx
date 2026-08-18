@@ -899,8 +899,7 @@ export default function CostOfLivingClient() {
                   inputMode="numeric"
                   min="0"
                   step="1000"
-                  label="Annual salary"
-                  labelPlacement="outside"
+                  aria-label="Annual salary"
                   value={historicalSalary}
                   onValueChange={setHistoricalSalary}
                   classNames={{
@@ -912,8 +911,7 @@ export default function CostOfLivingClient() {
 
               {entryStage === 1 && (
                 <Select
-                  label="Year obtained"
-                  labelPlacement="outside"
+                  aria-label="Year obtained"
                   disallowEmptySelection
                   selectedKeys={[selectedSalaryYearValue]}
                   onSelectionChange={(keys) => {
@@ -933,8 +931,7 @@ export default function CostOfLivingClient() {
 
               {entryStage === 2 && (
                 <Select
-                  label="Month obtained"
-                  labelPlacement="outside"
+                  aria-label="Month obtained"
                   disallowEmptySelection
                   selectedKeys={[selectedSalaryMonthValue]}
                   onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
@@ -1007,46 +1004,58 @@ export default function CostOfLivingClient() {
         <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-7">
           <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <Input
-                type="number"
-                inputMode="numeric"
-                min="0"
-                step="1000"
-                label="Salary"
-                labelPlacement="outside"
-                value={historicalSalary}
-                onValueChange={setHistoricalSalary}
-                classNames={siteInputClassNames}
-              />
+              <label className="space-y-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Salary
+                </span>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  step="1000"
+                  aria-label="Salary"
+                  value={historicalSalary}
+                  onValueChange={setHistoricalSalary}
+                  classNames={siteInputClassNames}
+                />
+              </label>
 
-              <Select
-                label="Year"
-                labelPlacement="outside"
-                disallowEmptySelection
-                selectedKeys={[selectedSalaryYearValue]}
-                onSelectionChange={(keys) => {
-                  setSelectedSalaryYear(selectionToValue(keys));
-                  setSelectedSalaryMonth('');
-                }}
-                classNames={siteSelectClassNames}
-              >
-                {availableYears.map((year) => (
-                  <SelectItem key={year}>{year}</SelectItem>
-                ))}
-              </Select>
+              <label className="space-y-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Year
+                </span>
+                <Select
+                  aria-label="Year"
+                  disallowEmptySelection
+                  selectedKeys={[selectedSalaryYearValue]}
+                  onSelectionChange={(keys) => {
+                    setSelectedSalaryYear(selectionToValue(keys));
+                    setSelectedSalaryMonth('');
+                  }}
+                  classNames={siteSelectClassNames}
+                >
+                  {availableYears.map((year) => (
+                    <SelectItem key={year}>{year}</SelectItem>
+                  ))}
+                </Select>
+              </label>
 
-              <Select
-                label="Month"
-                labelPlacement="outside"
-                disallowEmptySelection
-                selectedKeys={[selectedSalaryMonthValue]}
-                onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
-                classNames={siteSelectClassNames}
-              >
-                {monthOptions.map((option) => (
-                  <SelectItem key={option.value}>{option.label}</SelectItem>
-                ))}
-              </Select>
+              <label className="space-y-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Month
+                </span>
+                <Select
+                  aria-label="Month"
+                  disallowEmptySelection
+                  selectedKeys={[selectedSalaryMonthValue]}
+                  onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
+                  classNames={siteSelectClassNames}
+                >
+                  {monthOptions.map((option) => (
+                    <SelectItem key={option.value}>{option.label}</SelectItem>
+                  ))}
+                </Select>
+              </label>
             </div>
 
             <div className="flex flex-col gap-3 lg:items-end">

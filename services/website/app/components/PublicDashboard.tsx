@@ -159,22 +159,26 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
             </div>
 
             <div className="min-w-[12rem] sm:max-w-[14rem]">
-              <Select
-                label="Sort by"
-                labelPlacement="inside"
-                disallowEmptySelection
-                selectedKeys={[sortKey]}
-                onSelectionChange={(keys) => setSortKey(selectionToValue(keys))}
-                classNames={{
-                  ...siteSelectClassNames,
-                  trigger: `${siteSelectClassNames.trigger} min-h-14`,
-                  value: 'text-sm font-semibold text-[var(--color-foreground)]',
-                }}
-              >
-                <SelectItem key="value">Value</SelectItem>
-                <SelectItem key="pct">Gain %</SelectItem>
-                <SelectItem key="date">Date</SelectItem>
-              </Select>
+              <label className="space-y-2">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                  Sort by
+                </span>
+                <Select
+                  aria-label="Sort by"
+                  disallowEmptySelection
+                  selectedKeys={[sortKey]}
+                  onSelectionChange={(keys) => setSortKey(selectionToValue(keys))}
+                  classNames={{
+                    ...siteSelectClassNames,
+                    trigger: `${siteSelectClassNames.trigger} min-h-14`,
+                    value: 'text-sm font-semibold text-[var(--color-foreground)]',
+                  }}
+                >
+                  <SelectItem key="value">Value</SelectItem>
+                  <SelectItem key="pct">Gain %</SelectItem>
+                  <SelectItem key="date">Date</SelectItem>
+                </Select>
+              </label>
             </div>
           </div>
 
