@@ -651,14 +651,6 @@ export default function CostOfLivingClient() {
     notes: '',
     benchmarks: [],
   };
-  const mealDeal = data?.mealDeal ?? {
-    retailer: 'Tesco',
-    clubcardPrice: null,
-    regularPrice: null,
-    source: { name: 'Unavailable', url: '#', fetchedAt: '' },
-    notes: '',
-    history: [],
-  };
   const sourceStates = data?.sourceStatus ?? {
     inflation: 'unavailable' as SourceMode,
     salaries: 'unavailable' as SourceMode,
@@ -675,8 +667,8 @@ export default function CostOfLivingClient() {
   const sourceHealthItems = [
     { label: 'Inflation', mode: sourceStates.inflation },
     { label: 'Salaries', mode: sourceStates.salaries },
-    { label: 'Meal deals', mode: sourceStates.mealDeals },
   ];
+  const visibleWarnings = _meta.warnings.filter((warning) => !/meal|tesco|clubcard/i.test(warning));
 
   const historicalSalaryValue = parseSalaryInput(historicalSalary);
   const inflationHistory = inflation.history ?? [];
@@ -862,8 +854,8 @@ export default function CostOfLivingClient() {
               title={_meta.stale ? 'Showing cached data' : 'Partial data loaded'}
               tone={_meta.stale ? 'warning' : 'neutral'}
               description={
-                _meta.warnings.length > 0
-                  ? _meta.warnings.join(' · ')
+                visibleWarnings.length > 0
+                  ? visibleWarnings.join(' · ')
                   : 'One or more live sources could not be fetched right now.'
               }
             />
@@ -1014,7 +1006,7 @@ export default function CostOfLivingClient() {
                   step="1000"
                   value={historicalSalary}
                   onChange={(event) => setHistoricalSalary(event.target.value)}
-                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 />
               </label>
 
@@ -1045,7 +1037,7 @@ export default function CostOfLivingClient() {
                 <select
                   value={selectedSalaryMonthValue}
                   onChange={(event) => setSelectedSalaryMonth(event.target.value)}
-                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
+                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
                 >
                   {monthOptions.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -1244,10 +1236,13 @@ export default function CostOfLivingClient() {
                 Sources
               </p>
               <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-                Live feed status
+                Data health
               </h2>
+              <p className="text-sm text-[var(--color-muted-foreground)]">
+                This page now focuses on the two signals that drive the salary view: inflation and salary benchmarks.
+              </p>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <DataCard
                 title="Inflation"
                 value={formatSourceState(sourceStates.inflation)}
@@ -1261,13 +1256,6 @@ export default function CostOfLivingClient() {
                 detail={salaries.source.name}
                 fetchedAt={salaries.source.fetchedAt}
                 tone={toneFromSourceState(sourceStates.salaries)}
-              />
-              <DataCard
-                title="Everyday prices"
-                value={formatSourceState(sourceStates.mealDeals)}
-                detail={mealDeal.source.name}
-                fetchedAt={mealDeal.source.fetchedAt}
-                tone={toneFromSourceState(sourceStates.mealDeals)}
               />
             </div>
           </section>

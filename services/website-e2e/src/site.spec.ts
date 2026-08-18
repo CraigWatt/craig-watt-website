@@ -64,11 +64,13 @@ test.describe('contact', () => {
 
     await page.goto('/');
     await page.locator('#contact').getByLabel('Name').fill('Craig Watt');
+    await page.getByRole('button', { name: 'Next' }).click();
     await page.locator('#contact').getByLabel('Email').fill('craig@example.com');
+    await page.getByRole('button', { name: 'Next' }).click();
     await page.locator('#contact').getByLabel('Message').fill('Testing the contact form.');
-    await page.getByRole('button', { name: 'Send Message' }).click();
+    await page.getByRole('button', { name: 'Send message' }).click();
 
-    await expect(page.getByText('Thank you!')).toBeVisible();
-    await expect(page.getByText('I’ll be in touch soon.')).toBeVisible();
+    await expect(page.getByText('Thank you')).toBeVisible();
+    await expect(page.getByText('Your message has been sent. I’ll be in touch soon.')).toBeVisible();
   });
 });
