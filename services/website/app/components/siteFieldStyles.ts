@@ -23,12 +23,12 @@ export const siteTextareaClassNames = {
 export const siteSelectClassNames = {
   base: 'w-full',
   trigger:
-    'min-h-16 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background)]/96 px-5 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.28)] transition-colors data-[hover=true]:border-[var(--color-accent)] data-[focus=true]:border-[var(--color-accent)] data-[open=true]:border-[var(--color-accent)] data-[focus-visible=true]:ring-0 data-[focus-visible=true]:ring-transparent data-[focus-visible=true]:ring-offset-0',
+    'min-h-16 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background)]/96 px-5 pe-12 py-3 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.28)] transition-colors data-[hover=true]:border-[var(--color-accent)] data-[focus=true]:border-[var(--color-accent)] data-[open=true]:border-[var(--color-accent)] data-[focus-visible=true]:ring-0 data-[focus-visible=true]:ring-transparent data-[focus-visible=true]:ring-offset-0',
   value: 'text-lg font-semibold leading-none text-[var(--color-foreground)] md:text-xl',
   label:
     'mb-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)] group-data-[focus=true]:text-[var(--color-accent)]',
   selectorIcon:
-    'text-[var(--color-muted)] transition-transform group-data-[open=true]:rotate-180',
+    'end-5 text-[var(--color-muted)] transition-transform group-data-[open=true]:rotate-180',
   popoverContent:
     'rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)]',
   listboxWrapper: 'p-1',

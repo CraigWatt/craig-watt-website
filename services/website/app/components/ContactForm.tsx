@@ -284,9 +284,9 @@ export default function ContactForm() {
             )}
           </div>
 
-          <p className="text-sm text-[var(--color-muted-foreground)]">
-            {stepIndex < steps.length - 1 ? 'One thing at a time.' : 'Final step.'}
-          </p>
+          {stepIndex === steps.length - 1 && (
+            <p className="text-sm text-[var(--color-muted-foreground)]">Final step.</p>
+          )}
         </div>
       </div>
     </Form>
