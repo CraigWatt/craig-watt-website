@@ -900,7 +900,7 @@ export default function CostOfLivingClient() {
                   min="0"
                   step="1000"
                   label="Annual salary"
-                  labelPlacement="inside"
+                  labelPlacement="outside"
                   value={historicalSalary}
                   onValueChange={setHistoricalSalary}
                   classNames={{
@@ -913,7 +913,7 @@ export default function CostOfLivingClient() {
               {entryStage === 1 && (
                 <Select
                   label="Year obtained"
-                  labelPlacement="inside"
+                  labelPlacement="outside"
                   disallowEmptySelection
                   selectedKeys={[selectedSalaryYearValue]}
                   onSelectionChange={(keys) => {
@@ -922,7 +922,7 @@ export default function CostOfLivingClient() {
                   }}
                   classNames={{
                     ...siteSelectClassNames,
-                    value: 'self-end text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
+                    value: 'text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
                   }}
                 >
                   {availableYears.map((year) => (
@@ -934,13 +934,13 @@ export default function CostOfLivingClient() {
               {entryStage === 2 && (
                 <Select
                   label="Month obtained"
-                  labelPlacement="inside"
+                  labelPlacement="outside"
                   disallowEmptySelection
                   selectedKeys={[selectedSalaryMonthValue]}
                   onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
                   classNames={{
                     ...siteSelectClassNames,
-                    value: 'self-end text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
+                    value: 'text-xl font-semibold leading-none text-[var(--color-foreground)] md:text-2xl',
                   }}
                 >
                   {monthOptions.map((option) => (
@@ -1013,7 +1013,7 @@ export default function CostOfLivingClient() {
                 min="0"
                 step="1000"
                 label="Salary"
-                labelPlacement="inside"
+                labelPlacement="outside"
                 value={historicalSalary}
                 onValueChange={setHistoricalSalary}
                 classNames={siteInputClassNames}
@@ -1021,7 +1021,7 @@ export default function CostOfLivingClient() {
 
               <Select
                 label="Year"
-                labelPlacement="inside"
+                labelPlacement="outside"
                 disallowEmptySelection
                 selectedKeys={[selectedSalaryYearValue]}
                 onSelectionChange={(keys) => {
@@ -1037,7 +1037,7 @@ export default function CostOfLivingClient() {
 
               <Select
                 label="Month"
-                labelPlacement="inside"
+                labelPlacement="outside"
                 disallowEmptySelection
                 selectedKeys={[selectedSalaryMonthValue]}
                 onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}

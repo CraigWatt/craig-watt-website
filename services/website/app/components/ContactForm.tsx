@@ -215,7 +215,7 @@ export default function ContactForm() {
             key={currentStep.key}
             name="message"
             label="Message"
-            labelPlacement="inside"
+            labelPlacement="outside"
             isRequired
             value={form.message}
             onValueChange={handleChange}
@@ -228,7 +228,7 @@ export default function ContactForm() {
             name={currentStep.key}
             type={currentStep.key === 'email' ? 'email' : 'text'}
             label={currentStep.title}
-            labelPlacement="inside"
+            labelPlacement="outside"
             isRequired
             value={form[currentStep.key]}
             onValueChange={handleChange}
