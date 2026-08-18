@@ -112,35 +112,7 @@ resource "aws_iam_role_policy" "github_actions" {
       {
         Sid    = "WebsiteBucketsManage"
         Effect = "Allow"
-        Action = [
-          "s3:GetAccelerateConfiguration",
-          "s3:DeleteBucket",
-          "s3:GetBucketAcl",
-          "s3:GetBucketLogging",
-          "s3:GetBucketNotification",
-          "s3:GetBucketObjectLockConfiguration",
-          "s3:GetBucketCors",
-          "s3:GetBucketLocation",
-          "s3:GetBucketPolicyStatus",
-          "s3:GetBucketRequestPayment",
-          "s3:GetBucketTagging",
-          "s3:GetBucketVersioning",
-          "s3:GetBucketWebsite",
-          "s3:GetEncryptionConfiguration",
-          "s3:GetLifecycleConfiguration",
-          "s3:GetReplicationConfiguration",
-          "s3:ListBucket",
-          "s3:GetBucketPolicy",
-          "s3:PutBucketPolicy",
-          "s3:DeleteBucketPolicy",
-          "s3:GetBucketPublicAccessBlock",
-          "s3:PutBucketPublicAccessBlock",
-          "s3:GetBucketOwnershipControls",
-          "s3:PutBucketOwnershipControls",
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
+        Action = ["s3:*"]
         Resource = [
           "arn:aws:s3:::${local.site_bucket}",
           "arn:aws:s3:::${local.site_bucket}/*",
