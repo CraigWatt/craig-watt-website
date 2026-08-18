@@ -157,8 +157,20 @@ function formatMoney(value: number | null) {
 }
 
 function parseSalaryInput(value: string) {
-  const parsed = Number(value);
+  const parsed = Number(value.replace(/,/g, ''));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function formatSalaryInputValue(value: string) {
+  const digits = value.replace(/[^\d]/g, '');
+
+  if (!digits) {
+    return '';
+  }
+
+  return new Intl.NumberFormat('en-GB', {
+    maximumFractionDigits: 0,
+  }).format(Number(digits));
 }
 
 function selectionToValue(keys: unknown) {
@@ -625,7 +637,7 @@ function SalaryHistoryChart({
 }
 
 export default function CostOfLivingClient() {
-  const [historicalSalary, setHistoricalSalary] = useState('100000');
+  const [historicalSalary, setHistoricalSalary] = useState('');
   const [selectedRole, setSelectedRole] = useState<SalaryRole>('all-employees');
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
@@ -832,10 +844,10 @@ export default function CostOfLivingClient() {
                 Cost of living
               </p>
               <h1 className="text-4xl font-semibold leading-tight text-balance md:text-5xl">
-                Salary first. Context second.
+                Salary inflation checker
               </h1>
               <p className="text-sm text-[var(--color-muted-foreground)] md:text-base">
-                Enter the salary you most recently obtained and when you got it.
+                Check what your salary needs to be today to keep the same buying power.
               </p>
             </div>
 
@@ -863,7 +875,7 @@ export default function CostOfLivingClient() {
             ))}
           </div>
 
-          {(_meta.partial || _meta.stale) && (
+          {(_meta.stale || visibleWarnings.length > 0) && (
             <StatusBanner
               title={_meta.stale ? 'Showing cached data' : 'Partial data loaded'}
               tone={_meta.stale ? 'warning' : 'neutral'}
@@ -895,16 +907,16 @@ export default function CostOfLivingClient() {
             <div className="space-y-5">
               {entryStage === 0 && (
                 <Input
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min="0"
-                  step="1000"
                   aria-label="Annual salary"
+                  placeholder="100,000"
                   value={historicalSalary}
-                  onValueChange={setHistoricalSalary}
+                  onValueChange={(value) => setHistoricalSalary(formatSalaryInputValue(value))}
                   classNames={{
                     ...siteInputClassNames,
-                    input: 'text-xl font-semibold leading-none text-[var(--color-foreground)] placeholder:text-transparent md:text-2xl',
+                    input:
+                      'text-xl font-semibold leading-none text-[var(--color-foreground)] placeholder:text-[var(--color-muted)]/70 md:text-2xl',
                   }}
                 />
               )}
@@ -1009,14 +1021,17 @@ export default function CostOfLivingClient() {
                   Salary
                 </span>
                 <Input
-                  type="number"
+                  type="text"
                   inputMode="numeric"
-                  min="0"
-                  step="1000"
                   aria-label="Salary"
+                  placeholder="100,000"
                   value={historicalSalary}
-                  onValueChange={setHistoricalSalary}
-                  classNames={siteInputClassNames}
+                  onValueChange={(value) => setHistoricalSalary(formatSalaryInputValue(value))}
+                  classNames={{
+                    ...siteInputClassNames,
+                    input:
+                      'text-lg font-semibold leading-none text-[var(--color-foreground)] placeholder:text-[var(--color-muted)]/70 md:text-xl',
+                  }}
                 />
               </label>
 

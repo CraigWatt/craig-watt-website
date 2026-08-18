@@ -202,37 +202,53 @@ export default function ContactForm() {
       )}
 
       {status === 'error' && errorMsg && (
-        <Alert color="danger" title="Check this step" description={errorMsg} variant="flat" isClosable />
+        <div className="rounded-[1.5rem] border border-rose-500/30 bg-rose-500/8 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(225,29,72,0.35)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-600 dark:text-rose-300">
+            Check this step
+          </p>
+          <p className="mt-2 text-sm leading-relaxed text-rose-700 dark:text-rose-200">
+            {errorMsg}
+          </p>
+        </div>
       )}
 
       {status === 'sending' && (
-        <Progress isIndeterminate aria-label="Sending message…" className="w-full" size="sm" />
+        <div className="rounded-[1.5rem] border border-sky-500/25 bg-sky-500/8 px-4 py-4 shadow-[0_18px_40px_-34px_rgba(14,165,233,0.28)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 dark:text-sky-300">
+            Sending
+          </p>
+          <p className="mt-2 text-sm text-sky-800 dark:text-sky-100">
+            Sending your message now.
+          </p>
+          <Progress isIndeterminate aria-label="Sending message…" className="mt-4 w-full" size="sm" />
+        </div>
       )}
 
       <div className="space-y-5">
-        {currentStep.key === 'message' ? (
-          <Textarea
-            key={currentStep.key}
-            name="message"
-            aria-label="Message"
-            isRequired
-            value={form.message}
-            onValueChange={handleChange}
-            minRows={5}
-            classNames={siteTextareaClassNames}
-          />
-        ) : (
-          <Input
-            key={currentStep.key}
-            name={currentStep.key}
-            type={currentStep.key === 'email' ? 'email' : 'text'}
-            aria-label={currentStep.key === 'name' ? 'Name' : 'Email'}
-            isRequired
-            value={form[currentStep.key]}
-            onValueChange={handleChange}
-            classNames={siteInputClassNames}
-          />
-        )}
+        {status !== 'sending' &&
+          (currentStep.key === 'message' ? (
+            <Textarea
+              key={currentStep.key}
+              name="message"
+              aria-label="Message"
+              isRequired
+              value={form.message}
+              onValueChange={handleChange}
+              minRows={5}
+              classNames={siteTextareaClassNames}
+            />
+          ) : (
+            <Input
+              key={currentStep.key}
+              name={currentStep.key}
+              type={currentStep.key === 'email' ? 'email' : 'text'}
+              aria-label={currentStep.key === 'name' ? 'Name' : 'Email'}
+              isRequired
+              value={form[currentStep.key]}
+              onValueChange={handleChange}
+              classNames={siteInputClassNames}
+            />
+          ))}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex gap-3">
