@@ -11,9 +11,54 @@ terraform {
   }
 }
 
+moved {
+  from = aws_s3_bucket.cost_of_living_history
+  to   = aws_s3_bucket.salary_inflation_checker_history
+}
+
+moved {
+  from = aws_s3_bucket_public_access_block.cost_of_living_history
+  to   = aws_s3_bucket_public_access_block.salary_inflation_checker_history
+}
+
+moved {
+  from = aws_s3_bucket_ownership_controls.cost_of_living_history
+  to   = aws_s3_bucket_ownership_controls.salary_inflation_checker_history
+}
+
+moved {
+  from = aws_iam_role_policy.lambda_cost_of_living_history
+  to   = aws_iam_role_policy.lambda_salary_inflation_checker_history
+}
+
+moved {
+  from = aws_lambda_function.cost_of_living
+  to   = aws_lambda_function.salary_inflation_checker
+}
+
+moved {
+  from = aws_apigatewayv2_integration.cost_of_living
+  to   = aws_apigatewayv2_integration.salary_inflation_checker
+}
+
+moved {
+  from = aws_apigatewayv2_route.cost_of_living
+  to   = aws_apigatewayv2_route.salary_inflation_checker
+}
+
+moved {
+  from = aws_lambda_permission.cost_of_living
+  to   = aws_lambda_permission.salary_inflation_checker
+}
+
 locals {
   bucket_name                              = "${replace(var.domain, ".", "-")}-site"
-  salary_inflation_checker_history_name    = "${replace(var.domain, ".", "-")}-salary-inflation-checker-history-v2"
+  # Keep the underlying bucket name stable for now so the rename is a safe
+  # Terraform/state migration rather than a destructive data migration.
+  salary_inflation_checker_history_name    = "${replace(var.domain, ".", "-")}-cost-of-living-history-v2"
+  salary_inflation_checker_function_name   = "${replace(var.domain, ".", "-")}-cost-of-living"
+  salary_inflation_checker_policy_name     = "${replace(var.domain, ".", "-")}-website-lambda-cost-of-living-history"
+  salary_inflation_checker_permission_name = "AllowApiGatewayCostOfLivingInvoke"
   site_files                               = fileset(var.site_build_dir, "**")
   mime_types = {
     css  = "text/css; charset=utf-8"
@@ -236,7 +281,7 @@ resource "aws_iam_role_policy" "lambda_ses_send" {
 }
 
 resource "aws_iam_role_policy" "lambda_salary_inflation_checker_history" {
-  name = "${replace(var.domain, ".", "-")}-website-lambda-salary-inflation-checker-history"
+  name = local.salary_inflation_checker_policy_name
   role = aws_iam_role.lambda.id
 
   policy = jsonencode({
@@ -279,7 +324,7 @@ resource "aws_lambda_function" "contact" {
 }
 
 resource "aws_lambda_function" "salary_inflation_checker" {
-  function_name    = "${replace(var.domain, ".", "-")}-salary-inflation-checker"
+  function_name    = local.salary_inflation_checker_function_name
   role             = aws_iam_role.lambda.arn
   runtime          = "nodejs22.x"
   handler          = "index.handler"
@@ -380,7 +425,7 @@ resource "aws_lambda_permission" "contact" {
 }
 
 resource "aws_lambda_permission" "salary_inflation_checker" {
-  statement_id  = "AllowApiGatewaySalaryInflationCheckerInvoke"
+  statement_id  = local.salary_inflation_checker_permission_name
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.salary_inflation_checker.function_name
   principal     = "apigateway.amazonaws.com"
