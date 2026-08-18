@@ -32,7 +32,7 @@ const socialLinks: SocialLink[] = [
 ];
 
 const navLinks = [
-  { label: 'Cost of Living', href: '/cost-of-living' },
+  { label: 'Salary Inflation Checker', href: '/salary-inflation-checker' },
   { label: 'Projects', href: '/projects' },
   { label: 'Experience', href: '/experience' },
   { label: 'Credentials', href: '/credentials' },

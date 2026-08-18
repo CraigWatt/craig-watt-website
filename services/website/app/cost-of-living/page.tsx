@@ -1,5 +1,5 @@
-import CostOfLivingClient from './CostOfLivingClient';
+import { redirect } from 'next/navigation';
 
-export default function CostOfLivingPage() {
-  return <CostOfLivingClient />;
+export default function LegacySalaryInflationCheckerRedirect() {
+  redirect('/salary-inflation-checker');
 }

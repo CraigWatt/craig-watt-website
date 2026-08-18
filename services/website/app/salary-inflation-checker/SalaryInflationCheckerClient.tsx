@@ -14,7 +14,6 @@ import {
 } from 'recharts';
 import type { TooltipContentProps, TooltipValueType } from 'recharts';
 import { LoadingIndicator } from '../components/LoadingIndicator';
-import { RefreshArrow } from '../components/icons/RefreshArrow';
 import { siteInputClassNames, siteSelectClassNames } from '../components/siteFieldStyles';
 
 type SourceSnapshot = {
@@ -38,7 +37,7 @@ type SalaryBenchmark = {
   notes: string;
 };
 
-type CostOfLivingPayload = {
+type SalaryInflationCheckerPayload = {
   apiStatus: {
     inflation: boolean;
     salaries: boolean;
@@ -117,7 +116,7 @@ const FALLBACK_BENCHMARK: SalaryBenchmark = {
   notes: 'Representative benchmark unavailable right now.',
 };
 
-const fetcher = async (url: string): Promise<CostOfLivingPayload> => {
+const fetcher = async (url: string): Promise<SalaryInflationCheckerPayload> => {
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}`);
@@ -636,7 +635,7 @@ function SalaryHistoryChart({
   );
 }
 
-export default function CostOfLivingClient() {
+export default function SalaryInflationCheckerClient() {
   const [historicalSalary, setHistoricalSalary] = useState('');
   const [selectedRole, setSelectedRole] = useState<SalaryRole>('all-employees');
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
@@ -648,8 +647,8 @@ export default function CostOfLivingClient() {
     period: string;
   } | null>(null);
 
-  const { data, error, isValidating, mutate } = useSWR<CostOfLivingPayload>(
-    '/api/cost-of-living',
+  const { data, error, isValidating, mutate } = useSWR<SalaryInflationCheckerPayload>(
+    '/api/salary-inflation-checker',
     fetcher,
     {
       shouldRetryOnError: false,
@@ -659,7 +658,7 @@ export default function CostOfLivingClient() {
 
   useEffect(() => {
     if (error) {
-      console.warn('[CostOfLiving] Load failed:', error);
+      console.warn('[SalaryInflationChecker] Load failed:', error);
     }
   }, [error]);
 
@@ -805,7 +804,7 @@ export default function CostOfLivingClient() {
     return (
       <main className="mx-auto min-h-screen max-w-6xl px-6 py-16 md:px-12 lg:px-24">
         <StatusBanner
-          title="Could not load cost-of-living data"
+          title="Could not load salary inflation data"
           description="The page is up, but the live sources are temporarily unavailable. Try again in a moment."
           tone="danger"
           action={
@@ -827,7 +826,7 @@ export default function CostOfLivingClient() {
     return (
       <main className="mx-auto min-h-screen max-w-6xl px-6 py-16 md:px-12 lg:px-24">
         <div className="py-20">
-          <LoadingIndicator label="Loading cost-of-living data..." />
+          <LoadingIndicator label="Loading salary inflation data..." />
         </div>
       </main>
     );
@@ -841,24 +840,15 @@ export default function CostOfLivingClient() {
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="max-w-3xl space-y-2">
               <p className="text-sm uppercase tracking-[0.35em] text-[var(--color-muted)]">
-                Cost of living
+                Salary inflation checker
               </p>
               <h1 className="text-4xl font-semibold leading-tight text-balance md:text-5xl">
-                Salary inflation checker
+                Salary Inflation Checker
               </h1>
               <p className="text-sm text-[var(--color-muted-foreground)] md:text-base">
                 Check what your salary needs to be today to keep the same buying power.
               </p>
             </div>
-
-            <Button
-              onPress={() => mutate()}
-              variant="flat"
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)]"
-              startContent={<RefreshArrow className="h-4 w-4" />}
-            >
-              Refresh
-            </Button>
           </div>
 
           <div className="flex flex-wrap gap-2">

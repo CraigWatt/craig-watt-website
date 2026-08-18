@@ -43,13 +43,13 @@ export function NavbarRightIcons() {
   return (
     <div className="hidden items-center gap-3 md:flex">
       <a
-        href={siteUrl('/cost-of-living')}
+        href={siteUrl('/salary-inflation-checker')}
         className={navIconButtonClassName}
-        aria-label="Cost of living"
+        aria-label="Salary inflation checker"
       >
         <Image
           src="/icons/pound-coin.png"
-          alt="Cost of living"
+          alt="Salary inflation checker"
           width={28}
           height={28}
           className="object-contain"

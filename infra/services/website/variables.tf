@@ -23,8 +23,8 @@ variable "contact_lambda_dir" {
   type        = string
 }
 
-variable "cost_of_living_lambda_dir" {
-  description = "Directory containing the bundled cost-of-living Lambda artifact"
+variable "salary_inflation_checker_lambda_dir" {
+  description = "Directory containing the bundled salary inflation checker Lambda artifact"
   type        = string
 }
 

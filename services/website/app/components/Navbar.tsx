@@ -201,7 +201,7 @@ export const Navbar = () => {
 
             <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[var(--color-border)] px-0 pt-4">
             <a
-              href={siteUrl('/cost-of-living')}
+              href={siteUrl('/salary-inflation-checker')}
               onClick={() => {
                 setIsMenuOpen(false);
                 setMobileBlogOpen(false);
@@ -209,11 +209,11 @@ export const Navbar = () => {
               className={`
                 ${navIconButtonClassName}
               `}
-              aria-label="Cost of living"
+              aria-label="Salary inflation checker"
             >
               <Image
                 src="/icons/pound-coin.png"
-                alt="Cost of living"
+                alt="Salary inflation checker"
                 width={28}
                 height={28}
                 className="object-contain"

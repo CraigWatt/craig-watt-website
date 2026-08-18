@@ -21,10 +21,10 @@ variable "contact_lambda_dir" {
   default     = "../dist/services/contact-api"
 }
 
-variable "cost_of_living_lambda_dir" {
-  description = "Path to the bundled cost-of-living Lambda artifact directory"
+variable "salary_inflation_checker_lambda_dir" {
+  description = "Path to the bundled salary inflation checker Lambda artifact directory"
   type        = string
-  default     = "../dist/services/cost-of-living-api"
+  default     = "../dist/services/salary-inflation-checker-api"
 }
 
 variable "trading212_lambda_dir" {

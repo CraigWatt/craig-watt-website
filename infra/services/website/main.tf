@@ -12,9 +12,9 @@ terraform {
 }
 
 locals {
-  bucket_name                  = "${replace(var.domain, ".", "-")}-site"
-  cost_of_living_history_name = "${replace(var.domain, ".", "-")}-cost-of-living-history-v2"
-  site_files                  = fileset(var.site_build_dir, "**")
+  bucket_name                              = "${replace(var.domain, ".", "-")}-site"
+  salary_inflation_checker_history_name    = "${replace(var.domain, ".", "-")}-salary-inflation-checker-history-v2"
+  site_files                               = fileset(var.site_build_dir, "**")
   mime_types = {
     css  = "text/css; charset=utf-8"
     html = "text/html; charset=utf-8"
@@ -40,10 +40,10 @@ data "archive_file" "contact_lambda" {
   output_path = "${path.root}/.terraform/contact-api.zip"
 }
 
-data "archive_file" "cost_of_living_lambda" {
+data "archive_file" "salary_inflation_checker_lambda" {
   type        = "zip"
-  source_dir  = var.cost_of_living_lambda_dir
-  output_path = "${path.root}/.terraform/cost-of-living-api.zip"
+  source_dir  = var.salary_inflation_checker_lambda_dir
+  output_path = "${path.root}/.terraform/salary-inflation-checker-api.zip"
 }
 
 data "archive_file" "trading212_lambda" {
@@ -86,8 +86,8 @@ resource "aws_s3_bucket" "site" {
   bucket = local.bucket_name
 }
 
-resource "aws_s3_bucket" "cost_of_living_history" {
-  bucket = local.cost_of_living_history_name
+resource "aws_s3_bucket" "salary_inflation_checker_history" {
+  bucket = local.salary_inflation_checker_history_name
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {
@@ -98,8 +98,8 @@ resource "aws_s3_bucket_public_access_block" "site" {
   restrict_public_buckets = true
 }
 
-resource "aws_s3_bucket_public_access_block" "cost_of_living_history" {
-  bucket                  = aws_s3_bucket.cost_of_living_history.id
+resource "aws_s3_bucket_public_access_block" "salary_inflation_checker_history" {
+  bucket                  = aws_s3_bucket.salary_inflation_checker_history.id
   block_public_acls       = true
   block_public_policy     = true
   ignore_public_acls      = true
@@ -144,8 +144,8 @@ resource "aws_cloudfront_cache_policy" "static" {
   }
 }
 
-resource "aws_s3_bucket_ownership_controls" "cost_of_living_history" {
-  bucket = aws_s3_bucket.cost_of_living_history.id
+resource "aws_s3_bucket_ownership_controls" "salary_inflation_checker_history" {
+  bucket = aws_s3_bucket.salary_inflation_checker_history.id
 
   rule {
     object_ownership = "BucketOwnerPreferred"
@@ -235,15 +235,15 @@ resource "aws_iam_role_policy" "lambda_ses_send" {
   })
 }
 
-resource "aws_iam_role_policy" "lambda_cost_of_living_history" {
-  name = "${replace(var.domain, ".", "-")}-website-lambda-cost-of-living-history"
+resource "aws_iam_role_policy" "lambda_salary_inflation_checker_history" {
+  name = "${replace(var.domain, ".", "-")}-website-lambda-salary-inflation-checker-history"
   role = aws_iam_role.lambda.id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "AllowCostOfLivingHistoryStorage"
+        Sid    = "AllowSalaryInflationCheckerHistoryStorage"
         Effect = "Allow"
         Action = [
           "s3:GetObject",
@@ -251,8 +251,8 @@ resource "aws_iam_role_policy" "lambda_cost_of_living_history" {
           "s3:ListBucket"
         ]
         Resource = [
-          aws_s3_bucket.cost_of_living_history.arn,
-          "${aws_s3_bucket.cost_of_living_history.arn}/*"
+          aws_s3_bucket.salary_inflation_checker_history.arn,
+          "${aws_s3_bucket.salary_inflation_checker_history.arn}/*"
         ]
       }
     ]
@@ -278,20 +278,20 @@ resource "aws_lambda_function" "contact" {
   }
 }
 
-resource "aws_lambda_function" "cost_of_living" {
-  function_name    = "${replace(var.domain, ".", "-")}-cost-of-living"
+resource "aws_lambda_function" "salary_inflation_checker" {
+  function_name    = "${replace(var.domain, ".", "-")}-salary-inflation-checker"
   role             = aws_iam_role.lambda.arn
   runtime          = "nodejs22.x"
   handler          = "index.handler"
-  filename         = data.archive_file.cost_of_living_lambda.output_path
-  source_code_hash = data.archive_file.cost_of_living_lambda.output_base64sha256
+  filename         = data.archive_file.salary_inflation_checker_lambda.output_path
+  source_code_hash = data.archive_file.salary_inflation_checker_lambda.output_base64sha256
   timeout          = 29
   memory_size      = 512
 
   environment {
     variables = {
-      COST_OF_LIVING_HISTORY_BUCKET = aws_s3_bucket.cost_of_living_history.bucket
-      COST_OF_LIVING_HISTORY_KEY     = "cost-of-living/meal-deal-history.json"
+      SALARY_INFLATION_CHECKER_HISTORY_BUCKET = aws_s3_bucket.salary_inflation_checker_history.bucket
+      SALARY_INFLATION_CHECKER_HISTORY_KEY    = "salary-inflation-checker/meal-deal-history.json"
     }
   }
 }
@@ -335,10 +335,10 @@ resource "aws_apigatewayv2_integration" "contact" {
   timeout_milliseconds   = 15000
 }
 
-resource "aws_apigatewayv2_integration" "cost_of_living" {
+resource "aws_apigatewayv2_integration" "salary_inflation_checker" {
   api_id                 = aws_apigatewayv2_api.website.id
   integration_type       = "AWS_PROXY"
-  integration_uri        = aws_lambda_function.cost_of_living.invoke_arn
+  integration_uri        = aws_lambda_function.salary_inflation_checker.invoke_arn
   integration_method     = "POST"
   payload_format_version = "2.0"
   timeout_milliseconds   = 15000
@@ -359,10 +359,10 @@ resource "aws_apigatewayv2_route" "contact" {
   target    = "integrations/${aws_apigatewayv2_integration.contact.id}"
 }
 
-resource "aws_apigatewayv2_route" "cost_of_living" {
+resource "aws_apigatewayv2_route" "salary_inflation_checker" {
   api_id    = aws_apigatewayv2_api.website.id
-  route_key = "GET /api/cost-of-living"
-  target    = "integrations/${aws_apigatewayv2_integration.cost_of_living.id}"
+  route_key = "GET /api/salary-inflation-checker"
+  target    = "integrations/${aws_apigatewayv2_integration.salary_inflation_checker.id}"
 }
 
 resource "aws_apigatewayv2_route" "trading212" {
@@ -379,10 +379,10 @@ resource "aws_lambda_permission" "contact" {
   source_arn    = "${aws_apigatewayv2_api.website.execution_arn}/*/*"
 }
 
-resource "aws_lambda_permission" "cost_of_living" {
-  statement_id  = "AllowApiGatewayCostOfLivingInvoke"
+resource "aws_lambda_permission" "salary_inflation_checker" {
+  statement_id  = "AllowApiGatewaySalaryInflationCheckerInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.cost_of_living.function_name
+  function_name = aws_lambda_function.salary_inflation_checker.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.website.execution_arn}/*/*"
 }

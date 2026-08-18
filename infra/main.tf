@@ -50,7 +50,7 @@ module "website" {
   aws_region                = var.aws_region
   site_build_dir            = var.site_build_dir
   contact_lambda_dir        = var.contact_lambda_dir
-  cost_of_living_lambda_dir = var.cost_of_living_lambda_dir
+  salary_inflation_checker_lambda_dir = var.salary_inflation_checker_lambda_dir
   zone_id                   = module.route53.zone_id
   trading212_lambda_dir     = var.trading212_lambda_dir
   recaptcha_secret_key      = var.recaptcha_secret_key

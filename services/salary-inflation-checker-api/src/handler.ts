@@ -40,7 +40,7 @@ type InflationHistoryPoint = {
   index: number;
 };
 
-type CostOfLivingPayload = {
+type SalaryInflationCheckerPayload = {
   apiStatus: {
     inflation: boolean;
     salaries: boolean;
@@ -81,7 +81,7 @@ type CostOfLivingPayload = {
   };
 };
 
-type SourceStatuses = CostOfLivingPayload['sourceStatus'];
+type SourceStatuses = SalaryInflationCheckerPayload['sourceStatus'];
 
 const JSON_HEADERS = {
   'content-type': 'application/json; charset=utf-8',
@@ -100,8 +100,14 @@ const ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional/ashetable152025provisional.zip';
 const TESCO_MEAL_DEAL_URL =
   'https://www.tesco.com/groceries/en-GB/shop/fresh-food/chilled-soup-sandwiches-and-salad-pots/lunch-meal-deals';
-const HISTORY_BUCKET = process.env.COST_OF_LIVING_HISTORY_BUCKET ?? '';
-const HISTORY_KEY = process.env.COST_OF_LIVING_HISTORY_KEY ?? 'cost-of-living/meal-deal-history.json';
+const HISTORY_BUCKET =
+  process.env.SALARY_INFLATION_CHECKER_HISTORY_BUCKET ??
+  process.env.COST_OF_LIVING_HISTORY_BUCKET ??
+  '';
+const HISTORY_KEY =
+  process.env.SALARY_INFLATION_CHECKER_HISTORY_KEY ??
+  process.env.COST_OF_LIVING_HISTORY_KEY ??
+  'salary-inflation-checker/meal-deal-history.json';
 const HISTORY_LIMIT = 365;
 const s3 = HISTORY_BUCKET ? new S3Client({}) : null;
 
@@ -162,7 +168,7 @@ const CPIH_HISTORY_FALLBACK: InflationHistoryPoint[] = [
   { date: '2026-06', index: 142.3 },
 ];
 
-const INFLATION_FALLBACK_SNAPSHOT: CostOfLivingPayload['inflation'] = {
+const INFLATION_FALLBACK_SNAPSHOT: SalaryInflationCheckerPayload['inflation'] = {
   index: 142.3,
   rate12m: 2.8,
   period: '2026 JUN',
@@ -244,9 +250,9 @@ const RETRIES = 2;
 const REQUEST_TIMEOUT_MS = 5000;
 const BINARY_REQUEST_TIMEOUT_MS = 15000;
 
-let cachedPayload: CostOfLivingPayload | null = null;
+let cachedPayload: SalaryInflationCheckerPayload | null = null;
 let lastFetchedAt = 0;
-let inFlight: Promise<CostOfLivingPayload> | null = null;
+let inFlight: Promise<SalaryInflationCheckerPayload> | null = null;
 
 function json(statusCode: number, body: unknown): HttpResponse {
   return {
@@ -277,7 +283,7 @@ async function fetchText(url: string): Promise<string> {
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: {
         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'user-agent': 'craigwatt-cost-of-living-bot/1.0',
+        'user-agent': 'craigwatt-salary-inflation-checker-bot/1.0',
       },
     });
 
@@ -308,7 +314,7 @@ async function fetchBuffer(url: string, timeoutMs = BINARY_REQUEST_TIMEOUT_MS): 
       signal: AbortSignal.timeout(timeoutMs),
       headers: {
         accept: 'application/zip,application/octet-stream;q=0.9,*/*;q=0.8',
-        'user-agent': 'craigwatt-cost-of-living-bot/1.0',
+        'user-agent': 'craigwatt-salary-inflation-checker-bot/1.0',
       },
     });
 
@@ -396,8 +402,8 @@ async function writeHistoryToS3(points: MealDealHistoryPoint[]) {
 
 function buildMeta(
   sourceStatus: SourceStatuses,
-  overrides: Partial<CostOfLivingPayload['_meta']> = {}
-): CostOfLivingPayload['_meta'] {
+  overrides: Partial<SalaryInflationCheckerPayload['_meta']> = {}
+): SalaryInflationCheckerPayload['_meta'] {
   const warnings = [
     sourceStatus.inflation === 'fallback'
       ? 'Inflation source is on fallback snapshot'
@@ -408,11 +414,6 @@ function buildMeta(
       ? 'Salary source is on fallback snapshot'
       : sourceStatus.salaries === 'unavailable'
         ? 'Salary data unavailable'
-        : null,
-    sourceStatus.mealDeals === 'fallback'
-      ? 'Meal-deal source is on fallback snapshot'
-      : sourceStatus.mealDeals === 'unavailable'
-        ? 'Meal-deal data unavailable'
         : null,
   ].filter((entry): entry is string => Boolean(entry));
 
@@ -473,7 +474,7 @@ function parseOnsLineChartHistory(script: string): InflationHistoryPoint[] {
   return history.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-async function loadCpihSnapshot(): Promise<CostOfLivingPayload['inflation']> {
+async function loadCpihSnapshot(): Promise<SalaryInflationCheckerPayload['inflation']> {
   try {
     const lineChartConfig = await fetchText(ONS_CPIH_INDEX_LINECHART_CONFIG_URL);
     const history = parseOnsLineChartHistory(lineChartConfig);
@@ -513,7 +514,7 @@ async function loadCpihSnapshot(): Promise<CostOfLivingPayload['inflation']> {
 }
 
 function getInflationStatus(
-  inflation: CostOfLivingPayload['inflation']
+  inflation: SalaryInflationCheckerPayload['inflation']
 ): SourceMode {
   if (inflation.index === null || inflation.history.length === 0) {
     return 'unavailable';
@@ -603,7 +604,7 @@ async function loadMealDealHistory(
   return merged;
 }
 
-async function loadFreshPayload(): Promise<CostOfLivingPayload> {
+async function loadFreshPayload(): Promise<SalaryInflationCheckerPayload> {
   const inflation = await loadCpihSnapshot();
 
   const salaries = await loadSalarySnapshot();
@@ -699,7 +700,7 @@ export async function handler(event: HttpEvent): Promise<HttpResponse> {
       _meta: buildMeta(payload.sourceStatus, { cold: false, stale: false }),
     });
   } catch (error) {
-    console.error('Cost of living lambda failed', error);
+    console.error('Salary inflation checker lambda failed', error);
 
     if (cachedPayload && now - lastFetchedAt < STALE_TTL_MS) {
       return json(200, {

@@ -4,7 +4,7 @@ Static-first personal site with supporting APIs and infrastructure:
 
 - `services/website`
 - `services/contact-api`
-- `services/cost-of-living-api`
+- `services/salary-inflation-checker-api`
 - `services/trading212-api`
 - `platform/trading212`
 - `infra`
@@ -17,7 +17,7 @@ craig-watt-website/
 │  ├─ website/
 │  ├─ website-e2e/
 │  ├─ contact-api/
-│  ├─ cost-of-living-api/
+│  ├─ salary-inflation-checker-api/
 │  └─ trading212-api/
 ├─ platform/
 │  └─ trading212/
@@ -50,9 +50,9 @@ Dynamic data is fetched by AWS Lambda and proxied through API Gateway, so the si
 
 - `GET /api/trading212` for portfolio data
 - `POST /api/contact` for the contact form
-- `GET /api/cost-of-living` for the new cost-of-living snapshots
+- `GET /api/salary-inflation-checker` for salary inflation checker snapshots
 
-The cost-of-living endpoint uses public sources only, so there are no extra API keys to store in GitHub Secrets for the first pass:
+The salary inflation checker endpoint uses public sources only, so there are no extra API keys to store in GitHub Secrets for the first pass:
 
 - ONS Consumer Price Inflation bulletin for CPIH and the inflation baseline
 - ONS ASHE Table 7 dataset page for salary-by-location source acquisition
@@ -65,7 +65,7 @@ The production stack is now:
 - S3 for static asset storage
 - CloudFront for CDN + `/api/*` routing
 - API Gateway for public API ingress
-- Lambda for `contact`, `cost-of-living`, and `trading212`
+- Lambda for `contact`, `salary-inflation-checker`, and `trading212`
 - Route 53 for DNS
 
 Terraform entrypoint:

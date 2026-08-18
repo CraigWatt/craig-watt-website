@@ -7,15 +7,23 @@ locals {
   provider_id                        = replace(var.github_oidc_provider_url, "https://", "")
   domain_slug                        = replace(var.domain, ".", "-")
   site_bucket                        = "${local.domain_slug}-site"
-  cost_of_living_history_bucket_wild = "${local.domain_slug}-cost-of-living-history*"
+  salary_inflation_checker_history_bucket_wild = "${local.domain_slug}-salary-inflation-checker-history*"
   state_bucket                       = var.state_bucket_name
 }
 
-data "aws_iam_openid_connect_provider" "github" {
-  url = var.github_oidc_provider_url
-}
-
 data "aws_caller_identity" "current" {}
+
+resource "aws_iam_openid_connect_provider" "github" {
+  url = var.github_oidc_provider_url
+
+  client_id_list = [
+    "sts.amazonaws.com"
+  ]
+
+  thumbprint_list = [
+    "6938fd4d98bab03faadb97b34396831e3780aea1"
+  ]
+}
 
 resource "aws_s3_bucket" "state" {
   bucket = var.state_bucket_name
@@ -53,7 +61,7 @@ resource "aws_iam_role" "github_actions" {
       Effect = "Allow"
       Action = "sts:AssumeRoleWithWebIdentity"
       Principal = {
-        Federated = data.aws_iam_openid_connect_provider.github.arn
+        Federated = aws_iam_openid_connect_provider.github.arn
       }
       Condition = {
         StringEquals = {
@@ -122,8 +130,8 @@ resource "aws_iam_role_policy" "github_actions" {
         Resource = [
           "arn:aws:s3:::${local.site_bucket}",
           "arn:aws:s3:::${local.site_bucket}/*",
-          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}",
-          "arn:aws:s3:::${local.cost_of_living_history_bucket_wild}/*"
+          "arn:aws:s3:::${local.salary_inflation_checker_history_bucket_wild}",
+          "arn:aws:s3:::${local.salary_inflation_checker_history_bucket_wild}/*"
         ]
       },
       {
