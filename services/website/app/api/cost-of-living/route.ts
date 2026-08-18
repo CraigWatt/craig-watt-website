@@ -1,1 +1,5 @@
-export { GET } from '../salary-inflation-checker/route';
+export {
+  GET,
+  dynamic,
+  revalidate,
+} from '../salary-inflation-checker/route';
