@@ -17,7 +17,7 @@ export const siteTextareaClassNames = {
     'min-h-40 rounded-[1.75rem] border border-[var(--color-border)] bg-[var(--color-background)]/96 px-5 py-4 shadow-[0_18px_40px_-34px_rgba(15,23,42,0.28)] transition-colors group-data-[focus=true]:border-[var(--color-accent)] group-data-[focus=true]:bg-[var(--color-card)] group-data-[hover=true]:border-[var(--color-accent)]',
   innerWrapper: 'items-start gap-3',
   input:
-    'text-base leading-relaxed text-[var(--color-foreground)] placeholder:text-transparent',
+    'resize-none border-0 bg-transparent text-base leading-relaxed text-[var(--color-foreground)] placeholder:text-transparent outline-none focus:outline-none focus-visible:outline-none focus:ring-0',
 } as const;
 
 export const siteSelectClassNames = {
