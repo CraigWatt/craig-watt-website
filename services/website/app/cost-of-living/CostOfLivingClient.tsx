@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { Button, Card, CardBody, Chip } from '@heroui/react';
+import { Button, Card, CardBody, Chip, Input, Select, SelectItem } from '@heroui/react';
 import {
   CartesianGrid,
   Line,
@@ -15,6 +15,7 @@ import {
 import type { TooltipContentProps, TooltipValueType } from 'recharts';
 import { LoadingIndicator } from '../components/LoadingIndicator';
 import { RefreshArrow } from '../components/icons/RefreshArrow';
+import { siteInputClassNames, siteSelectClassNames } from '../components/siteFieldStyles';
 
 type SourceSnapshot = {
   name: string;
@@ -158,6 +159,19 @@ function formatMoney(value: number | null) {
 function parseSalaryInput(value: string) {
   const parsed = Number(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function selectionToValue(keys: unknown) {
+  if (!keys || keys === 'all') {
+    return '';
+  }
+
+  if (typeof keys === 'object' && Symbol.iterator in keys) {
+    const [value] = Array.from(keys as Iterable<React.Key>);
+    return value == null ? '' : String(value);
+  }
+
+  return '';
 }
 
 function formatDisplayDate(value: string) {
@@ -880,61 +894,59 @@ export default function CostOfLivingClient() {
 
             <div className="space-y-5">
               {entryStage === 0 && (
-                <label className="block space-y-3">
-                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Annual salary
-                  </span>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min="0"
-                    step="1000"
-                    value={historicalSalary}
-                    onChange={(event) => setHistoricalSalary(event.target.value)}
-                    className="site-input-surface site-select w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
-                  />
-                </label>
+                <Input
+                  type="number"
+                  inputMode="numeric"
+                  min="0"
+                  step="1000"
+                  label="Annual salary"
+                  labelPlacement="inside"
+                  value={historicalSalary}
+                  onValueChange={setHistoricalSalary}
+                  classNames={{
+                    ...siteInputClassNames,
+                    input: 'text-2xl font-semibold text-[var(--color-foreground)] placeholder:text-transparent md:text-3xl',
+                  }}
+                />
               )}
 
               {entryStage === 1 && (
-                <label className="block space-y-3">
-                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Year obtained
-                  </span>
-                  <select
-                    value={selectedSalaryYearValue}
-                    onChange={(event) => {
-                      setSelectedSalaryYear(event.target.value);
-                      setSelectedSalaryMonth('');
-                    }}
-                    className="site-input-surface site-select w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
-                  >
-                    {availableYears.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Year obtained"
+                  labelPlacement="inside"
+                  disallowEmptySelection
+                  selectedKeys={[selectedSalaryYearValue]}
+                  onSelectionChange={(keys) => {
+                    setSelectedSalaryYear(selectionToValue(keys));
+                    setSelectedSalaryMonth('');
+                  }}
+                  classNames={{
+                    ...siteSelectClassNames,
+                    value: 'text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl',
+                  }}
+                >
+                  {availableYears.map((year) => (
+                    <SelectItem key={year}>{year}</SelectItem>
+                  ))}
+                </Select>
               )}
 
               {entryStage === 2 && (
-                <label className="block space-y-3">
-                  <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                    Month obtained
-                  </span>
-                  <select
-                    value={selectedSalaryMonthValue}
-                    onChange={(event) => setSelectedSalaryMonth(event.target.value)}
-                    className="site-input-surface w-full rounded-[1.75rem] px-6 py-5 text-2xl font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)] md:text-3xl"
-                  >
-                    {monthOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <Select
+                  label="Month obtained"
+                  labelPlacement="inside"
+                  disallowEmptySelection
+                  selectedKeys={[selectedSalaryMonthValue]}
+                  onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
+                  classNames={{
+                    ...siteSelectClassNames,
+                    value: 'text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl',
+                  }}
+                >
+                  {monthOptions.map((option) => (
+                    <SelectItem key={option.value}>{option.label}</SelectItem>
+                  ))}
+                </Select>
               )}
 
               <div className="grid grid-cols-3 gap-2">
@@ -995,57 +1007,46 @@ export default function CostOfLivingClient() {
         <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-7">
           <div className="grid gap-4 lg:grid-cols-[1.35fr_0.65fr] lg:items-end">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Salary
-                </span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min="0"
-                  step="1000"
-                  value={historicalSalary}
-                  onChange={(event) => setHistoricalSalary(event.target.value)}
-                  className="site-input-surface w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
-                />
-              </label>
+              <Input
+                type="number"
+                inputMode="numeric"
+                min="0"
+                step="1000"
+                label="Salary"
+                labelPlacement="inside"
+                value={historicalSalary}
+                onValueChange={setHistoricalSalary}
+                classNames={siteInputClassNames}
+              />
 
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Year
-                </span>
-                <select
-                  value={selectedSalaryYearValue}
-                  onChange={(event) => {
-                    setSelectedSalaryYear(event.target.value);
-                    setSelectedSalaryMonth('');
-                  }}
-                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
-                >
-                  {availableYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <Select
+                label="Year"
+                labelPlacement="inside"
+                disallowEmptySelection
+                selectedKeys={[selectedSalaryYearValue]}
+                onSelectionChange={(keys) => {
+                  setSelectedSalaryYear(selectionToValue(keys));
+                  setSelectedSalaryMonth('');
+                }}
+                classNames={siteSelectClassNames}
+              >
+                {availableYears.map((year) => (
+                  <SelectItem key={year}>{year}</SelectItem>
+                ))}
+              </Select>
 
-              <label className="block space-y-2">
-                <span className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                  Month
-                </span>
-                <select
-                  value={selectedSalaryMonthValue}
-                  onChange={(event) => setSelectedSalaryMonth(event.target.value)}
-                  className="site-input-surface site-select w-full rounded-2xl px-4 py-3 text-lg font-semibold text-[var(--color-foreground)] outline-none transition-colors focus:border-[var(--color-accent)]"
-                >
-                  {monthOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <Select
+                label="Month"
+                labelPlacement="inside"
+                disallowEmptySelection
+                selectedKeys={[selectedSalaryMonthValue]}
+                onSelectionChange={(keys) => setSelectedSalaryMonth(selectionToValue(keys))}
+                classNames={siteSelectClassNames}
+              >
+                {monthOptions.map((option) => (
+                  <SelectItem key={option.value}>{option.label}</SelectItem>
+                ))}
+              </Select>
             </div>
 
             <div className="flex flex-col gap-3 lg:items-end">

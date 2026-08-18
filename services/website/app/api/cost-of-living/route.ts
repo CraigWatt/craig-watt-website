@@ -433,11 +433,6 @@ function buildMeta(
       : sourceStatus.salaries === 'unavailable'
         ? 'Salary data unavailable'
         : null,
-    sourceStatus.mealDeals === 'fallback'
-      ? 'Meal-deal source is on fallback snapshot'
-      : sourceStatus.mealDeals === 'unavailable'
-        ? 'Meal-deal data unavailable'
-        : null,
   ].filter((entry): entry is string => Boolean(entry));
 
   return {

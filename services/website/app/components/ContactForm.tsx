@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Alert, Button, Form, Input, Progress, Textarea } from '@heroui/react';
+import { siteInputClassNames, siteTextareaClassNames } from './siteFieldStyles';
 
 type FormState = {
   name: string;
@@ -10,22 +11,6 @@ type FormState = {
 };
 
 type StepKey = keyof FormState;
-
-const inputClassNames = {
-  base: 'w-full',
-  inputWrapper:
-    'min-h-16 rounded-2xl border border-[var(--color-border)] bg-white/95 px-5 py-4 shadow-none transition-colors dark:bg-slate-900/70',
-  innerWrapper: 'items-center',
-  label: 'text-xs font-semibold uppercase tracking-[0.28em] text-[var(--color-muted)]',
-  input: 'text-base text-[var(--color-foreground)] placeholder:text-[var(--color-muted)]',
-} as const;
-
-const textareaClassNames = {
-  ...inputClassNames,
-  inputWrapper:
-    'min-h-40 rounded-2xl border border-[var(--color-border)] bg-white/95 px-5 py-4 shadow-none transition-colors dark:bg-slate-900/70',
-  innerWrapper: 'items-start',
-} as const;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -230,13 +215,12 @@ export default function ContactForm() {
             key={currentStep.key}
             name="message"
             label="Message"
-            labelPlacement="outside"
-            placeholder={currentStep.placeholder}
+            labelPlacement="inside"
             isRequired
             value={form.message}
             onValueChange={handleChange}
             minRows={5}
-            classNames={textareaClassNames}
+            classNames={siteTextareaClassNames}
           />
         ) : (
           <Input
@@ -244,12 +228,11 @@ export default function ContactForm() {
             name={currentStep.key}
             type={currentStep.key === 'email' ? 'email' : 'text'}
             label={currentStep.title}
-            labelPlacement="outside"
-            placeholder={currentStep.placeholder}
+            labelPlacement="inside"
             isRequired
             value={form[currentStep.key]}
             onValueChange={handleChange}
-            classNames={inputClassNames}
+            classNames={siteInputClassNames}
           />
         )}
 

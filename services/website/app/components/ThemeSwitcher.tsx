@@ -3,6 +3,7 @@
 import { useTheme } from 'next-themes';
 import { useSyncExternalStore } from 'react';
 import { Moon, Sun } from 'lucide-react';
+import { navIconButtonClassName } from './navIconButtonStyles';
 
 interface ThemeSwitcherProps {
   className?: string;
@@ -25,12 +26,12 @@ export function ThemeSwitcher({ className }: ThemeSwitcherProps) {
       type="button"
       aria-label="Toggle theme"
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
-      className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)] transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] ${className ?? ''}`}
+      className={`${navIconButtonClassName} ${className ?? ''}`}
     >
       {isDark ? (
-        <Sun size={20} className="text-[var(--color-foreground)]" />
+        <Sun size={20} />
       ) : (
-        <Moon size={20} className="text-[var(--color-foreground)]" />
+        <Moon size={20} />
       )}
     </button>
   );

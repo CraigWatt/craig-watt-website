@@ -3,6 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { siteUrl } from '../data/site';
+import { navIconButtonClassName } from './navIconButtonStyles';
 
 type ExternalTool = {
   href: string;
@@ -40,10 +41,10 @@ export const externalTools: ExternalTool[] = [
 
 export function NavbarRightIcons() {
   return (
-    <div className="hidden items-center gap-2 md:flex">
+    <div className="hidden items-center gap-3 md:flex">
       <a
         href={siteUrl('/cost-of-living')}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5"
+        className={navIconButtonClassName}
         aria-label="Cost of living"
       >
         <Image
@@ -95,7 +96,7 @@ export function NavbarRightIcons() {
             href={tool.internal ? siteUrl(tool.href) : tool.href}
             target={tool.internal ? undefined : '_blank'}
             rel={tool.internal ? undefined : 'noopener noreferrer'}
-            className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--color-border)] ${bgClass} shadow-sm transition hover:border-[var(--color-accent)] hover:-translate-y-0.5`}
+            className={`${navIconButtonClassName} ${bgClass}`}
             aria-label={tool.ariaLabel}
           >
             {Icon}

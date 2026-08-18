@@ -1,8 +1,10 @@
 // app/components/PublicDashboard.tsx
 'use client'
 import React from 'react'
+import { Select, SelectItem } from '@heroui/react'
 import type { PublicApiStatus, PublicMetrics, PublicPos } from '../trading212/types'
 import { RefreshArrow } from './icons/RefreshArrow'
+import { siteSelectClassNames } from './siteFieldStyles'
 
 interface PublicDashboardProps {
   data: {
@@ -21,6 +23,21 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
 
   type SortKey = 'value' | 'pct' | 'date'
   const [sortKey, setSortKey] = React.useState<SortKey>('value')
+
+  const selectionToValue = (keys: unknown): SortKey => {
+    if (!keys || keys === 'all') {
+      return 'value'
+    }
+
+    if (typeof keys === 'object' && Symbol.iterator in keys) {
+      const [value] = Array.from(keys as Iterable<React.Key>)
+      if (value === 'pct' || value === 'date' || value === 'value') {
+        return value
+      }
+    }
+
+    return 'value'
+  }
 
   // sort by extracting numbers from the masked strings
   const sorted = React.useMemo(() => {
@@ -141,18 +158,24 @@ export default function PublicDashboard({ data }: PublicDashboardProps) {
               </p>
             </div>
 
-            <label className="flex flex-col gap-2 text-sm text-[var(--color-muted-foreground)] sm:items-end">
-              <span>Sort by</span>
-              <select
-                value={sortKey}
-                onChange={(event) => setSortKey(event.target.value as SortKey)}
-                className="site-input-surface site-select min-w-[10rem] rounded-2xl px-4 py-2 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-accent)]"
+            <div className="min-w-[12rem] sm:max-w-[14rem]">
+              <Select
+                label="Sort by"
+                labelPlacement="inside"
+                disallowEmptySelection
+                selectedKeys={[sortKey]}
+                onSelectionChange={(keys) => setSortKey(selectionToValue(keys))}
+                classNames={{
+                  ...siteSelectClassNames,
+                  trigger: `${siteSelectClassNames.trigger} min-h-14`,
+                  value: 'text-sm font-semibold text-[var(--color-foreground)]',
+                }}
               >
-                <option value="value">Value</option>
-                <option value="pct">Gain %</option>
-                <option value="date">Date</option>
-              </select>
-            </label>
+                <SelectItem key="value">Value</SelectItem>
+                <SelectItem key="pct">Gain %</SelectItem>
+                <SelectItem key="date">Date</SelectItem>
+              </Select>
+            </div>
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
