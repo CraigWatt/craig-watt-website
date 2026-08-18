@@ -117,6 +117,7 @@ resource "aws_iam_role_policy" "github_actions" {
           "s3:GetBucketAcl",
           "s3:GetBucketCors",
           "s3:GetBucketLocation",
+          "s3:GetBucketVersioning",
           "s3:GetBucketWebsite",
           "s3:ListBucket",
           "s3:GetBucketPolicy",
