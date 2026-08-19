@@ -45,6 +45,17 @@ export function HeroThreeBackground() {
       return undefined;
     }
 
+    const supportsMatchMedia = typeof window.matchMedia === 'function';
+    const supportsResizeObserver = typeof window.ResizeObserver !== 'undefined';
+    const webglCanvas = document.createElement('canvas');
+    const supportsWebgl =
+      typeof window.WebGLRenderingContext !== 'undefined' &&
+      !!(webglCanvas.getContext('webgl2') || webglCanvas.getContext('webgl') || webglCanvas.getContext('experimental-webgl'));
+
+    if (!supportsMatchMedia || !supportsResizeObserver || !supportsWebgl) {
+      return undefined;
+    }
+
     const supportsReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const random = createSeededRandom(42);
 
