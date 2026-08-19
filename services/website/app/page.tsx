@@ -8,6 +8,7 @@ import ContactForm from './components/ContactForm';
 import Image from 'next/image';
 import { siteUrl } from './data/site';
 import { buildPageMetadata } from './config/metadata';
+import { HeroThreeBackground } from './components/HeroThreeBackground';
 
 export const metadata: Metadata = buildPageMetadata({
   title: 'Craig Watt — Platform Engineer focused on Observability',
@@ -28,10 +29,14 @@ export default function App() {
     <main className="min-h-screen">
       {/* Hero Section - minimal, left-aligned aesthetic */}
       <section className="relative flex min-h-[72vh] items-start px-6 py-16 sm:min-h-[78vh] sm:py-20 md:min-h-[85vh] md:items-center md:px-12 md:py-0 lg:px-24">
-        {/* This div is a placeholder for your future Three.js background */}
-        <div className="absolute inset-0 -z-10" id="hero-canvas-container" />
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <HeroThreeBackground />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.46),transparent_38%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.08),transparent_34%)] dark:bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.2),transparent_40%),radial-gradient(circle_at_bottom_right,rgba(14,165,233,0.12),transparent_36%)]" />
+          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-[var(--color-background)]/42 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[var(--color-background)]/70 to-transparent" />
+        </div>
         
-        <div className="max-w-4xl">
+        <div className="relative z-10 max-w-4xl">
           <p className="text-[var(--color-muted-foreground)] text-sm uppercase tracking-widest mb-4">
             Platform Engineer focused on observability
           </p>
