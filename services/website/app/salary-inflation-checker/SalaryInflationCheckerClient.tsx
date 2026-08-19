@@ -24,6 +24,7 @@ type SourceSnapshot = {
 
 type SourceMode = 'live' | 'fallback' | 'unavailable';
 type SalaryRole = 'all-employees' | 'software-engineer';
+type SalaryAgeBand = '18-21' | '22-29' | '30-39' | '40-49' | '50-59' | '60+';
 
 type SalaryBenchmark = {
   role: SalaryRole;
@@ -31,6 +32,17 @@ type SalaryBenchmark = {
   label: string;
   locality: string;
   areaCode: string;
+  annualMedian: number | null;
+  sourceSheet: string;
+  sourceDataset: string;
+  notes: string;
+};
+
+type SalaryAgeOverlay = {
+  role: SalaryRole;
+  ageBand: SalaryAgeBand;
+  label: string;
+  comparisonGroup: string;
   annualMedian: number | null;
   sourceSheet: string;
   sourceDataset: string;
@@ -61,6 +73,7 @@ type SalaryInflationCheckerPayload = {
     source: SourceSnapshot;
     notes: string;
     benchmarks: SalaryBenchmark[];
+    ageOverlays: SalaryAgeOverlay[];
   };
   mealDeal: {
     retailer: string;
@@ -122,6 +135,16 @@ const FALLBACK_BENCHMARK: SalaryBenchmark = {
   sourceDataset: 'ASHE Table 7',
   notes: 'Representative benchmark unavailable right now.',
 };
+
+const AGE_OVERLAY_OPTIONS: Array<{ key: 'none' | SalaryAgeBand; label: string }> = [
+  { key: 'none', label: 'No age overlay' },
+  { key: '18-21', label: '18-21' },
+  { key: '22-29', label: '22-29' },
+  { key: '30-39', label: '30-39' },
+  { key: '40-49', label: '40-49' },
+  { key: '50-59', label: '50-59' },
+  { key: '60+', label: '60+' },
+];
 
 const fetcher = async (url: string): Promise<SalaryInflationCheckerPayload> => {
   const res = await fetch(url);
@@ -732,6 +755,7 @@ function SalaryHistoryChart({
 export default function SalaryInflationCheckerClient() {
   const [historicalSalary, setHistoricalSalary] = useState('');
   const [selectedRole, setSelectedRole] = useState<SalaryRole>('all-employees');
+  const [selectedAgeBand, setSelectedAgeBand] = useState<'none' | SalaryAgeBand>('none');
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
   );
@@ -769,6 +793,7 @@ export default function SalaryInflationCheckerClient() {
     source: { name: 'Unavailable', url: '#', fetchedAt: '' },
     notes: '',
     benchmarks: [],
+    ageOverlays: [],
   };
   const sourceStates = data?.sourceStatus ?? {
     inflation: 'unavailable' as SourceMode,
@@ -857,6 +882,13 @@ export default function SalaryInflationCheckerClient() {
     { key: 'all-employees', label: 'All employees' },
     { key: 'software-engineer', label: 'Software engineer' },
   ];
+  const activeAgeOverlay =
+    selectedAgeBand === 'none'
+      ? null
+      : salaries.ageOverlays.find(
+          (overlay) => overlay.role === selectedRole && overlay.ageBand === selectedAgeBand
+        ) ?? null;
+  const activeAgeOverlayAnnualMedian = activeAgeOverlay?.annualMedian ?? null;
 
   const submittedAdjustedSalary =
     submittedSalaryAnalysis && submittedInflationMultiplier !== null
@@ -889,6 +921,26 @@ export default function SalaryInflationCheckerClient() {
   const currentSalaryDeltaPercent =
     currentSalaryDelta !== null && activeBenchmarkAnnualMedian && activeBenchmarkAnnualMedian !== 0
       ? (currentSalaryDelta / activeBenchmarkAnnualMedian) * 100
+      : null;
+  const ageOverlayTodayDelta =
+    submittedAdjustedSalary !== null && activeAgeOverlayAnnualMedian !== null
+      ? submittedAdjustedSalary - activeAgeOverlayAnnualMedian
+      : null;
+  const ageOverlayCurrentDelta =
+    submittedSalaryAnalysis !== null && activeAgeOverlayAnnualMedian !== null
+      ? submittedSalaryAnalysis.salary - activeAgeOverlayAnnualMedian
+      : null;
+  const ageOverlayTodayDeltaPercent =
+    ageOverlayTodayDelta !== null &&
+    activeAgeOverlayAnnualMedian !== null &&
+    activeAgeOverlayAnnualMedian !== 0
+      ? (ageOverlayTodayDelta / activeAgeOverlayAnnualMedian) * 100
+      : null;
+  const ageOverlayCurrentDeltaPercent =
+    ageOverlayCurrentDelta !== null &&
+    activeAgeOverlayAnnualMedian !== null &&
+    activeAgeOverlayAnnualMedian !== 0
+      ? (ageOverlayCurrentDelta / activeAgeOverlayAnnualMedian) * 100
       : null;
   const buyingPowerChangePercent =
     submittedAdjustedSalary !== null &&
@@ -1342,6 +1394,35 @@ export default function SalaryInflationCheckerClient() {
                   })}
                 </div>
 
+                <div className="space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
+                    Optional age-band overlay
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {AGE_OVERLAY_OPTIONS.map((option) => {
+                      const active = option.key === selectedAgeBand;
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => setSelectedAgeBand(option.key)}
+                          className={[
+                            'rounded-full px-3 py-2 text-xs font-medium transition-colors',
+                            active
+                              ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                              : 'border border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                          ].join(' ')}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                    Adds UK-wide age-band context from ASHE age tables without replacing the local benchmark.
+                  </p>
+                </div>
+
                 <div className="site-input-surface rounded-[1.75rem] p-6">
                   <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
                     Selected benchmark
@@ -1406,6 +1487,58 @@ export default function SalaryInflationCheckerClient() {
                     {formatPercentage(benchmarkDeltaPercent)} against the selected benchmark.
                   </p>
                 </div>
+
+                {activeAgeOverlay ? (
+                  <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                      Age-band overlay
+                    </p>
+                    <div className="mt-3 flex flex-col gap-2">
+                      <h4 className="text-xl font-semibold text-[var(--color-foreground)]">
+                        {activeAgeOverlay.label}
+                      </h4>
+                      <p className="text-sm text-[var(--color-muted-foreground)]">
+                        {activeAgeOverlay.comparisonGroup}
+                      </p>
+                      <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                        {activeAgeOverlay.notes}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 grid gap-4 md:grid-cols-3">
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                          Annual median
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                          {formatMoney(activeAgeOverlay.annualMedian)}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                          Versus entered salary
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                          {formatSignedMoney(ageOverlayCurrentDelta)}
+                        </p>
+                        <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                          {formatPercentage(ageOverlayCurrentDeltaPercent)} against the overlay median.
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                          Versus salary today
+                        </p>
+                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                          {formatSignedMoney(ageOverlayTodayDelta)}
+                        </p>
+                        <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                          {formatPercentage(ageOverlayTodayDeltaPercent)} against the overlay median.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </section>

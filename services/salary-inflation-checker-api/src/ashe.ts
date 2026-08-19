@@ -2,6 +2,7 @@ import { inflateRawSync } from 'node:zlib';
 
 export type SalaryBenchmarkKey = 'central-london' | 'west-london' | 'edinburgh';
 export type SalaryRole = 'all-employees' | 'software-engineer';
+export type SalaryAgeBand = '18-21' | '22-29' | '30-39' | '40-49' | '50-59' | '60+';
 
 export type SalaryBenchmark = {
   role: SalaryRole;
@@ -9,6 +10,17 @@ export type SalaryBenchmark = {
   label: string;
   locality: string;
   areaCode: string;
+  annualMedian: number | null;
+  sourceSheet: string;
+  sourceDataset: string;
+  notes: string;
+};
+
+export type SalaryAgeOverlay = {
+  role: SalaryRole;
+  ageBand: SalaryAgeBand;
+  label: string;
+  comparisonGroup: string;
   annualMedian: number | null;
   sourceSheet: string;
   sourceDataset: string;
@@ -38,12 +50,33 @@ type Table15Target = {
   notes: string;
 };
 
+type AgeBandTarget = {
+  ageBand: SalaryAgeBand;
+  label: string;
+};
+
+const TABLE_6_FULL_TIME_SHEET = 'Full-Time';
 const TABLE_7_FULL_TIME_SHEET = 'Full-Time';
 const TABLE_15_FULL_TIME_SHEET = 'Full-Time';
+const TABLE_20_FULL_TIME_SHEET = 'Full-Time';
 const SOFTWARE_ENGINEER_OCCUPATION_CODE = '2134';
+const SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_CODE = '21';
+const SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL =
+  'Science, research, engineering and technology professionals';
+const TABLE_6_ANNUAL_PAY_WORKBOOK_PATTERN = /Table 6\.7a\s+Annual pay - Gross .*\.xlsx$/i;
 const TABLE_7_ANNUAL_PAY_WORKBOOK_PATTERN = /Table 7\.7a\s+Annual pay - Gross .*\.xlsx$/i;
 const TABLE_15_ANNUAL_PAY_WORKBOOK_PATTERN =
   /Table 15 \(4\)\.7a\s+Annual pay - Gross .*\.xlsx$/i;
+const TABLE_20_ANNUAL_PAY_WORKBOOK_PATTERN = /Table 20\.7a\s+Annual pay - Gross .*\.xlsx$/i;
+
+const AGE_BAND_TARGETS: AgeBandTarget[] = [
+  { ageBand: '18-21', label: '18-21' },
+  { ageBand: '22-29', label: '22-29' },
+  { ageBand: '30-39', label: '30-39' },
+  { ageBand: '40-49', label: '40-49' },
+  { ageBand: '50-59', label: '50-59' },
+  { ageBand: '60+', label: '60+' },
+];
 
 const TABLE_7_TARGETS: Table7Target[] = [
   {
@@ -168,6 +201,135 @@ export const SALARY_BENCHMARK_FALLBACKS: SalaryBenchmark[] = [
   },
 ];
 
+export const SALARY_AGE_OVERLAY_FALLBACKS: SalaryAgeOverlay[] = [
+  {
+    role: 'all-employees',
+    ageBand: '18-21',
+    label: '18-21',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 23596,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'all-employees',
+    ageBand: '22-29',
+    label: '22-29',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 32347,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'all-employees',
+    ageBand: '30-39',
+    label: '30-39',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 40668,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'all-employees',
+    ageBand: '40-49',
+    label: '40-49',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 44244,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'all-employees',
+    ageBand: '50-59',
+    label: '50-59',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 41866,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'all-employees',
+    ageBand: '60+',
+    label: '60+',
+    comparisonGroup: 'UK full-time all employees',
+    annualMedian: 36467,
+    sourceSheet: TABLE_6_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 6',
+    notes: 'UK-wide full-time all-employees median for this age band.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '18-21',
+    label: '18-21',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 24073,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '22-29',
+    label: '22-29',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 38801,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '30-39',
+    label: '30-39',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 52081,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '40-49',
+    label: '40-49',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 57110,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '50-59',
+    label: '50-59',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 58097,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+  {
+    role: 'software-engineer',
+    ageBand: '60+',
+    label: '60+',
+    comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+    annualMedian: 53777,
+    sourceSheet: TABLE_20_FULL_TIME_SHEET,
+    sourceDataset: 'ASHE Table 20',
+    notes:
+      'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
+  },
+];
+
 function decodeXml(value: string) {
   return value
     .replace(/&amp;/g, '&')
@@ -175,6 +337,10 @@ function decodeXml(value: string) {
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'");
+}
+
+function normalizeWhitespace(value: string) {
+  return value.replace(/\s+/g, ' ').trim();
 }
 
 function parseZipEntries(buffer: Buffer): Map<string, ZipEntry> {
@@ -453,6 +619,72 @@ export function extractSalaryBenchmarksFromAsheTable15Zip(zipBuffer: Buffer): Sa
       sourceSheet: TABLE_15_FULL_TIME_SHEET,
       sourceDataset: 'ASHE Table 15',
       notes: target.notes,
+    };
+  });
+}
+
+export function extractSalaryAgeOverlaysFromAsheTable6Zip(zipBuffer: Buffer): SalaryAgeOverlay[] {
+  const workbookZipBuffer = resolveWorkbookZipBuffer(zipBuffer, TABLE_6_ANNUAL_PAY_WORKBOOK_PATTERN);
+  const rows = parseWorkbookRows(workbookZipBuffer, TABLE_6_FULL_TIME_SHEET);
+
+  return AGE_BAND_TARGETS.map((target) => {
+    const row = rows.find((candidate) => normalizeWhitespace(candidate.A ?? '') === target.label);
+
+    if (!row) {
+      throw new Error(`Missing ASHE Table 6 age-band row for ${target.label}`);
+    }
+
+    const annualMedian = Number(row.D);
+    if (!Number.isFinite(annualMedian)) {
+      throw new Error(`Invalid ASHE Table 6 median for ${target.label}`);
+    }
+
+    return {
+      role: 'all-employees' as const,
+      ageBand: target.ageBand,
+      label: target.label,
+      comparisonGroup: 'UK full-time all employees',
+      annualMedian,
+      sourceSheet: TABLE_6_FULL_TIME_SHEET,
+      sourceDataset: 'ASHE Table 6',
+      notes: 'UK-wide full-time all-employees median for this age band.',
+    };
+  });
+}
+
+export function extractSalaryAgeOverlaysFromAsheTable20Zip(zipBuffer: Buffer): SalaryAgeOverlay[] {
+  const workbookZipBuffer = resolveWorkbookZipBuffer(zipBuffer, TABLE_20_ANNUAL_PAY_WORKBOOK_PATTERN);
+  const rows = parseWorkbookRows(workbookZipBuffer, TABLE_20_FULL_TIME_SHEET);
+
+  return AGE_BAND_TARGETS.map((target) => {
+    const row = rows.find((candidate) => {
+      const description = normalizeWhitespace(candidate.A ?? '');
+      return (
+        candidate.B === SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_CODE &&
+        description.startsWith(target.label) &&
+        description.includes(SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL)
+      );
+    });
+
+    if (!row) {
+      throw new Error(`Missing ASHE Table 20 age-band row for ${target.label}`);
+    }
+
+    const annualMedian = Number(row.D);
+    if (!Number.isFinite(annualMedian)) {
+      throw new Error(`Invalid ASHE Table 20 median for ${target.label}`);
+    }
+
+    return {
+      role: 'software-engineer' as const,
+      ageBand: target.ageBand,
+      label: target.label,
+      comparisonGroup: SOFTWARE_ENGINEER_AGE_OVERLAY_OCCUPATION_LABEL,
+      annualMedian,
+      sourceSheet: TABLE_20_FULL_TIME_SHEET,
+      sourceDataset: 'ASHE Table 20',
+      notes:
+        'Nearest published age-banded occupation cut for the software-engineer path: UK-wide science, research, engineering and technology professionals.',
     };
   });
 }

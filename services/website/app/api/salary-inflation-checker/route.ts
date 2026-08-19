@@ -1,7 +1,11 @@
 import {
+  extractSalaryAgeOverlaysFromAsheTable20Zip,
+  extractSalaryAgeOverlaysFromAsheTable6Zip,
   extractSalaryBenchmarksFromAsheTable15Zip,
   extractSalaryBenchmarksFromAsheTable7Zip,
+  SALARY_AGE_OVERLAY_FALLBACKS,
   SALARY_BENCHMARK_FALLBACKS,
+  type SalaryAgeOverlay,
   type SalaryBenchmark,
 } from '../../../../salary-inflation-checker-api/src/ashe';
 import { GetObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
@@ -50,6 +54,7 @@ type SalaryInflationCheckerPayload = {
     source: SourceSnapshot;
     notes: string;
     benchmarks: SalaryBenchmark[];
+    ageOverlays: SalaryAgeOverlay[];
   };
   mealDeal: {
     retailer: string;
@@ -73,13 +78,21 @@ type SourceStatuses = SalaryInflationCheckerPayload['sourceStatus'];
 const ONS_CPIH_INDEX_SERIES_URL =
   'https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/l522/mm23';
 const ONS_CPIH_INDEX_LINECHART_CONFIG_URL = `${ONS_CPIH_INDEX_SERIES_URL}/linechartconfig`;
+const ONS_ASHE_TABLE_6_URL =
+  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupashetable6';
 const ONS_ASHE_TABLE_7_URL =
   'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7';
+const ONS_ASHE_TABLE_20_URL =
+  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupbyoccupation2digitsocashetable20';
 const ONS_INFLATION_TOPIC_URL = 'https://www.ons.gov.uk/economy/inflationandpriceindices?os=0';
+const ONS_ASHE_TABLE_6_FALLBACK_ZIP_URL =
+  'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupashetable6/2025provisional/ashetable62025provisional.zip';
 const ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7/2025provisional/ashetable72025provisional.zip';
 const ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL =
   'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/regionbyoccupation4digitsoc2010ashetable15/2025provisional/ashetable152025provisional.zip';
+const ONS_ASHE_TABLE_20_FALLBACK_ZIP_URL =
+  'https://www.ons.gov.uk/file?uri=/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupbyoccupation2digitsocashetable20/2025provisional/ashetable202025provisional.zip';
 const TESCO_MEAL_DEAL_URL =
   'https://www.tesco.com/groceries/en-GB/shop/fresh-food/chilled-soup-sandwiches-and-salad-pots/lunch-meal-deals';
 const HISTORY_BUCKET =
@@ -163,14 +176,17 @@ const INFLATION_FALLBACK_SNAPSHOT: SalaryInflationCheckerPayload['inflation'] = 
 };
 
 const SALARY_FALLBACK_SNAPSHOT = {
+  table6DownloadUrl: ONS_ASHE_TABLE_6_FALLBACK_ZIP_URL,
   table7DownloadUrl: ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL,
   table15DownloadUrl: ONS_ASHE_TABLE_15_FALLBACK_ZIP_URL,
+  table20DownloadUrl: ONS_ASHE_TABLE_20_FALLBACK_ZIP_URL,
   source: {
     name: 'ONS ASHE salary benchmark fallback snapshot',
     url: ONS_ASHE_TABLE_7_URL,
     fetchedAt: '2025-10-23T07:00:00.000Z',
   },
   benchmarks: SALARY_BENCHMARK_FALLBACKS,
+  ageOverlays: SALARY_AGE_OVERLAY_FALLBACKS,
 };
 
 const MEAL_DEAL_FALLBACK_SNAPSHOT = {
@@ -343,12 +359,13 @@ function buildStaticFallbackPayload(): SalaryInflationCheckerPayload {
     sourceStatus,
     inflation: INFLATION_FALLBACK_SNAPSHOT,
     salaries: {
-      dataset: 'ASHE Table 7 + 15',
+      dataset: 'ASHE Table 6 + 7 + 15 + 20',
       downloadUrl: SALARY_FALLBACK_SNAPSHOT.table7DownloadUrl,
       source: SALARY_FALLBACK_SNAPSHOT.source,
       notes:
-        'Public sources used to derive representative local-authority and software-engineer salary benchmarks.',
+        'Public sources used to derive representative local-authority and software-engineer salary benchmarks, plus optional age-band overlays.',
       benchmarks: SALARY_BENCHMARK_FALLBACKS,
+      ageOverlays: SALARY_AGE_OVERLAY_FALLBACKS,
     },
     mealDeal: {
       retailer: 'Tesco',
@@ -549,6 +566,13 @@ function getInflationStatus(
 }
 
 async function loadAsheBenchmarks() {
+  const table6Result = await fetchBuffer(ONS_ASHE_TABLE_6_FALLBACK_ZIP_URL)
+    .then((zipBuffer) => extractSalaryAgeOverlaysFromAsheTable6Zip(zipBuffer))
+    .then(
+      (value) => ({ status: 'fulfilled', value } as const),
+      (reason) => ({ status: 'rejected', reason } as const)
+    );
+
   const table7Result = await fetchBuffer(ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL)
     .then((zipBuffer) => extractSalaryBenchmarksFromAsheTable7Zip(zipBuffer))
     .then(
@@ -563,6 +587,17 @@ async function loadAsheBenchmarks() {
       (reason) => ({ status: 'rejected', reason } as const)
     );
 
+  const table20Result = await fetchBuffer(ONS_ASHE_TABLE_20_FALLBACK_ZIP_URL)
+    .then((zipBuffer) => extractSalaryAgeOverlaysFromAsheTable20Zip(zipBuffer))
+    .then(
+      (value) => ({ status: 'fulfilled', value } as const),
+      (reason) => ({ status: 'rejected', reason } as const)
+    );
+
+  if (table6Result.status === 'rejected') {
+    console.error('ASHE Table 6 age-overlay extraction failed', table6Result.reason);
+  }
+
   if (table7Result.status === 'rejected') {
     console.error('ASHE Table 7 benchmark extraction failed', table7Result.reason);
   }
@@ -571,7 +606,15 @@ async function loadAsheBenchmarks() {
     console.error('ASHE Table 15 benchmark extraction failed', table15Result.reason);
   }
 
+  if (table20Result.status === 'rejected') {
+    console.error('ASHE Table 20 age-overlay extraction failed', table20Result.reason);
+  }
+
   return {
+    table6AgeOverlays:
+      table6Result.status === 'fulfilled'
+        ? table6Result.value
+        : SALARY_AGE_OVERLAY_FALLBACKS.filter((overlay) => overlay.role === 'all-employees'),
     table7Benchmarks:
       table7Result.status === 'fulfilled'
         ? table7Result.value
@@ -582,20 +625,39 @@ async function loadAsheBenchmarks() {
         : SALARY_BENCHMARK_FALLBACKS.filter(
             (benchmark) => benchmark.role === 'software-engineer'
           ),
+    table20AgeOverlays:
+      table20Result.status === 'fulfilled'
+        ? table20Result.value
+        : SALARY_AGE_OVERLAY_FALLBACKS.filter(
+            (overlay) => overlay.role === 'software-engineer'
+          ),
+    table6Live: table6Result.status === 'fulfilled',
     table7Live: table7Result.status === 'fulfilled',
     table15Live: table15Result.status === 'fulfilled',
+    table20Live: table20Result.status === 'fulfilled',
   };
 }
 
 async function loadSalarySnapshot() {
-  const { table7Benchmarks, table15Benchmarks, table7Live, table15Live } =
+  const {
+    table6AgeOverlays,
+    table7Benchmarks,
+    table15Benchmarks,
+    table20AgeOverlays,
+    table6Live,
+    table7Live,
+    table15Live,
+    table20Live,
+  } =
     await loadAsheBenchmarks();
-  const liveCount = Number(table7Live) + Number(table15Live);
+  const liveCount =
+    Number(table6Live) + Number(table7Live) + Number(table15Live) + Number(table20Live);
 
   if (liveCount === 0) {
     return {
       downloadUrl: SALARY_FALLBACK_SNAPSHOT.table7DownloadUrl,
       benchmarks: SALARY_BENCHMARK_FALLBACKS,
+      ageOverlays: SALARY_AGE_OVERLAY_FALLBACKS,
       source: SALARY_FALLBACK_SNAPSHOT.source,
       sourceMode: 'fallback' as const,
     };
@@ -604,15 +666,16 @@ async function loadSalarySnapshot() {
   return {
     downloadUrl: ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL,
     benchmarks: [...table7Benchmarks, ...table15Benchmarks],
+    ageOverlays: [...table6AgeOverlays, ...table20AgeOverlays],
     source: {
       name:
-        liveCount === 2
-          ? 'ONS ASHE Table 7 and Table 15 ZIP downloads'
+        liveCount === 4
+          ? 'ONS ASHE Table 6, 7, 15 and 20 ZIP downloads'
           : 'ONS ASHE salary benchmark mixed live snapshot',
-      url: liveCount === 2 ? ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL : ONS_ASHE_TABLE_7_URL,
+      url: liveCount === 4 ? ONS_ASHE_TABLE_7_FALLBACK_ZIP_URL : ONS_ASHE_TABLE_20_URL,
       fetchedAt: new Date().toISOString(),
     },
-    sourceMode: liveCount === 2 ? ('live' as const) : ('fallback' as const),
+    sourceMode: liveCount === 4 ? ('live' as const) : ('fallback' as const),
   };
 }
 
@@ -662,11 +725,13 @@ async function loadFreshPayload(): Promise<SalaryInflationCheckerPayload> {
     sourceStatus,
     inflation,
     salaries: {
-      dataset: 'ASHE Table 7 + 15',
+      dataset: 'ASHE Table 6 + 7 + 15 + 20',
       downloadUrl: salaries.downloadUrl,
       source: salaries.source,
-      notes: 'Public sources used to derive representative local-authority and software-engineer salary benchmarks.',
+      notes:
+        'Public sources used to derive representative local-authority and software-engineer salary benchmarks, plus optional age-band overlays.',
       benchmarks: salaries.benchmarks,
+      ageOverlays: salaries.ageOverlays,
     },
     mealDeal: {
       retailer: 'Tesco',
