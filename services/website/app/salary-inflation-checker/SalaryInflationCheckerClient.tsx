@@ -211,6 +211,26 @@ function formatAxisSalary(value: number) {
   return `£${Math.round(value)}`;
 }
 
+function getRoleDisplayLabel(role: SalaryRole) {
+  return role === 'software-engineer' ? 'Software engineer' : 'All employees';
+}
+
+function getAgeOverlayIntro(role: SalaryRole) {
+  if (role === 'software-engineer') {
+    return 'Adds a UK-wide age-band benchmark for the nearest published engineering/software occupation group. Your selected location benchmark stays separate.';
+  }
+
+  return 'Adds a UK-wide age-band benchmark for all employees. Your selected location benchmark stays separate.';
+}
+
+function getAgeOverlayCaption(role: SalaryRole) {
+  if (role === 'software-engineer') {
+    return 'Role-matched age context';
+  }
+
+  return 'All-employees age context';
+}
+
 function formatShortDate(value: string) {
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
@@ -889,6 +909,9 @@ export default function SalaryInflationCheckerClient() {
           (overlay) => overlay.role === selectedRole && overlay.ageBand === selectedAgeBand
         ) ?? null;
   const activeAgeOverlayAnnualMedian = activeAgeOverlay?.annualMedian ?? null;
+  const ageOverlayIntro = getAgeOverlayIntro(selectedRole);
+  const ageOverlayCaption = getAgeOverlayCaption(selectedRole);
+  const selectedRoleLabel = getRoleDisplayLabel(selectedRole);
 
   const submittedAdjustedSalary =
     submittedSalaryAnalysis && submittedInflationMultiplier !== null
@@ -1394,7 +1417,7 @@ export default function SalaryInflationCheckerClient() {
                   })}
                 </div>
 
-                <div className="space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                <div className="space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4 sm:p-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
                     Optional age-band overlay
                   </p>
@@ -1419,15 +1442,15 @@ export default function SalaryInflationCheckerClient() {
                     })}
                   </div>
                   <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                    Adds UK-wide age-band context from ASHE age tables without replacing the local benchmark.
+                    {ageOverlayIntro}
                   </p>
                 </div>
 
-                <div className="site-input-surface rounded-[1.75rem] p-6">
+                <div className="site-input-surface rounded-[1.75rem] p-5 sm:p-6">
                   <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
                     Selected benchmark
                   </p>
-                  <h3 className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                  <h3 className="mt-3 text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                     {activeBenchmark.label}
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
@@ -1440,13 +1463,13 @@ export default function SalaryInflationCheckerClient() {
                 </div>
               </div>
 
-              <div className="site-input-surface rounded-[1.75rem] p-6">
+              <div className="site-input-surface rounded-[1.75rem] p-5 sm:p-6">
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                       Annual
                     </p>
-                    <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
+                    <p className="mt-2 break-words text-2xl font-semibold text-[var(--color-foreground)] sm:text-3xl">
                       {formatMoney(activeBenchmark.annualMedian)}
                     </p>
                   </div>
@@ -1454,7 +1477,7 @@ export default function SalaryInflationCheckerClient() {
                     <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                       Monthly
                     </p>
-                    <p className="mt-2 text-3xl font-semibold text-[var(--color-foreground)]">
+                    <p className="mt-2 break-words text-2xl font-semibold text-[var(--color-foreground)] sm:text-3xl">
                       {activeBenchmark.annualMedian === null
                         ? 'Unavailable'
                         : formatMoney(activeBenchmark.annualMedian / 12)}
@@ -1467,7 +1490,7 @@ export default function SalaryInflationCheckerClient() {
                     label="Compared with your entered salary"
                     tip="Compares the selected benchmark against the salary amount you entered before any inflation adjustment."
                   />
-                  <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                  <p className="mt-3 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                     {formatSignedMoney(currentSalaryDelta)}
                   </p>
                   <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
@@ -1480,7 +1503,7 @@ export default function SalaryInflationCheckerClient() {
                     label="Compared with your salary today"
                     tip="Compares the selected benchmark against what your entered salary would need to be today to keep the same buying power."
                   />
-                  <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                  <p className="mt-3 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                     {formatSignedMoney(benchmarkDelta)}
                   </p>
                   <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
@@ -1491,11 +1514,11 @@ export default function SalaryInflationCheckerClient() {
                 {activeAgeOverlay ? (
                   <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                      Age-band overlay
+                      {ageOverlayCaption}
                     </p>
                     <div className="mt-3 flex flex-col gap-2">
-                      <h4 className="text-xl font-semibold text-[var(--color-foreground)]">
-                        {activeAgeOverlay.label}
+                      <h4 className="text-lg font-semibold text-[var(--color-foreground)] sm:text-xl">
+                        {selectedRoleLabel} · {activeAgeOverlay.label}
                       </h4>
                       <p className="text-sm text-[var(--color-muted-foreground)]">
                         {activeAgeOverlay.comparisonGroup}
@@ -1510,7 +1533,7 @@ export default function SalaryInflationCheckerClient() {
                         <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                           Annual median
                         </p>
-                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                           {formatMoney(activeAgeOverlay.annualMedian)}
                         </p>
                       </div>
@@ -1518,7 +1541,7 @@ export default function SalaryInflationCheckerClient() {
                         <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                           Versus entered salary
                         </p>
-                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                           {formatSignedMoney(ageOverlayCurrentDelta)}
                         </p>
                         <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
@@ -1529,7 +1552,7 @@ export default function SalaryInflationCheckerClient() {
                         <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                           Versus salary today
                         </p>
-                        <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
+                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
                           {formatSignedMoney(ageOverlayTodayDelta)}
                         </p>
                         <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
