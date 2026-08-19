@@ -85,6 +85,10 @@ function createGroundShape(points: Array<[number, number]>, material: THREE.Mate
   return new THREE.Mesh(new THREE.ShapeGeometry(shape), material);
 }
 
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
+}
+
 function disposeScene(scene: THREE.Scene) {
   scene.traverse((object) => {
     const mesh = object as THREE.Mesh & { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] };
@@ -151,7 +155,7 @@ export function HeroThreeBackground() {
     root.add(dayGroup);
     root.add(nightGroup);
 
-    const particleCount = 220;
+    const particleCount = 180;
     const particleBase = new Float32Array(particleCount * 3);
     const particlePositions = new Float32Array(particleCount * 3);
 
@@ -182,15 +186,48 @@ export function HeroThreeBackground() {
     const particles = new THREE.Points(particleGeometry, particleMaterial);
     atmosphere.add(particles);
 
+    const starCount = 150;
+    const starBase = new Float32Array(starCount * 3);
+    const starPositions = new Float32Array(starCount * 3);
+
+    for (let idx = 0; idx < starCount; idx += 1) {
+      const stride = idx * 3;
+      const x = (random() - 0.5) * 15.5;
+      const y = random() * 4.9 - 0.1;
+      const z = (random() - 0.5) * 0.4;
+
+      starBase[stride] = x;
+      starBase[stride + 1] = y;
+      starBase[stride + 2] = z;
+
+      starPositions[stride] = x;
+      starPositions[stride + 1] = y;
+      starPositions[stride + 2] = z;
+    }
+
+    const starGeometry = new THREE.BufferGeometry();
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+      size: 0.055,
+      transparent: true,
+      opacity: 0.78,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+      color: new THREE.Color('#f8fafc'),
+    });
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    stars.position.z = -0.25;
+    nightGroup.add(stars);
+
     const dayCloudMaterial = new THREE.MeshBasicMaterial({
       transparent: true,
       opacity: 0.1,
       depthWrite: false,
     });
     const clouds = [
-      { group: createCloud(1.1, dayCloudMaterial), speed: 0.12, amplitude: 0.08, offset: 0.2, xRatio: -0.66, baseY: 2.15 },
-      { group: createCloud(0.9, dayCloudMaterial), speed: 0.16, amplitude: 0.05, offset: 1.4, xRatio: 0.08, baseY: 1.7 },
-      { group: createCloud(0.72, dayCloudMaterial), speed: 0.14, amplitude: 0.06, offset: 2.3, xRatio: 0.72, baseY: 2.45 },
+      { group: createCloud(1.04, dayCloudMaterial), speed: 0.12, amplitude: 0.08, offset: 0.2, xRatio: -0.66, baseY: 2.15 },
+      { group: createCloud(0.84, dayCloudMaterial), speed: 0.16, amplitude: 0.05, offset: 1.4, xRatio: 0.08, baseY: 1.7 },
+      { group: createCloud(0.68, dayCloudMaterial), speed: 0.14, amplitude: 0.06, offset: 2.3, xRatio: 0.72, baseY: 2.45 },
     ];
     clouds.forEach(({ group, xRatio, baseY }) => {
       group.position.set(xRatio * 6, baseY, -0.4);
@@ -226,6 +263,24 @@ export function HeroThreeBackground() {
       dayGroundMaterial,
     );
     dayGroup.add(dayGround);
+
+    const dayRidgeMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.16,
+    });
+    const dayRidge = createLine(
+      [
+        new THREE.Vector3(-7, -2.26, 0),
+        new THREE.Vector3(-5.2, -1.94, 0),
+        new THREE.Vector3(-3.4, -2.1, 0),
+        new THREE.Vector3(-1.1, -1.84, 0),
+        new THREE.Vector3(1.5, -2.08, 0),
+        new THREE.Vector3(3.8, -1.92, 0),
+        new THREE.Vector3(7, -1.76, 0),
+      ],
+      dayRidgeMaterial,
+    );
+    dayGroup.add(dayRidge);
 
     const turbineMaterial = new THREE.LineBasicMaterial({
       transparent: true,
@@ -326,9 +381,9 @@ export function HeroThreeBackground() {
     });
 
     const wheelGroup = new THREE.Group();
-    wheelGroup.position.set(0, -0.18, 0);
-    const outerWheel = createCircle(1.6, 120, wheelRimMaterial);
-    const innerWheel = createCircle(1.16, 90, wheelAccentMaterial);
+    wheelGroup.position.set(0, -0.08, 0);
+    const outerWheel = createCircle(1.82, 140, wheelRimMaterial);
+    const innerWheel = createCircle(1.34, 96, wheelAccentMaterial);
     const hubWheel = createCircle(0.16, 36, wheelRimMaterial);
     wheelGroup.add(outerWheel);
     wheelGroup.add(innerWheel);
@@ -339,8 +394,17 @@ export function HeroThreeBackground() {
       opacity: 0.34,
     });
     const gondolas: THREE.Group[] = [];
-    for (let idx = 0; idx < 10; idx += 1) {
-      const angle = (idx / 10) * Math.PI * 2;
+    const rimLightMaterial = new THREE.PointsMaterial({
+      size: 0.09,
+      transparent: true,
+      opacity: 0.72,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    });
+    const rimLightPoints: number[] = [];
+
+    for (let idx = 0; idx < 12; idx += 1) {
+      const angle = (idx / 12) * Math.PI * 2;
       const gondola = new THREE.Group();
       const hanger = createLine(
         [new THREE.Vector3(0, 0.14, 0), new THREE.Vector3(0, -0.05, 0)],
@@ -356,19 +420,27 @@ export function HeroThreeBackground() {
         ],
         gondolaMaterial,
       );
-      gondola.position.set(Math.cos(angle) * 1.58, Math.sin(angle) * 1.58, 0);
+      gondola.position.set(Math.cos(angle) * 1.8, Math.sin(angle) * 1.8, 0);
       gondola.userData.baseAngle = angle;
       gondola.add(hanger);
       gondola.add(cabin);
       gondolas.push(gondola);
       wheelGroup.add(gondola);
+
+      rimLightPoints.push(Math.cos(angle) * 1.82, Math.sin(angle) * 1.82, 0);
+      rimLightPoints.push(Math.cos(angle + Math.PI / 24) * 1.34, Math.sin(angle + Math.PI / 24) * 1.34, 0);
     }
+
+    const rimLightGeometry = new THREE.BufferGeometry();
+    rimLightGeometry.setAttribute('position', new THREE.Float32BufferAttribute(rimLightPoints, 3));
+    const rimLights = new THREE.Points(rimLightGeometry, rimLightMaterial);
+    wheelGroup.add(rimLights);
 
     const spokes: THREE.Line[] = [];
     for (let idx = 0; idx < 12; idx += 1) {
       const angle = (idx / 12) * Math.PI * 2;
       const spoke = createLine(
-        [new THREE.Vector3(0, 0, 0), new THREE.Vector3(Math.cos(angle) * 1.55, Math.sin(angle) * 1.55, 0)],
+        [new THREE.Vector3(0, 0, 0), new THREE.Vector3(Math.cos(angle) * 1.78, Math.sin(angle) * 1.78, 0)],
         wheelSpokeMaterial,
       );
       spokes.push(spoke);
@@ -380,15 +452,20 @@ export function HeroThreeBackground() {
       opacity: 0.24,
     });
     const leftSupport = createLine(
-      [new THREE.Vector3(-0.7, -1.75, 0), new THREE.Vector3(0, -0.18, 0)],
+      [new THREE.Vector3(-0.95, -2.05, 0), new THREE.Vector3(0, -0.08, 0)],
       supportMaterial,
     );
     const rightSupport = createLine(
-      [new THREE.Vector3(0.7, -1.75, 0), new THREE.Vector3(0, -0.18, 0)],
+      [new THREE.Vector3(0.95, -2.05, 0), new THREE.Vector3(0, -0.08, 0)],
+      supportMaterial,
+    );
+    const crossSupport = createLine(
+      [new THREE.Vector3(-0.66, -1.54, 0), new THREE.Vector3(0.66, -1.54, 0)],
       supportMaterial,
     );
     nightScene.add(leftSupport);
     nightScene.add(rightSupport);
+    nightScene.add(crossSupport);
     nightScene.add(wheelGroup);
 
     const beamMaterial = new THREE.MeshBasicMaterial({
@@ -471,12 +548,14 @@ export function HeroThreeBackground() {
       wheelAccentMaterial.color = border;
       wheelSpokeMaterial.color = accent.clone().lerp(border, 0.35);
       gondolaMaterial.color = border.clone().lerp(accent, 0.25);
+      rimLightMaterial.color = accent.clone().lerp(new THREE.Color('#ffffff'), 0.24);
       supportMaterial.color = border;
       beamMaterial.color = accent;
       shootingStarMaterial.color = accent.clone().lerp(new THREE.Color('#ffffff'), 0.18);
       moonMaterial.color = border.clone().lerp(accent, 0.2);
       nightGroundMaterial.color = border.clone().lerp(foreground, 0.22);
       nightHazeMaterial.color = accent;
+      dayRidgeMaterial.color = border.clone().lerp(foreground, 0.16);
 
       dayGroup.visible = !darkModeState.active;
       nightGroup.visible = darkModeState.active;
@@ -514,9 +593,10 @@ export function HeroThreeBackground() {
 
       dayGround.scale.x = Math.max(1, halfWidth / 6);
       nightGround.scale.x = Math.max(1, halfWidth / 6);
+      dayRidge.scale.x = Math.max(1, halfWidth / 6);
       sunArc.position.x = -halfWidth + 1.4;
       moon.position.x = -halfWidth + 1.55;
-      nightScene.position.x = halfWidth * 0.42;
+      nightScene.position.x = halfWidth * 0.43;
 
       clouds.forEach(({ group, xRatio }) => {
         group.position.x = xRatio * halfWidth;
@@ -555,6 +635,9 @@ export function HeroThreeBackground() {
       const elapsed = clock.getElapsedTime();
       const darkMode = darkModeState.active;
       const positionAttribute = particleGeometry.getAttribute('position') as THREE.BufferAttribute;
+      const starAttribute = starGeometry.getAttribute('position') as THREE.BufferAttribute;
+      const pointerWorldX = pointer.x * camera.right;
+      const pointerWorldY = pointer.y * camera.top;
 
       for (let idx = 0; idx < particleCount; idx += 1) {
         const stride = idx * 3;
@@ -571,13 +654,15 @@ export function HeroThreeBackground() {
 
       positionAttribute.needsUpdate = true;
 
-      root.position.x += ((pointer.x * 0.18) - root.position.x) * 0.035;
-      root.position.y += ((pointer.y * 0.12) - root.position.y) * 0.035;
+      root.position.x += ((pointer.x * 0.12) - root.position.x) * 0.03;
+      root.position.y += ((pointer.y * 0.08) - root.position.y) * 0.03;
 
       if (darkMode) {
         const meteorBoost = 1 + Math.abs(pointer.x) * 2.2 + Math.max(0, -pointer.y) * 0.8;
         wheelGroup.rotation.z += prefersReducedMotion ? 0 : 0.0013 + Math.abs(pointer.x) * 0.0015;
         nightHaze.scale.setScalar(1 + Math.sin(elapsed * 1.2) * 0.04);
+        starMaterial.opacity = 0.62 + ((Math.sin(elapsed * 0.8) + 1) / 2) * 0.18;
+        rimLightMaterial.opacity = 0.54 + ((Math.sin(elapsed * 2.1) + 1) / 2) * 0.2;
         beams.forEach(({ mesh, pulse }) => {
           mesh.scale.y = 0.96 + Math.sin(elapsed * 1.1 + pulse) * 0.08;
           const material = mesh.material as THREE.MeshBasicMaterial;
@@ -586,6 +671,15 @@ export function HeroThreeBackground() {
         gondolas.forEach((gondola) => {
           gondola.rotation.z = -wheelGroup.rotation.z;
         });
+        for (let idx = 0; idx < starCount; idx += 1) {
+          const stride = idx * 3;
+          const baseX = starBase[stride];
+          const baseY = starBase[stride + 1];
+          starAttribute.array[stride] = baseX + Math.sin(elapsed * 0.12 + idx * 0.7) * 0.01;
+          starAttribute.array[stride + 1] = baseY + Math.cos(elapsed * 0.15 + idx * 0.5) * 0.014;
+          starAttribute.array[stride + 2] = starBase[stride + 2];
+        }
+        starAttribute.needsUpdate = true;
         shootingStars.forEach(({ line, lane, height, speed, phase }) => {
           const travel = (((elapsed * speed * meteorBoost) + phase) % 1 + 1) % 1;
           const startX = -6.8 + travel * 13.6;
@@ -598,6 +692,7 @@ export function HeroThreeBackground() {
         });
       } else {
         const windForce = 1 + Math.abs(pointer.x) * 2.6 + Math.max(0, pointer.y) * 0.6;
+        starMaterial.opacity = 0;
         clouds.forEach(({ group, speed, amplitude, offset, xRatio, baseY }) => {
           const baseX = xRatio * (camera.right - 0.4);
           group.position.x = baseX + Math.sin(elapsed * speed * windForce + offset) * 0.42 * windForce;
@@ -605,7 +700,12 @@ export function HeroThreeBackground() {
         });
 
         turbines.forEach(({ rotor, speed, group }, index) => {
-          rotor.rotation.z -= prefersReducedMotion ? 0 : speed * 0.01 * windForce;
+          const distX = pointerWorldX - group.position.x;
+          const distY = pointerWorldY - (group.position.y + 0.6 * group.scale.x);
+          const dist = Math.hypot(distX, distY);
+          const localBoost = clamp(1 - dist / 2.4, 0, 1);
+          const acceleration = 1 + windForce * 0.7 + localBoost * 2.6;
+          rotor.rotation.z -= prefersReducedMotion ? 0 : speed * 0.01 * acceleration;
           group.position.y += (Math.sin(elapsed * 0.8 + index * 0.4) * 0.006 - (group.position.y - turbineConfigs[index].y)) * 0.08;
         });
         windLines.forEach(({ line, xRatio, baseY, offset }) => {
