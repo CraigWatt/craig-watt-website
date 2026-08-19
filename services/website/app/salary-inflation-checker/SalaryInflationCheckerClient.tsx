@@ -436,6 +436,30 @@ function formatSourceState(mode: SourceMode) {
   }
 }
 
+function sourceChipClasses(mode: SourceMode) {
+  if (mode === 'live') {
+    return 'border-emerald-500/30 bg-emerald-500/12 text-emerald-700 dark:text-emerald-300';
+  }
+
+  if (mode === 'fallback') {
+    return 'border-amber-500/30 bg-amber-500/12 text-amber-700 dark:text-amber-300';
+  }
+
+  return 'border-rose-500/30 bg-rose-500/12 text-rose-700 dark:text-rose-300';
+}
+
+function summariseInflationSource(sourceName: string) {
+  if (/cpih/i.test(sourceName)) {
+    return 'ONS CPIH';
+  }
+
+  if (/ons/i.test(sourceName)) {
+    return 'ONS inflation';
+  }
+
+  return sourceName;
+}
+
 function SalaryTooltip({ active, payload, label }: CustomTooltipProps) {
   if (!active || !payload || payload.length === 0) {
     return null;
@@ -759,12 +783,20 @@ export default function SalaryInflationCheckerClient() {
     warnings: [],
   };
 
+  const salaryDatasetLabel = extractAsheDatasetLabel(salaries.downloadUrl, salaries.source.fetchedAt);
   const sourceHealthItems = [
-    { label: 'Inflation', mode: sourceStates.inflation },
-    { label: 'Salaries', mode: sourceStates.salaries },
+    {
+      label: 'Inflation',
+      mode: sourceStates.inflation,
+      detail: summariseInflationSource(inflation.source.name),
+    },
+    {
+      label: 'Salaries',
+      mode: sourceStates.salaries,
+      detail: `ASHE ${salaryDatasetLabel}`,
+    },
   ];
   const visibleWarnings = _meta.warnings.filter((warning) => !/meal|tesco|clubcard/i.test(warning));
-  const salaryDatasetLabel = extractAsheDatasetLabel(salaries.downloadUrl, salaries.source.fetchedAt);
 
   const historicalSalaryValue = parseSalaryInput(historicalSalary);
   const inflationHistory = inflation.history ?? [];
@@ -941,15 +973,19 @@ export default function SalaryInflationCheckerClient() {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {sourceHealthItems.map(({ label, mode }) => (
+            {sourceHealthItems.map(({ label, mode, detail }) => (
               <Chip
                 key={label}
-                color={mode === 'live' ? 'success' : 'warning'}
                 variant="flat"
                 size="sm"
-                className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3"
+                className={[
+                  'rounded-full border px-3 py-1 text-xs shadow-sm',
+                  sourceChipClasses(mode),
+                ].join(' ')}
               >
                 {label} {formatSourceState(mode)}
+                <span className="mx-2 opacity-40">·</span>
+                {detail}
               </Chip>
             ))}
           </div>
