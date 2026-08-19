@@ -622,7 +622,7 @@ function SalaryHistoryChart({
   const categories = ['Your salary', 'Required salary', 'Projected required salary'] as const;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-[var(--color-muted-foreground)]">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-1">
@@ -665,7 +665,7 @@ function SalaryHistoryChart({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 md:p-5 shadow-sm">
+      <div className="overflow-hidden rounded-3xl border border-[var(--color-border)] bg-[var(--color-card)] p-3 md:p-4 shadow-sm">
         <LineChart
           className="h-80"
           data={chartData}
@@ -685,7 +685,7 @@ function SalaryHistoryChart({
             'Projected required salary': '7 7',
           }}
         />
-        <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+        <div className="mt-4 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
           <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
           <span>
             {effectiveHistoryRange === 'all'
@@ -696,7 +696,7 @@ function SalaryHistoryChart({
           </span>
           <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
         </div>
-        <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
+        <p className="mt-4 text-sm text-[var(--color-muted-foreground)]">
           The solid green line shows what your salary needed to become over time to preserve the same buying power.
           The dotted blue line extends that idea 12 months forward using the latest annual CPI rate as a projection.
         </p>
@@ -1215,8 +1215,8 @@ export default function SalaryInflationCheckerClient() {
             </div>
           </section>
 
-          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-            <div className="mb-5 flex flex-col gap-2">
+          <section className="site-surface rounded-[2rem] px-5 py-5 md:px-7 md:py-7">
+            <div className="mb-4 flex flex-col gap-2">
               <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
                 Salary graph
               </p>
@@ -1226,15 +1226,15 @@ export default function SalaryInflationCheckerClient() {
             </div>
 
             <Card shadow="sm" radius="lg" className="site-surface overflow-hidden rounded-[1.75rem]">
-              <CardBody className="space-y-4">
+              <CardBody className="space-y-5 p-4 md:p-5">
                 <SalaryHistoryChart
                   inflationHistory={inflation.history}
                   salaryValue={submittedSalaryAnalysis.salary}
                   salaryStartMonth={submittedInflationPoint?.date ?? null}
                   latestInflationRate={inflation.rate12m}
                 />
-                <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4 md:p-5">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                       Increase needed today
                     </p>
@@ -1245,7 +1245,7 @@ export default function SalaryInflationCheckerClient() {
                       The percentage increase your original salary would need today to buy the same things.
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4 md:p-5">
                     <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
                       Increase needed in 12 months
                     </p>
