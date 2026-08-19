@@ -96,8 +96,6 @@ const JSON_HEADERS = {
 const ONS_CPIH_INDEX_SERIES_URL =
   'https://www.ons.gov.uk/economy/inflationandpriceindices/timeseries/l522/mm23';
 const ONS_CPIH_INDEX_LINECHART_CONFIG_URL = `${ONS_CPIH_INDEX_SERIES_URL}/linechartconfig`;
-const ONS_ASHE_TABLE_6_URL =
-  'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/agegroupashetable6';
 const ONS_ASHE_TABLE_7_URL =
   'https://www.ons.gov.uk/employmentandlabourmarket/peopleinwork/earningsandworkinghours/datasets/placeofworkbylocalauthorityashetable7';
 const ONS_ASHE_TABLE_20_URL =
