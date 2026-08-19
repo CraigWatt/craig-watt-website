@@ -90,7 +90,7 @@ const TABLE_15_TARGETS: Table15Target[] = [
   },
   {
     key: 'edinburgh',
-    label: 'Edinburgh',
+    label: 'Scotland',
     locality: 'Scotland',
     areaCode: 'S92000003',
     description: 'Scotland, Programmers and software development professionals',
@@ -158,7 +158,7 @@ export const SALARY_BENCHMARK_FALLBACKS: SalaryBenchmark[] = [
   {
     role: 'software-engineer',
     key: 'edinburgh',
-    label: 'Edinburgh',
+    label: 'Scotland',
     locality: 'Scotland',
     areaCode: 'S92000003',
     annualMedian: 48930,
