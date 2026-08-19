@@ -59,7 +59,10 @@ locals {
   salary_inflation_checker_function_name   = "${replace(var.domain, ".", "-")}-cost-of-living"
   salary_inflation_checker_policy_name     = "${replace(var.domain, ".", "-")}-website-lambda-cost-of-living-history"
   salary_inflation_checker_permission_name = "AllowApiGatewayCostOfLivingInvoke"
-  site_files                               = fileset(var.site_build_dir, "**")
+  contact_recipient_emails = toset(compact([
+    for email in split(",", var.contact_email_to) : trimspace(email)
+  ]))
+  site_files = fileset(var.site_build_dir, "**")
   mime_types = {
     css  = "text/css; charset=utf-8"
     html = "text/html; charset=utf-8"
@@ -119,9 +122,7 @@ resource "aws_ses_domain_dkim" "contact" {
 }
 
 resource "aws_ses_email_identity" "contact_recipient" {
-  for_each = toset(compact([
-    for email in split(",", var.contact_email_to) : trimspace(email)
-  ]))
+  for_each = local.contact_recipient_emails
 
   email = each.value
 }
@@ -279,10 +280,16 @@ resource "aws_iam_role_policy" "lambda_ses_send" {
         Action = [
           "ses:SendEmail"
         ]
-        Resource = [
-          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.contact_email_from}",
-          "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain}"
-        ]
+        Resource = concat(
+          [
+            "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.contact_email_from}",
+            "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${var.domain}"
+          ],
+          [
+            for email in local.contact_recipient_emails :
+            "arn:aws:ses:${var.aws_region}:${data.aws_caller_identity.current.account_id}:identity/${email}"
+          ]
+        )
       }
     ]
   })
