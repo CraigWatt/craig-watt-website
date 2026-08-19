@@ -264,6 +264,7 @@ export default function ContactForm() {
 
             {stepIndex < steps.length - 1 ? (
               <Button
+                key={`next-step-${currentStep.key}`}
                 type="button"
                 variant="solid"
                 className="rounded-2xl"
@@ -274,6 +275,7 @@ export default function ContactForm() {
               </Button>
             ) : (
               <Button
+                key="submit-message"
                 type="submit"
                 variant="solid"
                 className="rounded-2xl"
