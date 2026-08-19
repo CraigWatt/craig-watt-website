@@ -30,7 +30,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6.1.3
         with:
-          role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
+          role-to-assume: ${{ secrets.DEPLOY_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 

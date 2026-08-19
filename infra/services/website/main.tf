@@ -52,7 +52,7 @@ moved {
 }
 
 locals {
-  bucket_name                              = "${replace(var.domain, ".", "-")}-site"
+  bucket_name = "${replace(var.domain, ".", "-")}-site"
   # Keep the underlying bucket name stable for now so the rename is a safe
   # Terraform/state migration rather than a destructive data migration.
   salary_inflation_checker_history_name    = "${replace(var.domain, ".", "-")}-cost-of-living-history-v2"
@@ -116,6 +116,14 @@ resource "aws_ses_domain_identity_verification" "contact" {
 
 resource "aws_ses_domain_dkim" "contact" {
   domain = aws_ses_domain_identity.contact.domain
+}
+
+resource "aws_ses_email_identity" "contact_recipient" {
+  for_each = toset(compact([
+    for email in split(",", var.contact_email_to) : trimspace(email)
+  ]))
+
+  email = each.value
 }
 
 resource "aws_route53_record" "ses_dkim" {

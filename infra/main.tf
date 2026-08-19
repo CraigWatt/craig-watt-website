@@ -45,19 +45,19 @@ module "certificate" {
 module "website" {
   source = "./services/website"
 
-  domain                    = var.domain
-  certificate_arn           = module.certificate.certificate_arn
-  aws_region                = var.aws_region
-  site_build_dir            = var.site_build_dir
-  contact_lambda_dir        = var.contact_lambda_dir
+  domain                              = var.domain
+  certificate_arn                     = module.certificate.certificate_arn
+  aws_region                          = var.aws_region
+  site_build_dir                      = var.site_build_dir
+  contact_lambda_dir                  = var.contact_lambda_dir
   salary_inflation_checker_lambda_dir = var.salary_inflation_checker_lambda_dir
-  zone_id                   = module.route53.zone_id
-  trading212_lambda_dir     = var.trading212_lambda_dir
-  recaptcha_secret_key      = var.recaptcha_secret_key
-  t212_api_key              = var.t212_api_key
-  t212_api_secret           = var.t212_api_secret
-  contact_email_to          = var.contact_email_to
-  contact_email_from        = var.contact_email_from
+  zone_id                             = module.route53.zone_id
+  trading212_lambda_dir               = var.trading212_lambda_dir
+  recaptcha_secret_key                = var.recaptcha_secret_key
+  t212_api_key                        = var.t212_api_key
+  t212_api_secret                     = var.t212_api_secret
+  contact_email_to                    = var.contact_email_to
+  contact_email_from                  = var.contact_email_from
 }
 
 module "dns_records" {

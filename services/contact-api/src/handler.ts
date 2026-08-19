@@ -49,6 +49,19 @@ function getTrimmedEnv(name: string): string {
   return getEnv(name).trim();
 }
 
+function getRecipientEmails(name: string): string[] {
+  const recipients = getEnv(name)
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (recipients.length === 0) {
+    throw new Error(`Missing required environment variable: ${name}`);
+  }
+
+  return recipients;
+}
+
 function parseBody(event: HttpEvent): ContactPayload {
   const rawBody = event.body ?? '{}';
   const decoded = event.isBase64Encoded
@@ -104,7 +117,7 @@ async function verifyRecaptcha(secret: string, token: string): Promise<{ ok: boo
 }
 
 async function sendEmail(payload: {
-  to: string;
+  to: string[];
   from: string;
   name: string;
   email: string;
@@ -115,7 +128,7 @@ async function sendEmail(payload: {
   await client.send(new SendEmailCommand({
     Source: payload.from,
     Destination: {
-      ToAddresses: [payload.to],
+      ToAddresses: payload.to,
     },
     ReplyToAddresses: [payload.email],
     Message: {
@@ -197,7 +210,7 @@ export async function handler(event: HttpEvent): Promise<HttpResponse> {
     }
 
     await sendEmail({
-      to: getTrimmedEnv('CONTACT_EMAIL_TO'),
+      to: getRecipientEmails('CONTACT_EMAIL_TO'),
       from: getTrimmedEnv('CONTACT_EMAIL_FROM'),
       name: safeName,
       email: safeEmail,

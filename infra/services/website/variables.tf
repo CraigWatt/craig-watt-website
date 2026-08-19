@@ -63,7 +63,7 @@ variable "t212_usd_gbp" {
 }
 
 variable "contact_email_to" {
-  description = "Contact form recipient email"
+  description = "Contact form recipient email address or comma-separated recipient email addresses"
   type        = string
 }
 

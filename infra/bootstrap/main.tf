@@ -3,13 +3,13 @@ provider "aws" {
 }
 
 locals {
-  repo_short                         = replace(var.github_repo, "/", "-")
-  provider_id                        = replace(var.github_oidc_provider_url, "https://", "")
-  domain_slug                        = replace(var.domain, ".", "-")
-  site_bucket                        = "${local.domain_slug}-site"
-  cost_of_living_history_bucket_wild = "${local.domain_slug}-cost-of-living-history*"
+  repo_short                                   = replace(var.github_repo, "/", "-")
+  provider_id                                  = replace(var.github_oidc_provider_url, "https://", "")
+  domain_slug                                  = replace(var.domain, ".", "-")
+  site_bucket                                  = "${local.domain_slug}-site"
+  cost_of_living_history_bucket_wild           = "${local.domain_slug}-cost-of-living-history*"
   salary_inflation_checker_history_bucket_wild = "${local.domain_slug}-salary-inflation-checker-history*"
-  state_bucket                       = var.state_bucket_name
+  state_bucket                                 = var.state_bucket_name
 }
 
 data "aws_caller_identity" "current" {}
@@ -164,6 +164,7 @@ resource "aws_iam_role_policy" "github_actions" {
         Sid    = "SesIdentityManagement"
         Effect = "Allow"
         Action = [
+          "ses:VerifyEmailIdentity",
           "ses:VerifyDomainIdentity",
           "ses:VerifyDomainDkim",
           "ses:DeleteIdentity",

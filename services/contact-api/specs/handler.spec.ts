@@ -19,7 +19,7 @@ describe('contact lambda handler', () => {
   beforeEach(() => {
     process.env = {
       ...originalEnv,
-      CONTACT_EMAIL_TO: 'hello@craigwatt.co.uk',
+      CONTACT_EMAIL_TO: 'craig-watt@live.co.uk, craig@webrefine.co.uk',
       CONTACT_EMAIL_FROM: 'no-reply@craigwatt.co.uk',
     };
     sendMock.mockReset();
@@ -65,7 +65,7 @@ describe('contact lambda handler', () => {
     expect(sendMock.mock.calls[0][0]).toMatchObject({
       Source: 'no-reply@craigwatt.co.uk',
       Destination: {
-        ToAddresses: ['hello@craigwatt.co.uk'],
+        ToAddresses: ['craig-watt@live.co.uk', 'craig@webrefine.co.uk'],
       },
       ReplyToAddresses: ['craig@example.com'],
       Message: {
@@ -82,5 +82,24 @@ describe('contact lambda handler', () => {
         },
       },
     });
+  });
+
+  it('rejects an empty recipient list after trimming', async () => {
+    process.env.CONTACT_EMAIL_TO = ' , ';
+
+    const response = await handler({
+      requestContext: { http: { method: 'POST' } },
+      body: JSON.stringify({
+        name: 'Craig',
+        email: 'craig@example.com',
+        message: 'Hello there',
+      }),
+    });
+
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.body)).toEqual({
+      error: 'Missing required environment variable: CONTACT_EMAIL_TO',
+    });
+    expect(sendMock).not.toHaveBeenCalled();
   });
 });

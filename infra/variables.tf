@@ -52,7 +52,7 @@ variable "t212_api_secret" {
 }
 
 variable "contact_email_to" {
-  description = "Contact form destination email address"
+  description = "Contact form destination email address or comma-separated destination email addresses"
   type        = string
 }
 

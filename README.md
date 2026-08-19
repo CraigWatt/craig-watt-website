@@ -76,6 +76,13 @@ terraform init
 terraform apply
 ```
 
+For the contact form, set:
+
+- `contact_email_from` to a sender on the verified domain, for example `no-reply@craigwatt.co.uk`
+- `contact_email_to` to one recipient or a comma-separated list, for example `craig-watt@live.co.uk,craig@webrefine.co.uk`
+
+Terraform also requests SES email verification for every destination address in `contact_email_to`. If the SES account is still in the sandbox, each recipient must click the AWS verification email before the contact form can deliver there.
+
 Terraform state locking now uses S3 lockfiles, so there is no separate DynamoDB lock table.
 
 Bootstrap resources for the GitHub Actions deployment role live under `infra/bootstrap`.
