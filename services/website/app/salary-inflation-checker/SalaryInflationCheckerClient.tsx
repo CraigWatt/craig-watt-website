@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import useSWR from 'swr';
-import { Button, Card, CardBody, Chip, Input, Select, SelectItem } from '@heroui/react';
+import { Button, Card, CardBody, Chip, Input, Select, SelectItem, Tooltip } from '@heroui/react';
 import {
   CartesianGrid,
   Line,
@@ -91,7 +91,7 @@ type InflationHistoryPoint = {
   index: number;
 };
 
-type HistoryRange = '1y' | '5y' | '10y' | '20y' | '40y';
+type HistoryRange = '1y' | '5y' | '10y' | 'all';
 
 type ChartDatum = Record<string, string | number | null | undefined>;
 type SalaryHistoryDatum = ChartDatum & {
@@ -153,6 +153,32 @@ function formatMoney(value: number | null) {
     currency: 'GBP',
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatSignedMoney(value: number | null) {
+  if (value === null) return 'Unavailable';
+  return `${value >= 0 ? '+' : '-'}${formatMoney(Math.abs(value))}`;
+}
+
+function formatPercentage(value: number | null) {
+  if (value === null || !Number.isFinite(value)) return 'Unavailable';
+  return `${value >= 0 ? '+' : '-'}${Math.abs(value).toFixed(1)}%`;
+}
+
+function formatAxisSalary(value: number) {
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  if (Math.abs(value) >= 1_000_000) {
+    return `£${(value / 1_000_000).toFixed(1)}m`;
+  }
+
+  if (Math.abs(value) >= 1_000) {
+    return `£${Math.round(value / 1_000)}k`;
+  }
+
+  return `£${Math.round(value)}`;
 }
 
 function parseSalaryInput(value: string) {
@@ -319,44 +345,26 @@ function LineChart({
   );
 }
 
-function DataCard({
-  title,
-  value,
-  detail,
-  source,
-  fetchedAt,
-  tone = 'default',
-}: {
-  title: string;
-  value: string;
-  detail?: string;
-  source?: string;
-  fetchedAt?: string;
-  tone?: 'default' | 'success' | 'warning';
-}) {
-  const toneClass =
-    tone === 'success'
-      ? 'text-emerald-600 dark:text-emerald-400'
-      : tone === 'warning'
-        ? 'text-amber-600 dark:text-amber-400'
-        : 'text-[var(--color-foreground)]';
-
+function InfoLabel({ label, tip }: { label: string; tip: string }) {
   return (
-    <div className="site-input-surface rounded-[1.5rem] px-5 py-5">
-      <div className="mb-4 flex items-center justify-between gap-4">
-        <span className="text-[11px] uppercase tracking-[0.28em] text-[var(--color-muted)]">
-          {title}
+    <Tooltip
+      content={<div className="max-w-xs text-sm leading-relaxed">{tip}</div>}
+      delay={150}
+      classNames={{
+        content:
+          'rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2 text-[var(--color-foreground)] shadow-lg',
+      }}
+    >
+      <button
+        type="button"
+        className="inline-flex items-center gap-2 text-left text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]"
+      >
+        <span>{label}</span>
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full border border-[var(--color-border)] text-[10px] normal-case tracking-normal text-[var(--color-muted-foreground)]">
+          i
         </span>
-      </div>
-      <div className="space-y-2">
-        <p className={`text-2xl font-semibold ${toneClass}`}>{value}</p>
-        {detail && (
-          <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">{detail}</p>
-        )}
-        {source && <p className="text-xs text-[var(--color-muted)]">{source}</p>}
-        {fetchedAt && <p className="text-xs text-[var(--color-muted)]">Updated {formatDisplayDate(fetchedAt)}</p>}
-      </div>
-    </div>
+      </button>
+    </Tooltip>
   );
 }
 
@@ -400,10 +408,6 @@ function formatSourceState(mode: SourceMode) {
     default:
       return 'Unavailable';
   }
-}
-
-function toneFromSourceState(mode: SourceMode): 'success' | 'warning' {
-  return mode === 'live' ? 'success' : 'warning';
 }
 
 function SalaryTooltip({ active, payload, label }: CustomTooltipProps) {
@@ -451,19 +455,55 @@ function SalaryHistoryChart({
   latestInflationRate: number | null;
 }) {
   const [historyRange, setHistoryRange] = useState<HistoryRange>('5y');
+  const rangeYears: Record<HistoryRange, number> = {
+    '1y': 1,
+    '5y': 5,
+    '10y': 10,
+    'all': Number.POSITIVE_INFINITY,
+  };
+
+  const latestHistoricalMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
+  const maxAvailableRange = useMemo(() => {
+    if (!salaryStartMonth || !latestHistoricalMonth) {
+      return 0;
+    }
+
+    const startDate = new Date(`${salaryStartMonth}-01T00:00:00Z`);
+    const endDate = new Date(`${latestHistoricalMonth}-01T00:00:00Z`);
+    const months =
+      (endDate.getUTCFullYear() - startDate.getUTCFullYear()) * 12 +
+      (endDate.getUTCMonth() - startDate.getUTCMonth()) +
+      1;
+
+    return Math.max(months / 12, 0);
+  }, [latestHistoricalMonth, salaryStartMonth]);
+
+  useEffect(() => {
+    if (!salaryStartMonth) {
+      return;
+    }
+
+    if (maxAvailableRange > 10 && historyRange === '5y') {
+      setHistoryRange('all');
+    }
+  }, [historyRange, maxAvailableRange, salaryStartMonth]);
+
+  useEffect(() => {
+    if (historyRange === 'all' || rangeYears[historyRange] <= maxAvailableRange || maxAvailableRange <= 0) {
+      return;
+    }
+
+    const fallbackRange = (['10y', '5y', '1y'] as const).find(
+      (candidate) => rangeYears[candidate] <= maxAvailableRange
+    );
+
+    setHistoryRange(fallbackRange ?? 'all');
+  }, [historyRange, maxAvailableRange]);
 
   const chartData = useMemo(() => {
     if (!salaryStartMonth || salaryValue <= 0) {
       return [];
     }
-
-    const rangeYears: Record<HistoryRange, number> = {
-      '1y': 1,
-      '5y': 5,
-      '10y': 10,
-      '20y': 20,
-      '40y': 40,
-    };
     const cpiLookup = new Map(inflationHistory.map((point) => [point.date, point.index]));
     const salaryBaseIndex = cpiLookup.get(salaryStartMonth) ?? null;
     if (salaryBaseIndex === null || salaryBaseIndex === 0) {
@@ -471,15 +511,18 @@ function SalaryHistoryChart({
     }
 
     const now = new Date();
-    const cutoff = new Date(
-      now.getFullYear() - rangeYears[historyRange],
-      now.getMonth(),
-      now.getDate()
-    );
-    const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
     const firstMonth =
-      compareMonthKeys(rangeStartMonth, salaryStartMonth) > 0 ? rangeStartMonth : salaryStartMonth;
-    const latestHistoricalMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
+      historyRange === 'all'
+        ? salaryStartMonth
+        : (() => {
+            const cutoff = new Date(
+              now.getFullYear() - rangeYears[historyRange],
+              now.getMonth(),
+              now.getDate()
+            );
+            const rangeStartMonth = monthKeyFromValue(cutoff.toISOString().slice(0, 10));
+            return compareMonthKeys(rangeStartMonth, salaryStartMonth) > 0 ? rangeStartMonth : salaryStartMonth;
+          })();
     if (compareMonthKeys(firstMonth, latestHistoricalMonth) > 0) {
       return [];
     }
@@ -541,7 +584,7 @@ function SalaryHistoryChart({
       },
       ...projectedData,
     ];
-  }, [historyRange, inflationHistory, latestInflationRate, salaryStartMonth, salaryValue]);
+  }, [historyRange, inflationHistory, latestHistoricalMonth, latestInflationRate, salaryStartMonth, salaryValue]);
 
   if (chartData.length === 0) {
     return (
@@ -555,8 +598,7 @@ function SalaryHistoryChart({
     { label: '1Y', value: '1y' },
     { label: '5Y', value: '5y' },
     { label: '10Y', value: '10y' },
-    { label: '20Y', value: '20y' },
-    { label: '40Y', value: '40y' },
+    { label: 'All', value: 'all' },
   ];
   const firstPoint = chartData[0] as { monthKey?: string };
   const lastPoint = chartData[chartData.length - 1] as { monthKey?: string };
@@ -582,16 +624,21 @@ function SalaryHistoryChart({
         <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
           {rangeButtons.map((button) => {
             const active = historyRange === button.value;
+            const disabled =
+              button.value !== 'all' && rangeYears[button.value] > maxAvailableRange;
             return (
               <button
                 key={button.value}
                 type="button"
-                onClick={() => setHistoryRange(button.value)}
+                onClick={() => !disabled && setHistoryRange(button.value)}
+                disabled={disabled}
                 className={[
                   'rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.25em] transition-colors',
                   active
                     ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                    : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                    : disabled
+                      ? 'cursor-not-allowed text-[var(--color-muted)]/45'
+                      : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
                 ].join(' ')}
               >
                 {button.label}
@@ -608,14 +655,14 @@ function SalaryHistoryChart({
           index="date"
           categories={[...categories]}
           colors={['gray', 'emerald', '#38bdf8']}
-          valueFormatter={(value: number) => formatCurrency(value)}
+          valueFormatter={(value: number) => formatAxisSalary(value)}
           showGridLines
           showYAxis
           showXAxis={false}
           autoMinValue
           connectNulls
           curveType="monotone"
-          yAxisWidth={72}
+          yAxisWidth={56}
           customTooltip={SalaryTooltip}
           strokeDasharrayMap={{
             'Projected required salary': '7 7',
@@ -623,7 +670,13 @@ function SalaryHistoryChart({
         />
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
           <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
-          <span>Last {historyRange.toUpperCase()} · GBP only</span>
+          <span>
+            {historyRange === 'all'
+              ? `All since ${formatMonthYear(salaryStartMonth ?? '')}`
+              : maxAvailableRange > 0 && rangeYears[historyRange] > maxAvailableRange
+                ? `Since ${formatMonthYear(salaryStartMonth ?? '')}`
+                : `Last ${historyRange.toUpperCase()} · GBP only`}
+          </span>
           <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
         </div>
         <p className="mt-3 text-sm text-[var(--color-muted-foreground)]">
@@ -781,6 +834,30 @@ export default function SalaryInflationCheckerClient() {
     submittedAdjustedSalary !== null && activeBenchmarkAnnualMedian !== null
       ? submittedAdjustedSalary - activeBenchmarkAnnualMedian
       : null;
+  const currentSalaryDelta =
+    submittedSalaryAnalysis !== null && activeBenchmarkAnnualMedian !== null
+      ? submittedSalaryAnalysis.salary - activeBenchmarkAnnualMedian
+      : null;
+  const benchmarkDeltaPercent =
+    benchmarkDelta !== null && activeBenchmarkAnnualMedian && activeBenchmarkAnnualMedian !== 0
+      ? (benchmarkDelta / activeBenchmarkAnnualMedian) * 100
+      : null;
+  const currentSalaryDeltaPercent =
+    currentSalaryDelta !== null && activeBenchmarkAnnualMedian && activeBenchmarkAnnualMedian !== 0
+      ? (currentSalaryDelta / activeBenchmarkAnnualMedian) * 100
+      : null;
+  const buyingPowerChangePercent =
+    submittedAdjustedSalary !== null &&
+    submittedSalaryAnalysis !== null &&
+    submittedSalaryAnalysis.salary > 0
+      ? ((submittedAdjustedSalary / submittedSalaryAnalysis.salary) - 1) * 100
+      : null;
+  const projectedBuyingPowerChangePercent =
+    projectedRequiredSalaryInOneYear !== null &&
+    submittedSalaryAnalysis !== null &&
+    submittedSalaryAnalysis.salary > 0
+      ? ((projectedRequiredSalaryInOneYear / submittedSalaryAnalysis.salary) - 1) * 100
+      : null;
   const currentEntryTitle =
     entryStage === 0
       ? 'Enter your most recently obtained salary'
@@ -860,7 +937,7 @@ export default function SalaryInflationCheckerClient() {
                 size="sm"
                 className="rounded-full border border-[var(--color-border)] bg-[var(--color-card)] px-3"
               >
-                {label}: {formatSourceState(mode)}
+                {label} {formatSourceState(mode)}
               </Chip>
             ))}
           </div>
@@ -872,7 +949,7 @@ export default function SalaryInflationCheckerClient() {
               description={
                 visibleWarnings.length > 0
                   ? visibleWarnings.join(' · ')
-                  : 'One or more live sources could not be fetched right now.'
+                  : 'Using cached source data for part of the analysis.'
               }
             />
           )}
@@ -1093,7 +1170,7 @@ export default function SalaryInflationCheckerClient() {
           <section className="grid gap-4 md:grid-cols-4">
             <div className="site-input-surface rounded-[1.75rem] p-5">
               <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                Selected period
+                Salary date
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
                 {submittedSalaryPeriodLabel ?? 'Unavailable'}
@@ -1101,7 +1178,7 @@ export default function SalaryInflationCheckerClient() {
             </div>
             <div className="site-input-surface rounded-[1.75rem] p-5">
               <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                Today equivalent
+                Salary needed today
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
                 {formatMoney(submittedAdjustedSalary)}
@@ -1109,20 +1186,19 @@ export default function SalaryInflationCheckerClient() {
             </div>
             <div className="site-input-surface rounded-[1.75rem] p-5">
               <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                In 12 months
+                Salary needed in 12 months
               </p>
               <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
                 {formatMoney(projectedRequiredSalaryInOneYear)}
               </p>
             </div>
             <div className="site-input-surface rounded-[1.75rem] p-5">
-              <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                Benchmark delta
-              </p>
+              <InfoLabel
+                label="Compared with local benchmark"
+                tip="Shows how far your salary, adjusted into today's buying power, sits above or below the selected benchmark salary."
+              />
               <p className="mt-2 text-2xl font-semibold text-[var(--color-foreground)]">
-                {benchmarkDelta === null
-                  ? 'Unavailable'
-                  : `${benchmarkDelta >= 0 ? '+' : '-'}${formatMoney(Math.abs(benchmarkDelta))}`}
+                {formatSignedMoney(benchmarkDelta)}
               </p>
             </div>
           </section>
@@ -1145,6 +1221,30 @@ export default function SalaryInflationCheckerClient() {
                   salaryStartMonth={submittedInflationPoint?.date ?? null}
                   latestInflationRate={inflation.rate12m}
                 />
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                      Increase needed today
+                    </p>
+                    <p className="mt-2 text-xl font-semibold text-[var(--color-foreground)]">
+                      {formatPercentage(buyingPowerChangePercent)}
+                    </p>
+                    <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                      The percentage increase your original salary would need today to buy the same things.
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4">
+                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                      Increase needed in 12 months
+                    </p>
+                    <p className="mt-2 text-xl font-semibold text-[var(--color-foreground)]">
+                      {formatPercentage(projectedBuyingPowerChangePercent)}
+                    </p>
+                    <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                      A simple forward view based on the latest annual CPI rate.
+                    </p>
+                  </div>
+                </div>
               </CardBody>
             </Card>
           </section>
@@ -1230,48 +1330,31 @@ export default function SalaryInflationCheckerClient() {
                 </div>
 
                 <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
-                  <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                    Versus your adjusted salary
-                  </p>
+                  <InfoLabel
+                    label="Compared with your entered salary"
+                    tip="Compares the selected benchmark against the salary amount you entered before any inflation adjustment."
+                  />
                   <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
-                    {inflatedHistoricalSalary === null || activeBenchmark.annualMedian === null
-                      ? 'Unavailable'
-                      : `${inflatedHistoricalSalary >= activeBenchmark.annualMedian ? '+' : '-'}${formatMoney(
-                          Math.abs(inflatedHistoricalSalary - activeBenchmark.annualMedian)
-                        )}`}
+                    {formatSignedMoney(currentSalaryDelta)}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                    {formatPercentage(currentSalaryDeltaPercent)} against the selected benchmark.
+                  </p>
+                </div>
+
+                <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
+                  <InfoLabel
+                    label="Compared with your salary today"
+                    tip="Compares the selected benchmark against what your entered salary would need to be today to keep the same buying power."
+                  />
+                  <p className="mt-3 text-2xl font-semibold text-[var(--color-foreground)]">
+                    {formatSignedMoney(benchmarkDelta)}
+                  </p>
+                  <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                    {formatPercentage(benchmarkDeltaPercent)} against the selected benchmark.
                   </p>
                 </div>
               </div>
-            </div>
-          </section>
-
-          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
-            <div className="mb-5 flex flex-col gap-2">
-              <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
-                Sources
-              </p>
-              <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-                Data health
-              </h2>
-              <p className="text-sm text-[var(--color-muted-foreground)]">
-                This page now focuses on the two signals that drive the salary view: inflation and salary benchmarks.
-              </p>
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <DataCard
-                title="Inflation"
-                value={formatSourceState(sourceStates.inflation)}
-                detail={inflation.source.name}
-                fetchedAt={inflation.source.fetchedAt}
-                tone={toneFromSourceState(sourceStates.inflation)}
-              />
-              <DataCard
-                title="Salaries"
-                value={formatSourceState(sourceStates.salaries)}
-                detail={salaries.source.name}
-                fetchedAt={salaries.source.fetchedAt}
-                tone={toneFromSourceState(sourceStates.salaries)}
-              />
             </div>
           </section>
         </>

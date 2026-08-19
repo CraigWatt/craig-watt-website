@@ -30,6 +30,7 @@ export const siteSelectClassNames = {
   selectorIcon:
     'end-5 text-[var(--color-muted)] transition-transform group-data-[open=true]:rotate-180',
   popoverContent:
-    'rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)]',
-  listboxWrapper: 'p-1',
+    'max-h-[22rem] overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-foreground)]',
+  listboxWrapper: 'max-h-[20rem] overflow-y-auto p-1',
+  listbox: 'gap-1',
 } as const;
