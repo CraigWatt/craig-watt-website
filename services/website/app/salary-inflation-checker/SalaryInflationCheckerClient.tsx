@@ -104,6 +104,13 @@ type SalaryHistoryDatum = ChartDatum & {
 
 type CustomTooltipProps = Pick<TooltipContentProps<TooltipValueType, string | number>, 'active' | 'label' | 'payload'>;
 
+const HISTORY_RANGE_YEARS: Record<HistoryRange, number> = {
+  '1y': 1,
+  '5y': 5,
+  '10y': 10,
+  'all': Number.POSITIVE_INFINITY,
+};
+
 const FALLBACK_BENCHMARK: SalaryBenchmark = {
   role: 'all-employees',
   key: 'central-london',
@@ -209,19 +216,6 @@ function selectionToValue(keys: unknown) {
   }
 
   return '';
-}
-
-function formatDisplayDate(value: string) {
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return value;
-  }
-
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  }).format(parsed);
 }
 
 function monthKeyFromValue(value: string) {
@@ -455,13 +449,6 @@ function SalaryHistoryChart({
   latestInflationRate: number | null;
 }) {
   const [historyRange, setHistoryRange] = useState<HistoryRange>('5y');
-  const rangeYears: Record<HistoryRange, number> = {
-    '1y': 1,
-    '5y': 5,
-    '10y': 10,
-    'all': Number.POSITIVE_INFINITY,
-  };
-
   const latestHistoricalMonth = inflationHistory[inflationHistory.length - 1]?.date ?? salaryStartMonth;
   const maxAvailableRange = useMemo(() => {
     if (!salaryStartMonth || !latestHistoricalMonth) {
@@ -478,26 +465,24 @@ function SalaryHistoryChart({
     return Math.max(months / 12, 0);
   }, [latestHistoricalMonth, salaryStartMonth]);
 
-  useEffect(() => {
-    if (!salaryStartMonth) {
-      return;
+  const effectiveHistoryRange = useMemo<HistoryRange>(() => {
+    if (maxAvailableRange <= 0) {
+      return historyRange;
     }
 
-    if (maxAvailableRange > 10 && historyRange === '5y') {
-      setHistoryRange('all');
+    if (historyRange === '5y' && maxAvailableRange > 10) {
+      return 'all';
     }
-  }, [historyRange, maxAvailableRange, salaryStartMonth]);
 
-  useEffect(() => {
-    if (historyRange === 'all' || rangeYears[historyRange] <= maxAvailableRange || maxAvailableRange <= 0) {
-      return;
+    if (historyRange === 'all' || HISTORY_RANGE_YEARS[historyRange] <= maxAvailableRange) {
+      return historyRange;
     }
 
     const fallbackRange = (['10y', '5y', '1y'] as const).find(
-      (candidate) => rangeYears[candidate] <= maxAvailableRange
+      (candidate) => HISTORY_RANGE_YEARS[candidate] <= maxAvailableRange
     );
 
-    setHistoryRange(fallbackRange ?? 'all');
+    return fallbackRange ?? 'all';
   }, [historyRange, maxAvailableRange]);
 
   const chartData = useMemo(() => {
@@ -512,11 +497,11 @@ function SalaryHistoryChart({
 
     const now = new Date();
     const firstMonth =
-      historyRange === 'all'
+      effectiveHistoryRange === 'all'
         ? salaryStartMonth
         : (() => {
             const cutoff = new Date(
-              now.getFullYear() - rangeYears[historyRange],
+              now.getFullYear() - HISTORY_RANGE_YEARS[effectiveHistoryRange],
               now.getMonth(),
               now.getDate()
             );
@@ -584,7 +569,7 @@ function SalaryHistoryChart({
       },
       ...projectedData,
     ];
-  }, [historyRange, inflationHistory, latestHistoricalMonth, latestInflationRate, salaryStartMonth, salaryValue]);
+  }, [effectiveHistoryRange, inflationHistory, latestHistoricalMonth, latestInflationRate, salaryStartMonth, salaryValue]);
 
   if (chartData.length === 0) {
     return (
@@ -623,9 +608,9 @@ function SalaryHistoryChart({
         </div>
         <div className="inline-flex rounded-full border border-[var(--color-border)] bg-[var(--color-card)] p-1">
           {rangeButtons.map((button) => {
-            const active = historyRange === button.value;
+            const active = effectiveHistoryRange === button.value;
             const disabled =
-              button.value !== 'all' && rangeYears[button.value] > maxAvailableRange;
+              button.value !== 'all' && HISTORY_RANGE_YEARS[button.value] > maxAvailableRange;
             return (
               <button
                 key={button.value}
@@ -671,11 +656,11 @@ function SalaryHistoryChart({
         <div className="mt-3 flex items-center justify-between gap-3 text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
           <span>{firstPoint?.monthKey ? formatMonthYear(firstPoint.monthKey) : 'Earlier'}</span>
           <span>
-            {historyRange === 'all'
+            {effectiveHistoryRange === 'all'
               ? `All since ${formatMonthYear(salaryStartMonth ?? '')}`
-              : maxAvailableRange > 0 && rangeYears[historyRange] > maxAvailableRange
+              : maxAvailableRange > 0 && HISTORY_RANGE_YEARS[effectiveHistoryRange] > maxAvailableRange
                 ? `Since ${formatMonthYear(salaryStartMonth ?? '')}`
-                : `Last ${historyRange.toUpperCase()} · GBP only`}
+                : `Last ${effectiveHistoryRange.toUpperCase()} · GBP only`}
           </span>
           <span>{lastPoint?.monthKey ? formatMonthYear(lastPoint.monthKey) : 'Latest'}</span>
         </div>
@@ -775,10 +760,6 @@ export default function SalaryInflationCheckerClient() {
     inflationHistory.find(
       (point) => point.date === `${selectedSalaryYearValue}-${selectedSalaryMonthValue}`
     ) ?? null;
-  const inflationMultiplier =
-    latestInflationPoint && selectedInflationPoint && selectedInflationPoint.index !== 0
-      ? latestInflationPoint.index / selectedInflationPoint.index
-      : null;
   const selectedSalaryPeriod = `${selectedSalaryYearValue}-${selectedSalaryMonthValue}`;
   const submittedInflationPoint =
     submittedSalaryAnalysis
@@ -812,8 +793,6 @@ export default function SalaryInflationCheckerClient() {
     { key: 'software-engineer', label: 'Software engineer' },
   ];
 
-  const inflatedHistoricalSalary =
-    inflationMultiplier === null ? null : historicalSalaryValue * inflationMultiplier;
   const submittedAdjustedSalary =
     submittedSalaryAnalysis && submittedInflationMultiplier !== null
       ? submittedSalaryAnalysis.salary * submittedInflationMultiplier
