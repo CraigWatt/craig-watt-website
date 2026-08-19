@@ -20,8 +20,6 @@ jobs:
   deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repo
@@ -30,14 +28,14 @@ jobs:
           fetch-depth: 0
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v5.1.1
+        uses: aws-actions/configure-aws-credentials@v6.1.3
         with:
           role-to-assume: ${{ secrets.BOOTSTRAP_GHA_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
           audience: sts.amazonaws.com
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6.0.8
         with:
           version: 10.15.1
           run_install: false
@@ -51,7 +49,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
 
       - name: Cache Next.js build cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: services/website/.next/cache
           key: ${{ runner.os }}-next-cache-${{ hashFiles('pnpm-lock.yaml', 'services/website/app/**/*', 'services/website/content/**/*', 'services/website/public/**/*', 'services/website/.storybook/**/*') }}
@@ -80,7 +78,7 @@ jobs:
         run: pnpm build:functions
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3.1.2
+        uses: hashicorp/setup-terraform@v4.0.1
         with:
           terraform_version: 1.5.7
 

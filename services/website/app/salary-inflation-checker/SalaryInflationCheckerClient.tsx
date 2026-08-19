@@ -188,6 +188,38 @@ function formatAxisSalary(value: number) {
   return `£${Math.round(value)}`;
 }
 
+function formatShortDate(value: string) {
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(parsed);
+}
+
+function extractAsheDatasetLabel(downloadUrl: string | null, fallbackFetchedAt: string) {
+  const match = downloadUrl?.match(/\/(20\d{2})(provisional|revised|final)?\//i);
+  if (match) {
+    const [, year, qualifier] = match;
+    const qualifierLabel =
+      qualifier?.toLowerCase() === 'provisional'
+        ? 'provisional'
+        : qualifier?.toLowerCase() === 'revised'
+          ? 'revised'
+          : qualifier?.toLowerCase() === 'final'
+            ? 'final'
+            : null;
+
+    return qualifierLabel ? `${year} ${qualifierLabel}` : year;
+  }
+
+  return fallbackFetchedAt ? `snapshot refreshed ${formatShortDate(fallbackFetchedAt)}` : 'latest snapshot';
+}
+
 function parseSalaryInput(value: string) {
   const parsed = Number(value.replace(/,/g, ''));
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
@@ -732,6 +764,7 @@ export default function SalaryInflationCheckerClient() {
     { label: 'Salaries', mode: sourceStates.salaries },
   ];
   const visibleWarnings = _meta.warnings.filter((warning) => !/meal|tesco|clubcard/i.test(warning));
+  const salaryDatasetLabel = extractAsheDatasetLabel(salaries.downloadUrl, salaries.source.fetchedAt);
 
   const historicalSalaryValue = parseSalaryInput(historicalSalary);
   const inflationHistory = inflation.history ?? [];
@@ -1282,6 +1315,10 @@ export default function SalaryInflationCheckerClient() {
                   </h3>
                   <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
                     {activeBenchmark.notes}
+                  </p>
+                  <p className="mt-3 text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                    Based on {salaryDatasetLabel} ASHE earnings data
+                    {salaries.source.fetchedAt ? ` · refreshed ${formatShortDate(salaries.source.fetchedAt)}` : ''}
                   </p>
                 </div>
               </div>
