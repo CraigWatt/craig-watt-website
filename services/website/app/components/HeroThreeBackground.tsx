@@ -151,14 +151,14 @@ export function HeroThreeBackground() {
     root.add(dayGroup);
     root.add(nightGroup);
 
-    const particleCount = 160;
+    const particleCount = 220;
     const particleBase = new Float32Array(particleCount * 3);
     const particlePositions = new Float32Array(particleCount * 3);
 
     for (let idx = 0; idx < particleCount; idx += 1) {
       const stride = idx * 3;
       const x = (random() - 0.5) * 14;
-      const y = (random() - 0.08) * 7;
+      const y = (random() - 0.12) * 7.4;
       const z = (random() - 0.5) * 0.6;
 
       particleBase[stride] = x;
@@ -188,12 +188,12 @@ export function HeroThreeBackground() {
       depthWrite: false,
     });
     const clouds = [
-      { group: createCloud(1.1, dayCloudMaterial), speed: 0.12, amplitude: 0.08, offset: 0.2, baseX: -3.8, baseY: 2.15 },
-      { group: createCloud(0.9, dayCloudMaterial), speed: 0.16, amplitude: 0.05, offset: 1.4, baseX: 0.8, baseY: 1.7 },
-      { group: createCloud(0.72, dayCloudMaterial), speed: 0.14, amplitude: 0.06, offset: 2.3, baseX: 4.3, baseY: 2.45 },
+      { group: createCloud(1.1, dayCloudMaterial), speed: 0.12, amplitude: 0.08, offset: 0.2, xRatio: -0.66, baseY: 2.15 },
+      { group: createCloud(0.9, dayCloudMaterial), speed: 0.16, amplitude: 0.05, offset: 1.4, xRatio: 0.08, baseY: 1.7 },
+      { group: createCloud(0.72, dayCloudMaterial), speed: 0.14, amplitude: 0.06, offset: 2.3, xRatio: 0.72, baseY: 2.45 },
     ];
-    clouds.forEach(({ group, baseX, baseY }) => {
-      group.position.set(baseX, baseY, -0.4);
+    clouds.forEach(({ group, xRatio, baseY }) => {
+      group.position.set(xRatio * 6, baseY, -0.4);
       dayGroup.add(group);
     });
 
@@ -238,16 +238,16 @@ export function HeroThreeBackground() {
 
     const turbines: Array<{ group: THREE.Group; rotor: THREE.Group; speed: number }> = [];
     const turbineConfigs = [
-      { x: -4.7, y: -1.82, scale: 0.62, speed: 0.58 },
-      { x: -2.15, y: -1.98, scale: 0.76, speed: 0.46 },
-      { x: 0.6, y: -1.78, scale: 1, speed: 0.34 },
-      { x: 3.15, y: -1.95, scale: 0.82, speed: 0.42 },
-      { x: 5.4, y: -2.08, scale: 0.66, speed: 0.5 },
+      { xRatio: -0.78, y: -1.82, scale: 0.62, speed: 0.58 },
+      { xRatio: -0.36, y: -1.98, scale: 0.76, speed: 0.46 },
+      { xRatio: 0.08, y: -1.78, scale: 1, speed: 0.34 },
+      { xRatio: 0.5, y: -1.95, scale: 0.82, speed: 0.42 },
+      { xRatio: 0.84, y: -2.08, scale: 0.66, speed: 0.5 },
     ];
 
-    turbineConfigs.forEach(({ x, y, scale, speed }) => {
+    turbineConfigs.forEach(({ xRatio, y, scale, speed }) => {
       const group = new THREE.Group();
-      group.position.set(x, y, 0);
+      group.position.set(xRatio * 6, y, 0);
       group.scale.setScalar(scale);
 
       const tower = createLine(
@@ -304,10 +304,13 @@ export function HeroThreeBackground() {
       blending: THREE.AdditiveBlending,
       side: THREE.DoubleSide,
     });
+    const nightScene = new THREE.Group();
+    nightGroup.add(nightScene);
+
     const nightHaze = new THREE.Mesh(new THREE.CircleGeometry(1.95, 48), nightHazeMaterial);
-    nightHaze.position.set(2.4, -0.15, -0.4);
+    nightHaze.position.set(0.15, -0.15, -0.4);
     nightHaze.scale.set(1.4, 1, 1);
-    nightGroup.add(nightHaze);
+    nightScene.add(nightHaze);
 
     const wheelRimMaterial = new THREE.LineBasicMaterial({
       transparent: true,
@@ -323,13 +326,43 @@ export function HeroThreeBackground() {
     });
 
     const wheelGroup = new THREE.Group();
-    wheelGroup.position.set(2.25, -0.18, 0);
+    wheelGroup.position.set(0, -0.18, 0);
     const outerWheel = createCircle(1.6, 120, wheelRimMaterial);
     const innerWheel = createCircle(1.16, 90, wheelAccentMaterial);
     const hubWheel = createCircle(0.16, 36, wheelRimMaterial);
     wheelGroup.add(outerWheel);
     wheelGroup.add(innerWheel);
     wheelGroup.add(hubWheel);
+
+    const gondolaMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.34,
+    });
+    const gondolas: THREE.Group[] = [];
+    for (let idx = 0; idx < 10; idx += 1) {
+      const angle = (idx / 10) * Math.PI * 2;
+      const gondola = new THREE.Group();
+      const hanger = createLine(
+        [new THREE.Vector3(0, 0.14, 0), new THREE.Vector3(0, -0.05, 0)],
+        gondolaMaterial,
+      );
+      const cabin = createLine(
+        [
+          new THREE.Vector3(-0.1, -0.05, 0),
+          new THREE.Vector3(0.1, -0.05, 0),
+          new THREE.Vector3(0.12, -0.16, 0),
+          new THREE.Vector3(-0.12, -0.16, 0),
+          new THREE.Vector3(-0.1, -0.05, 0),
+        ],
+        gondolaMaterial,
+      );
+      gondola.position.set(Math.cos(angle) * 1.58, Math.sin(angle) * 1.58, 0);
+      gondola.userData.baseAngle = angle;
+      gondola.add(hanger);
+      gondola.add(cabin);
+      gondolas.push(gondola);
+      wheelGroup.add(gondola);
+    }
 
     const spokes: THREE.Line[] = [];
     for (let idx = 0; idx < 12; idx += 1) {
@@ -347,16 +380,16 @@ export function HeroThreeBackground() {
       opacity: 0.24,
     });
     const leftSupport = createLine(
-      [new THREE.Vector3(1.55, -1.75, 0), new THREE.Vector3(2.25, -0.18, 0)],
+      [new THREE.Vector3(-0.7, -1.75, 0), new THREE.Vector3(0, -0.18, 0)],
       supportMaterial,
     );
     const rightSupport = createLine(
-      [new THREE.Vector3(2.95, -1.75, 0), new THREE.Vector3(2.25, -0.18, 0)],
+      [new THREE.Vector3(0.7, -1.75, 0), new THREE.Vector3(0, -0.18, 0)],
       supportMaterial,
     );
-    nightGroup.add(leftSupport);
-    nightGroup.add(rightSupport);
-    nightGroup.add(wheelGroup);
+    nightScene.add(leftSupport);
+    nightScene.add(rightSupport);
+    nightScene.add(wheelGroup);
 
     const beamMaterial = new THREE.MeshBasicMaterial({
       transparent: true,
@@ -367,14 +400,28 @@ export function HeroThreeBackground() {
     });
     const beamGeometry = new THREE.PlaneGeometry(0.3, 4.6, 1, 1);
     const beams = [
-      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: 1.35, y: -0.1, rotation: -0.18, pulse: 0.7 },
-      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: 2.3, y: 0.25, rotation: -0.03, pulse: 1.2 },
-      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: 3.15, y: -0.05, rotation: 0.16, pulse: 1.85 },
+      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: -0.9, y: -0.1, rotation: -0.18, pulse: 0.7 },
+      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: 0, y: 0.25, rotation: -0.03, pulse: 1.2 },
+      { mesh: new THREE.Mesh(beamGeometry, beamMaterial), x: 0.85, y: -0.05, rotation: 0.16, pulse: 1.85 },
     ];
     beams.forEach(({ mesh, x, y, rotation }) => {
       mesh.position.set(x, y, -0.55);
       mesh.rotation.z = rotation;
-      nightGroup.add(mesh);
+      nightScene.add(mesh);
+    });
+
+    const shootingStarMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.52,
+    });
+    const shootingStars = [
+      { line: createLine([new THREE.Vector3(-0.42, 0.12, 0), new THREE.Vector3(0.28, -0.08, 0)], shootingStarMaterial), lane: -0.62, height: 2.2, speed: 0.14, phase: 0.1 },
+      { line: createLine([new THREE.Vector3(-0.36, 0.1, 0), new THREE.Vector3(0.22, -0.06, 0)], shootingStarMaterial), lane: -0.08, height: 1.55, speed: 0.18, phase: 0.52 },
+      { line: createLine([new THREE.Vector3(-0.34, 0.08, 0), new THREE.Vector3(0.24, -0.06, 0)], shootingStarMaterial), lane: 0.48, height: 2.65, speed: 0.16, phase: 0.84 },
+    ];
+    shootingStars.forEach(({ line }) => {
+      line.visible = false;
+      nightGroup.add(line);
     });
 
     const moonMaterial = new THREE.LineBasicMaterial({
@@ -382,8 +429,22 @@ export function HeroThreeBackground() {
       opacity: 0.22,
     });
     const moon = createArc(0.58, Math.PI * 0.25, Math.PI * 1.8, 54, moonMaterial);
-    moon.position.set(-4.55, 2.15, -0.25);
+      moon.position.set(-4.55, 2.15, -0.25);
     nightGroup.add(moon);
+
+    const windLineMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.24,
+    });
+    const windLines = [
+      { line: createArc(0.72, Math.PI * 1.06, Math.PI * 1.72, 32, windLineMaterial), xRatio: -0.24, baseY: 0.45, offset: 0.2 },
+      { line: createArc(0.92, Math.PI * 1.02, Math.PI * 1.68, 32, windLineMaterial), xRatio: 0.12, baseY: 0.9, offset: 1.1 },
+      { line: createArc(0.84, Math.PI * 1.08, Math.PI * 1.7, 32, windLineMaterial), xRatio: 0.46, baseY: 0.2, offset: 2.1 },
+    ];
+    windLines.forEach(({ line, xRatio, baseY }) => {
+      line.position.set(xRatio * 6, baseY, -0.2);
+      dayGroup.add(line);
+    });
 
     const darkModeState = { active: isDarkThemeActive() };
 
@@ -404,12 +465,15 @@ export function HeroThreeBackground() {
       dayGroundMaterial.color = border.clone().lerp(foreground, 0.12);
       turbineMaterial.color = foreground.clone().lerp(border, 0.28);
       hubMaterial.color = accent.clone().lerp(border, 0.45);
+      windLineMaterial.color = accent.clone().lerp(border, 0.4);
 
       wheelRimMaterial.color = accent;
       wheelAccentMaterial.color = border;
       wheelSpokeMaterial.color = accent.clone().lerp(border, 0.35);
+      gondolaMaterial.color = border.clone().lerp(accent, 0.25);
       supportMaterial.color = border;
       beamMaterial.color = accent;
+      shootingStarMaterial.color = accent.clone().lerp(new THREE.Color('#ffffff'), 0.18);
       moonMaterial.color = border.clone().lerp(accent, 0.2);
       nightGroundMaterial.color = border.clone().lerp(foreground, 0.22);
       nightHazeMaterial.color = accent;
@@ -439,6 +503,7 @@ export function HeroThreeBackground() {
       const aspect = width / height;
       const viewHeight = 7.2;
       const viewWidth = viewHeight * aspect;
+      const halfWidth = viewWidth / 2;
 
       camera.left = -viewWidth / 2;
       camera.right = viewWidth / 2;
@@ -446,6 +511,24 @@ export function HeroThreeBackground() {
       camera.bottom = -viewHeight / 2;
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
+
+      dayGround.scale.x = Math.max(1, halfWidth / 6);
+      nightGround.scale.x = Math.max(1, halfWidth / 6);
+      sunArc.position.x = -halfWidth + 1.4;
+      moon.position.x = -halfWidth + 1.55;
+      nightScene.position.x = halfWidth * 0.42;
+
+      clouds.forEach(({ group, xRatio }) => {
+        group.position.x = xRatio * halfWidth;
+      });
+
+      turbines.forEach(({ group }, index) => {
+        group.position.x = turbineConfigs[index].xRatio * halfWidth;
+      });
+
+      windLines.forEach(({ line, xRatio }) => {
+        line.position.x = xRatio * halfWidth;
+      });
     };
 
     resize();
@@ -492,22 +575,47 @@ export function HeroThreeBackground() {
       root.position.y += ((pointer.y * 0.12) - root.position.y) * 0.035;
 
       if (darkMode) {
-        wheelGroup.rotation.z += prefersReducedMotion ? 0 : 0.0016;
+        const meteorBoost = 1 + Math.abs(pointer.x) * 2.2 + Math.max(0, -pointer.y) * 0.8;
+        wheelGroup.rotation.z += prefersReducedMotion ? 0 : 0.0013 + Math.abs(pointer.x) * 0.0015;
         nightHaze.scale.setScalar(1 + Math.sin(elapsed * 1.2) * 0.04);
         beams.forEach(({ mesh, pulse }) => {
           mesh.scale.y = 0.96 + Math.sin(elapsed * 1.1 + pulse) * 0.08;
           const material = mesh.material as THREE.MeshBasicMaterial;
           material.opacity = 0.06 + ((Math.sin(elapsed * 1.4 + pulse) + 1) / 2) * 0.09;
         });
+        gondolas.forEach((gondola) => {
+          gondola.rotation.z = -wheelGroup.rotation.z;
+        });
+        shootingStars.forEach(({ line, lane, height, speed, phase }) => {
+          const travel = (((elapsed * speed * meteorBoost) + phase) % 1 + 1) % 1;
+          const startX = -6.8 + travel * 13.6;
+          line.position.x = startX + lane * 0.4 + pointer.x * 0.65;
+          line.position.y = height - travel * 1.6 + pointer.y * 0.18;
+          line.visible = travel > 0.04 && travel < 0.96;
+          line.scale.setScalar(0.92 + meteorBoost * 0.08);
+          const material = line.material as THREE.LineBasicMaterial;
+          material.opacity = 0.18 + ((Math.sin(elapsed * 3.2 + phase * 8) + 1) / 2) * 0.42;
+        });
       } else {
-        clouds.forEach(({ group, speed, amplitude, offset, baseX, baseY }) => {
-          group.position.x = baseX + Math.sin(elapsed * speed + offset) * 0.42;
+        const windForce = 1 + Math.abs(pointer.x) * 2.6 + Math.max(0, pointer.y) * 0.6;
+        clouds.forEach(({ group, speed, amplitude, offset, xRatio, baseY }) => {
+          const baseX = xRatio * (camera.right - 0.4);
+          group.position.x = baseX + Math.sin(elapsed * speed * windForce + offset) * 0.42 * windForce;
           group.position.y = baseY + Math.cos(elapsed * speed * 1.6 + offset) * amplitude;
         });
 
         turbines.forEach(({ rotor, speed, group }, index) => {
-          rotor.rotation.z -= prefersReducedMotion ? 0 : speed * 0.01;
+          rotor.rotation.z -= prefersReducedMotion ? 0 : speed * 0.01 * windForce;
           group.position.y += (Math.sin(elapsed * 0.8 + index * 0.4) * 0.006 - (group.position.y - turbineConfigs[index].y)) * 0.08;
+        });
+        windLines.forEach(({ line, xRatio, baseY, offset }) => {
+          const baseX = xRatio * (camera.right - 0.5);
+          line.position.x = baseX + Math.sin(elapsed * 0.7 + offset) * 0.1;
+          line.position.y = baseY + Math.cos(elapsed * 0.9 + offset) * 0.04;
+          line.scale.setScalar(0.92 + Math.abs(pointer.x) * 0.3);
+          line.rotation.z = -0.02 - pointer.x * 0.12;
+          const material = line.material as THREE.LineBasicMaterial;
+          material.opacity = 0.12 + Math.abs(pointer.x) * 0.18;
         });
       }
 
