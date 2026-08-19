@@ -3,27 +3,36 @@ import { Providers } from './providers';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import Script from 'next/script';
+import { siteOrigin } from './data/site';
 
 export const metadata = {
   title: 'Craig Watt — Platform Engineer focused on Observability',
   description:
     'Building reliable platforms with observability, automation, Kubernetes, Terraform, and CI/CD.',
+  metadataBase: new URL(siteOrigin),
   openGraph: {
     title: 'Craig Watt — Platform Engineer focused on Observability',
     description:
       'Building reliable platforms with observability, automation, Kubernetes, Terraform, and CI/CD.',
-    url: 'https://craigwatt.co.uk',
-    siteName: 'Craig Watt Website',
+    url: siteOrigin,
+    siteName: 'Craig Watt',
     images: [
       {
-        url: 'https://craigwatt.co.uk/images/avatar.jpg',
+        url: `${siteOrigin}/images/og/craig-watt-share-card-v2.png`,
         width: 1200,
         height: 630,
-        alt: 'Craig Watt avatar & code screenshot',
+        alt: 'Craig Watt brand card with circular avatar and name',
       },
     ],
     locale: 'en_GB',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Craig Watt — Platform Engineer focused on Observability',
+    description:
+      'Building reliable platforms with observability, automation, Kubernetes, Terraform, and CI/CD.',
+    images: [`${siteOrigin}/images/og/craig-watt-share-card-v2.png`],
   },
 };
 

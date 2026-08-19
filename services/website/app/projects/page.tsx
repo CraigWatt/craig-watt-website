@@ -1,7 +1,15 @@
 // app/projects/page.tsx
-'use client';
+import type { Metadata } from 'next';
 import { allProjects } from 'content-collections'
 import { ProjectCard } from '../components/ProjectCard';
+import { buildPageMetadata } from '../config/metadata';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Projects',
+  description:
+    'Case studies and engineering work across platforms, observability, automation, and self-hosted systems.',
+  path: '/projects',
+});
 
 export default function ProjectsPage() {
   return (

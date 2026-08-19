@@ -1,5 +1,5 @@
 // app/page.tsx
-'use client';
+import type { Metadata } from 'next';
 import { allProjects, allPosts } from 'content-collections';
 import { ProjectCard } from './components/ProjectCard';
 import { Button } from '@heroui/react';
@@ -7,6 +7,14 @@ import { BlogCard } from './components/BlogCard';
 import ContactForm from './components/ContactForm';
 import Image from 'next/image';
 import { siteUrl } from './data/site';
+import { buildPageMetadata } from './config/metadata';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Craig Watt — Platform Engineer focused on Observability',
+  description:
+    'Platform engineering, observability, automation, and reliable delivery across Kubernetes, Terraform, and AWS.',
+  path: '/',
+});
 
 const projects = allProjects ?? [];
 const posts = allPosts?.filter((p) => p.thumb) ?? [];

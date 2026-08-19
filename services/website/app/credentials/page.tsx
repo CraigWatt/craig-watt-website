@@ -1,8 +1,15 @@
-'use client';
-
+import type { Metadata } from 'next';
 import { Button, Card } from '@heroui/react';
 import { Award, ArrowRight, BadgeCheck, Medal, ShieldCheck } from 'lucide-react';
 import { siteUrl } from '../data/site';
+import { buildPageMetadata } from '../config/metadata';
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Credentials',
+  description:
+    'A place for Craig Watt’s certifications, awards, and formal credentials alongside the broader platform story.',
+  path: '/credentials',
+});
 
 export default function CredentialsPage() {
   return (
