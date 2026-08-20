@@ -172,21 +172,13 @@ async function ensurePublicDashboard(dashboardUid) {
     true
   );
 
-  if (existing?.uid && existing?.accessToken) {
-    const updated = await grafanaRequest(
+  if (existing?.uid) {
+    await grafanaRequest(
       `/api/dashboards/uid/${dashboardUid}/public-dashboards/${existing.uid}`,
       {
-        method: 'PATCH',
-        body: JSON.stringify({
-          isEnabled: true,
-          timeSelectionEnabled: false,
-          annotationsEnabled: false,
-          share: 'public',
-        }),
+        method: 'DELETE',
       }
     );
-
-    return updated;
   }
 
   try {
@@ -209,10 +201,17 @@ async function ensurePublicDashboard(dashboardUid) {
         `/api/dashboards/uid/${dashboardUid}/public-dashboards/`
       );
 
-      return grafanaRequest(
+      await grafanaRequest(
         `/api/dashboards/uid/${dashboardUid}/public-dashboards/${shared.uid}`,
         {
-          method: 'PATCH',
+          method: 'DELETE',
+        }
+      );
+
+      return grafanaRequest(
+        `/api/dashboards/uid/${dashboardUid}/public-dashboards/`,
+        {
+          method: 'POST',
           body: JSON.stringify({
             isEnabled: true,
             timeSelectionEnabled: false,
