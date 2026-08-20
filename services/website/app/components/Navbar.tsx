@@ -9,47 +9,11 @@ import { navItems } from '../config/nav.config';
 import { NavbarRightIcons, externalTools } from './NavbarRightIcons';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { siteUrl } from '../data/site';
-import {
-  defaultGrafanaPublicDashboardUrl,
-  grafanaRuntimeConfigPath,
-} from '../data/runtime';
 import { navIconButtonClassName } from './navIconButtonStyles';
 
 export const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [mobileBlogOpen, setMobileBlogOpen] = useState(false);
-  const [grafanaHref, setGrafanaHref] = useState(defaultGrafanaPublicDashboardUrl);
-
-  React.useEffect(() => {
-    let cancelled = false;
-
-    async function loadRuntimeConfig() {
-      try {
-        const response = await fetch(grafanaRuntimeConfigPath, {
-          cache: 'no-store',
-        });
-
-        if (!response.ok) {
-          return;
-        }
-
-        const payload = await response.json();
-        const publicUrl = payload?.grafana?.['craigwatt-platform-health'];
-
-        if (!cancelled && typeof publicUrl === 'string' && publicUrl.length > 0) {
-          setGrafanaHref(publicUrl);
-        }
-      } catch {
-        // Keep fallback URL if runtime config is unavailable.
-      }
-    }
-
-    void loadRuntimeConfig();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const hoverBgClass = 'hover:bg-black/5 dark:hover:bg-white/8';
   const itemRounded = 'rounded-2xl';
@@ -261,19 +225,14 @@ export const Navbar = () => {
               const bgClass = hasThemeVariants
                 ? 'bg-[var(--color-card)]'
                 : 'bg-[var(--color-background)]';
-              const href =
-                tool.alt === 'Grafana'
-                  ? grafanaHref
-                  : tool.internal
-                    ? siteUrl(tool.href)
-                    : tool.href;
+              const href = tool.internal ? siteUrl(tool.href) : tool.href;
               
               return (
                 <a
                   key={tool.alt}
                   href={href}
-                  target={tool.internal ? undefined : '_blank'}
-                  rel={tool.internal ? undefined : 'noopener noreferrer'}
+                  target={tool.newTab ? '_blank' : undefined}
+                  rel={tool.newTab ? 'noopener noreferrer' : undefined}
                   onClick={() => {
                     setIsMenuOpen(false);
                     setMobileBlogOpen(false);
