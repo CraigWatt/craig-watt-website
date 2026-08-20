@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -52,6 +52,23 @@ async function grafanaRequest(pathname, init = {}, allowNotFound = false) {
   }
 
   return response.json();
+}
+
+function maybeParseGrafanaApiError(error) {
+  if (!(error instanceof Error)) {
+    return null;
+  }
+
+  const match = error.message.match(/\{.*\}$/s);
+  if (!match) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(match[0]);
+  } catch {
+    return null;
+  }
 }
 
 function replaceDatasourceUid(value, datasourceUid) {
@@ -148,8 +165,74 @@ async function upsertDashboard(folderUid, dashboardMeta, datasourceUid) {
   return response.url ?? response.slug ?? dashboardMeta.uid;
 }
 
+async function ensurePublicDashboard(dashboardUid) {
+  const existing = await grafanaRequest(
+    `/api/dashboards/uid/${dashboardUid}/public-dashboards/`,
+    {},
+    true
+  );
+
+  if (existing?.uid && existing?.accessToken) {
+    const updated = await grafanaRequest(
+      `/api/dashboards/uid/${dashboardUid}/public-dashboards/${existing.uid}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify({
+          isEnabled: true,
+          timeSelectionEnabled: false,
+          annotationsEnabled: false,
+          share: 'public',
+        }),
+      }
+    );
+
+    return updated;
+  }
+
+  try {
+    return await grafanaRequest(
+      `/api/dashboards/uid/${dashboardUid}/public-dashboards/`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          isEnabled: true,
+          timeSelectionEnabled: false,
+          annotationsEnabled: false,
+          share: 'public',
+        }),
+      }
+    );
+  } catch (error) {
+    const payload = maybeParseGrafanaApiError(error);
+    if (payload?.messageId === 'publicdashboards.dashboardIsPublic') {
+      const shared = await grafanaRequest(
+        `/api/dashboards/uid/${dashboardUid}/public-dashboards/`
+      );
+
+      return grafanaRequest(
+        `/api/dashboards/uid/${dashboardUid}/public-dashboards/${shared.uid}`,
+        {
+          method: 'PATCH',
+          body: JSON.stringify({
+            isEnabled: true,
+            timeSelectionEnabled: false,
+            annotationsEnabled: false,
+            share: 'public',
+          }),
+        }
+      );
+    }
+
+    throw error;
+  }
+}
+
 const cloudwatchDatasourceUid = await resolveCloudwatchDatasourceUid();
 const folderUid = await ensureFolder(manifest.folder);
+const websiteRuntime = {
+  generatedAt: new Date().toISOString(),
+  grafana: {},
+};
 
 for (const dashboard of manifest.dashboards) {
   const result = await upsertDashboard(
@@ -158,4 +241,18 @@ for (const dashboard of manifest.dashboards) {
     cloudwatchDatasourceUid
   );
   console.log(`Synced Grafana dashboard ${dashboard.uid}: ${result}`);
+
+  const shared = await ensurePublicDashboard(dashboard.uid);
+  const publicUrl = new URL(
+    `/public-dashboards/${shared.accessToken}`,
+    grafanaUrl
+  ).toString();
+  websiteRuntime.grafana[dashboard.uid] = publicUrl;
+  console.log(`Shared Grafana dashboard ${dashboard.uid}: ${publicUrl}`);
 }
+
+mkdirSync(buildDir, { recursive: true });
+writeFileSync(
+  path.join(buildDir, 'website-runtime.json'),
+  JSON.stringify(websiteRuntime, null, 2) + '\n'
+);

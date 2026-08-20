@@ -2,6 +2,10 @@
 import React from 'react';
 import Image from 'next/image';
 import { ThemeSwitcher } from './ThemeSwitcher';
+import {
+  defaultGrafanaPublicDashboardUrl,
+  grafanaRuntimeConfigPath,
+} from '../data/runtime';
 import { siteUrl } from '../data/site';
 import { navIconButtonClassName } from './navIconButtonStyles';
 
@@ -25,7 +29,7 @@ export const externalTools: ExternalTool[] = [
     internal: true,
   },
   {
-    href: 'https://craigwatt.grafana.net/public-dashboards/9f96dfe163484bafbccb7f825a506899',
+    href: defaultGrafanaPublicDashboardUrl,
     src: '/icons/grafana.svg',
     alt: 'Grafana',
     ariaLabel: 'Grafana',
@@ -40,6 +44,41 @@ export const externalTools: ExternalTool[] = [
 ];
 
 export function NavbarRightIcons() {
+  const [grafanaHref, setGrafanaHref] = React.useState(
+    defaultGrafanaPublicDashboardUrl
+  );
+
+  React.useEffect(() => {
+    let cancelled = false;
+
+    async function loadRuntimeConfig() {
+      try {
+        const response = await fetch(grafanaRuntimeConfigPath, {
+          cache: 'no-store',
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const payload = await response.json();
+        const publicUrl = payload?.grafana?.['craigwatt-platform-health'];
+
+        if (!cancelled && typeof publicUrl === 'string' && publicUrl.length > 0) {
+          setGrafanaHref(publicUrl);
+        }
+      } catch {
+        // Keep fallback URL if runtime config is unavailable.
+      }
+    }
+
+    void loadRuntimeConfig();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="hidden items-center gap-3 md:flex">
       <a
@@ -59,7 +98,15 @@ export function NavbarRightIcons() {
 
       {externalTools.map((tool) => {
         const hasThemeVariants = tool.lightSrc && tool.darkSrc;
-        const bgClass = hasThemeVariants ? 'bg-[var(--color-card)]' : 'bg-[var(--color-background)]';
+        const bgClass = hasThemeVariants
+          ? 'bg-[var(--color-card)]'
+          : 'bg-[var(--color-background)]';
+        const href =
+          tool.alt === 'Grafana'
+            ? grafanaHref
+            : tool.internal
+              ? siteUrl(tool.href)
+              : tool.href;
 
         const Icon = hasThemeVariants ? (
           <>
@@ -93,7 +140,7 @@ export function NavbarRightIcons() {
         return (
           <a
             key={tool.alt}
-            href={tool.internal ? siteUrl(tool.href) : tool.href}
+            href={href}
             target={tool.internal ? undefined : '_blank'}
             rel={tool.internal ? undefined : 'noopener noreferrer'}
             className={`${navIconButtonClassName} ${bgClass}`}

@@ -122,3 +122,17 @@ jobs:
           GRAFANA_SERVICE_ACCOUNT_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACCOUNT_TOKEN }}
           GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
         run: pnpm sync:grafana
+
+      - name: Publish Grafana runtime link config
+        working-directory: infra
+        run: |
+          export SITE_BUCKET_NAME="$(terraform output -raw site_bucket_name)"
+          export DISTRIBUTION_ID="$(terraform output -raw distribution_id)"
+          aws s3 cp \
+            ../dist/grafana/website-runtime.json \
+            "s3://${SITE_BUCKET_NAME}/runtime/grafana-links.json" \
+            --content-type "application/json; charset=utf-8" \
+            --cache-control "no-store, max-age=0"
+          aws cloudfront create-invalidation \
+            --distribution-id "${DISTRIBUTION_ID}" \
+            --paths "/runtime/grafana-links.json"
