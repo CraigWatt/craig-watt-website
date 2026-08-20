@@ -3,10 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { ReduceDataOptionsBuilder } from '@grafana/grafana-foundation-sdk/common';
-import {
-  DashboardBuilder,
-  DatasourceVariableBuilder,
-} from '@grafana/grafana-foundation-sdk/dashboard';
+import { DashboardBuilder } from '@grafana/grafana-foundation-sdk/dashboard';
 import {
   MetricEditorMode,
   MetricQueryType,
@@ -35,7 +32,7 @@ const folder = {
 
 const cloudwatchDatasource = {
   type: 'cloudwatch',
-  uid: '${cloudwatch_datasource}',
+  uid: '__GRAFANA_CLOUDWATCH_DATASOURCE_UID__',
 };
 
 const lambdaFunctions = [
@@ -139,7 +136,7 @@ function buildOperationalOverview() {
   const intro = [
     'This dashboard is generated from code in the repository and synced by GitHub Actions.',
     '',
-    '- Select your **CloudWatch** datasource from the dropdown above.',
+    '- The CloudWatch datasource is pinned during dashboard sync so the public share works cleanly.',
     `- Lambda and SES signals are wired by naming convention for **${config.domain}**.`,
     config.apiGatewayId
       ? `- API Gateway panels are wired to **${config.apiGatewayId}**.`
@@ -165,12 +162,6 @@ function buildOperationalOverview() {
     .refresh('1m')
     .time({ from: 'now-6h', to: 'now' })
     .timezone('browser')
-    .withVariable(
-      new DatasourceVariableBuilder('cloudwatch_datasource')
-        .label('CloudWatch datasource')
-        .description('Pick the Grafana CloudWatch datasource for this AWS account.')
-        .type('cloudwatch')
-    )
     .withPanel(
       textPanel({
         title: 'Wiring',
