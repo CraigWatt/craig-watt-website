@@ -25,3 +25,7 @@ output "api_id" {
 output "api_endpoint" {
   value = module.website.api_endpoint
 }
+
+output "site_bucket_name" {
+  value = module.website.site_bucket_name
+}
