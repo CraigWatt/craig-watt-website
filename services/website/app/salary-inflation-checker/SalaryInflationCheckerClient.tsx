@@ -136,8 +136,7 @@ const FALLBACK_BENCHMARK: SalaryBenchmark = {
   notes: 'Representative benchmark unavailable right now.',
 };
 
-const AGE_OVERLAY_OPTIONS: Array<{ key: 'none' | SalaryAgeBand; label: string }> = [
-  { key: 'none', label: 'No age overlay' },
+const AGE_OVERLAY_OPTIONS: Array<{ key: SalaryAgeBand; label: string }> = [
   { key: '18-21', label: '18-21' },
   { key: '22-29', label: '22-29' },
   { key: '30-39', label: '30-39' },
@@ -213,22 +212,6 @@ function formatAxisSalary(value: number) {
 
 function getRoleDisplayLabel(role: SalaryRole) {
   return role === 'software-engineer' ? 'Software engineer' : 'All employees';
-}
-
-function getAgeOverlayIntro(role: SalaryRole) {
-  if (role === 'software-engineer') {
-    return 'Adds a UK-wide age-band benchmark for the nearest published engineering/software occupation group. Your selected location benchmark stays separate.';
-  }
-
-  return 'Adds a UK-wide age-band benchmark for all employees. Your selected location benchmark stays separate.';
-}
-
-function getAgeOverlayCaption(role: SalaryRole) {
-  if (role === 'software-engineer') {
-    return 'Role-matched age context';
-  }
-
-  return 'All-employees age context';
 }
 
 function formatShortDate(value: string) {
@@ -775,7 +758,8 @@ function SalaryHistoryChart({
 export default function SalaryInflationCheckerClient() {
   const [historicalSalary, setHistoricalSalary] = useState('');
   const [selectedRole, setSelectedRole] = useState<SalaryRole>('all-employees');
-  const [selectedAgeBand, setSelectedAgeBand] = useState<'none' | SalaryAgeBand>('none');
+  const [selectedAgeRole, setSelectedAgeRole] = useState<SalaryRole>('all-employees');
+  const [selectedAgeBand, setSelectedAgeBand] = useState<SalaryAgeBand>('30-39');
   const [selectedLocation, setSelectedLocation] = useState<'central-london' | 'west-london' | 'edinburgh'>(
     'central-london'
   );
@@ -903,15 +887,11 @@ export default function SalaryInflationCheckerClient() {
     { key: 'software-engineer', label: 'Software engineer' },
   ];
   const activeAgeOverlay =
-    selectedAgeBand === 'none'
-      ? null
-      : salaries.ageOverlays.find(
-          (overlay) => overlay.role === selectedRole && overlay.ageBand === selectedAgeBand
-        ) ?? null;
+    salaries.ageOverlays.find(
+      (overlay) => overlay.role === selectedAgeRole && overlay.ageBand === selectedAgeBand
+    ) ?? null;
   const activeAgeOverlayAnnualMedian = activeAgeOverlay?.annualMedian ?? null;
-  const ageOverlayIntro = getAgeOverlayIntro(selectedRole);
-  const ageOverlayCaption = getAgeOverlayCaption(selectedRole);
-  const selectedRoleLabel = getRoleDisplayLabel(selectedRole);
+  const selectedAgeRoleLabel = getRoleDisplayLabel(selectedAgeRole);
 
   const submittedAdjustedSalary =
     submittedSalaryAnalysis && submittedInflationMultiplier !== null
@@ -1417,35 +1397,6 @@ export default function SalaryInflationCheckerClient() {
                   })}
                 </div>
 
-                <div className="space-y-3 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-4 sm:p-5">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[var(--color-muted)]">
-                    Optional age-band overlay
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {AGE_OVERLAY_OPTIONS.map((option) => {
-                      const active = option.key === selectedAgeBand;
-                      return (
-                        <button
-                          key={option.key}
-                          type="button"
-                          onClick={() => setSelectedAgeBand(option.key)}
-                          className={[
-                            'rounded-full px-3 py-2 text-xs font-medium transition-colors',
-                            active
-                              ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
-                              : 'border border-[var(--color-border)] text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
-                          ].join(' ')}
-                        >
-                          {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                    {ageOverlayIntro}
-                  </p>
-                </div>
-
                 <div className="site-input-surface rounded-[1.75rem] p-5 sm:p-6">
                   <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
                     Selected benchmark
@@ -1511,57 +1462,128 @@ export default function SalaryInflationCheckerClient() {
                   </p>
                 </div>
 
-                {activeAgeOverlay ? (
-                  <div className="mt-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-background)] p-5">
-                    <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                      {ageOverlayCaption}
+              </div>
+            </div>
+          </section>
+
+          <section className="site-surface rounded-[2rem] px-6 py-6 md:px-8 md:py-8">
+            <div className="space-y-6">
+              <div className="max-w-3xl space-y-2">
+                <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                  Age-band benchmark
+                </p>
+                <h2 className="text-2xl font-semibold text-[var(--color-foreground)] md:text-3xl">
+                  UK age context, kept separate
+                </h2>
+                <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                  Use this as an optional secondary comparison after the main location benchmark, not as part of it.
+                </p>
+              </div>
+
+              <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+                <div className="space-y-4">
+                  <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+                    {roleOptions.map((option) => {
+                      const active = option.key === selectedAgeRole;
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => setSelectedAgeRole(option.key)}
+                          className={[
+                            'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                            active
+                              ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                              : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                          ].join(' ')}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="inline-flex w-full flex-wrap gap-2 rounded-2xl border border-[var(--color-border)] bg-[var(--color-background)] p-2">
+                    {AGE_OVERLAY_OPTIONS.map((option) => {
+                      const active = option.key === selectedAgeBand;
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() => setSelectedAgeBand(option.key)}
+                          className={[
+                            'rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+                            active
+                              ? 'bg-[var(--color-foreground)] text-[var(--color-background)]'
+                              : 'text-[var(--color-muted-foreground)] hover:text-[var(--color-foreground)]',
+                          ].join(' ')}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="site-input-surface rounded-[1.75rem] p-5 sm:p-6">
+                    <p className="text-xs uppercase tracking-[0.28em] text-[var(--color-muted)]">
+                      Selected age benchmark
                     </p>
-                    <div className="mt-3 flex flex-col gap-2">
-                      <h4 className="text-lg font-semibold text-[var(--color-foreground)] sm:text-xl">
-                        {selectedRoleLabel} · {activeAgeOverlay.label}
-                      </h4>
-                      <p className="text-sm text-[var(--color-muted-foreground)]">
-                        {activeAgeOverlay.comparisonGroup}
+                    <h3 className="mt-3 text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
+                      {selectedAgeRoleLabel} · {activeAgeOverlay?.label ?? selectedAgeBand}
+                    </h3>
+                    <p className="mt-3 text-sm leading-relaxed text-[var(--color-muted-foreground)]">
+                      {activeAgeOverlay?.notes ?? 'UK-wide age-band benchmark unavailable right now.'}
+                    </p>
+                    <p className="mt-3 text-xs uppercase tracking-[0.2em] text-[var(--color-muted)]">
+                      Based on {salaryDatasetLabel} ASHE earnings data
+                      {salaries.source.fetchedAt ? ` · refreshed ${formatShortDate(salaries.source.fetchedAt)}` : ''}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="site-input-surface rounded-[1.75rem] p-5 sm:p-6">
+                  <div className="space-y-2">
+                    <h4 className="text-lg font-semibold text-[var(--color-foreground)] sm:text-xl">
+                      {activeAgeOverlay?.comparisonGroup ?? 'UK-wide age benchmark'}
+                    </h4>
+                    <p className="text-sm text-[var(--color-muted-foreground)]">
+                      Kept separate from your location benchmark so the comparison stays clear.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                        Annual median
                       </p>
-                      <p className="text-sm leading-relaxed text-[var(--color-muted-foreground)]">
-                        {activeAgeOverlay.notes}
+                      <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
+                        {formatMoney(activeAgeOverlay?.annualMedian ?? null)}
                       </p>
                     </div>
-
-                    <div className="mt-4 grid gap-4 md:grid-cols-3">
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                          Annual median
-                        </p>
-                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
-                          {formatMoney(activeAgeOverlay.annualMedian)}
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                          Versus entered salary
-                        </p>
-                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
-                          {formatSignedMoney(ageOverlayCurrentDelta)}
-                        </p>
-                        <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-                          {formatPercentage(ageOverlayCurrentDeltaPercent)} against the overlay median.
-                        </p>
-                      </div>
-                      <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
-                        <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
-                          Versus salary today
-                        </p>
-                        <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
-                          {formatSignedMoney(ageOverlayTodayDelta)}
-                        </p>
-                        <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
-                          {formatPercentage(ageOverlayTodayDeltaPercent)} against the overlay median.
-                        </p>
-                      </div>
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                        Versus entered salary
+                      </p>
+                      <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
+                        {formatSignedMoney(ageOverlayCurrentDelta)}
+                      </p>
+                      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                        {formatPercentage(ageOverlayCurrentDeltaPercent)} against this age-band median.
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+                      <p className="text-[11px] uppercase tracking-[0.25em] text-[var(--color-muted)]">
+                        Versus salary today
+                      </p>
+                      <p className="mt-2 break-words text-xl font-semibold text-[var(--color-foreground)] sm:text-2xl">
+                        {formatSignedMoney(ageOverlayTodayDelta)}
+                      </p>
+                      <p className="mt-2 text-sm text-[var(--color-muted-foreground)]">
+                        {formatPercentage(ageOverlayTodayDeltaPercent)} against this age-band median.
+                      </p>
                     </div>
                   </div>
-                ) : null}
+                </div>
               </div>
             </div>
           </section>

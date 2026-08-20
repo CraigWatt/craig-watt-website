@@ -89,6 +89,13 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
+function createPolylineMaterialLine(points: Array<[number, number]>, material: THREE.Material) {
+  return createLine(
+    points.map(([x, y]) => new THREE.Vector3(x, y, 0)),
+    material,
+  );
+}
+
 function disposeScene(scene: THREE.Scene) {
   scene.traverse((object) => {
     const mesh = object as THREE.Mesh & { geometry?: THREE.BufferGeometry; material?: THREE.Material | THREE.Material[] };
@@ -244,19 +251,19 @@ export function HeroThreeBackground() {
 
     const dayGroundMaterial = new THREE.MeshBasicMaterial({
       transparent: true,
-      opacity: 0.08,
+      opacity: 0.12,
       depthWrite: false,
     });
     const dayGround = createGroundShape(
       [
-        [-7, -2.4],
-        [-5.7, -2.1],
-        [-4.3, -2.26],
-        [-2.4, -1.95],
-        [-0.1, -2.28],
-        [2.5, -2.02],
-        [4.6, -2.2],
-        [7, -1.92],
+        [-7, -2.12],
+        [-5.6, -1.86],
+        [-3.8, -1.94],
+        [-1.8, -1.78],
+        [0.4, -1.96],
+        [2.4, -1.84],
+        [4.9, -1.98],
+        [7, -1.82],
         [7, -3.6],
         [-7, -3.6],
       ],
@@ -266,21 +273,42 @@ export function HeroThreeBackground() {
 
     const dayRidgeMaterial = new THREE.LineBasicMaterial({
       transparent: true,
-      opacity: 0.16,
+      opacity: 0.2,
     });
-    const dayRidge = createLine(
+    const dayRidge = createPolylineMaterialLine(
       [
-        new THREE.Vector3(-7, -2.26, 0),
-        new THREE.Vector3(-5.2, -1.94, 0),
-        new THREE.Vector3(-3.4, -2.1, 0),
-        new THREE.Vector3(-1.1, -1.84, 0),
-        new THREE.Vector3(1.5, -2.08, 0),
-        new THREE.Vector3(3.8, -1.92, 0),
-        new THREE.Vector3(7, -1.76, 0),
+        [-7, -1.82],
+        [-5.2, -1.64],
+        [-3.4, -1.74],
+        [-1.1, -1.58],
+        [1.5, -1.8],
+        [3.8, -1.66],
+        [7, -1.52],
       ],
       dayRidgeMaterial,
     );
     dayGroup.add(dayRidge);
+
+    const seaLineMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.18,
+    });
+    const seaLineDefinitions = [
+      { y: -2.08, amplitude: 0.05, speed: 0.9, phase: 0.2 },
+      { y: -2.34, amplitude: 0.07, speed: 0.72, phase: 1.1 },
+      { y: -2.64, amplitude: 0.08, speed: 0.58, phase: 1.9 },
+    ];
+    const seaLines = seaLineDefinitions.map((definition) => {
+      const line = createPolylineMaterialLine(
+        Array.from({ length: 12 }, (_, index) => {
+          const x = -7 + index * (14 / 11);
+          return [x, definition.y] as [number, number];
+        }),
+        seaLineMaterial,
+      );
+      dayGroup.add(line);
+      return line;
+    });
 
     const turbineMaterial = new THREE.LineBasicMaterial({
       transparent: true,
@@ -329,6 +357,138 @@ export function HeroThreeBackground() {
       dayGroup.add(group);
       turbines.push({ group, rotor, speed });
     });
+
+    const vesselMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.32,
+    });
+    const vesselAccentMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.26,
+    });
+    const vessels: Array<{
+      group: THREE.Group;
+      speed: number;
+      phase: number;
+      laneY: number;
+      direction: 1 | -1;
+      bob: number;
+    }> = [];
+
+    const cargoShip = new THREE.Group();
+    cargoShip.add(
+      createPolylineMaterialLine(
+        [
+          [-0.5, -0.04],
+          [0.42, -0.04],
+          [0.58, 0.06],
+          [-0.6, 0.06],
+          [-0.5, -0.04],
+        ],
+        vesselMaterial,
+      ),
+    );
+    cargoShip.add(
+      createPolylineMaterialLine(
+        [
+          [-0.18, 0.06],
+          [0.12, 0.06],
+          [0.12, 0.18],
+          [-0.18, 0.18],
+          [-0.18, 0.06],
+        ],
+        vesselAccentMaterial,
+      ),
+    );
+    cargoShip.add(
+      createPolylineMaterialLine(
+        [
+          [0.12, 0.06],
+          [0.26, 0.06],
+          [0.26, 0.14],
+          [0.12, 0.14],
+          [0.12, 0.06],
+        ],
+        vesselAccentMaterial,
+      ),
+    );
+    dayGroup.add(cargoShip);
+    vessels.push({ group: cargoShip, speed: 0.032, phase: 0.14, laneY: -2.22, direction: 1, bob: 0.05 });
+
+    const ferry = new THREE.Group();
+    ferry.add(
+      createPolylineMaterialLine(
+        [
+          [-0.32, -0.03],
+          [0.28, -0.03],
+          [0.4, 0.05],
+          [-0.4, 0.05],
+          [-0.32, -0.03],
+        ],
+        vesselMaterial,
+      ),
+    );
+    ferry.add(
+      createPolylineMaterialLine(
+        [
+          [-0.08, 0.05],
+          [0.16, 0.05],
+          [0.16, 0.16],
+          [-0.08, 0.16],
+          [-0.08, 0.05],
+        ],
+        vesselAccentMaterial,
+      ),
+    );
+    ferry.add(createLine([new THREE.Vector3(0.16, 0.16, 0), new THREE.Vector3(0.24, 0.24, 0)], vesselAccentMaterial));
+    dayGroup.add(ferry);
+    vessels.push({ group: ferry, speed: 0.04, phase: 0.58, laneY: -2.62, direction: -1, bob: 0.04 });
+
+    const helicopterMaterial = new THREE.LineBasicMaterial({
+      transparent: true,
+      opacity: 0.26,
+    });
+    const helicopters: Array<{
+      group: THREE.Group;
+      rotor: THREE.Line;
+      speed: number;
+      phase: number;
+      baseY: number;
+      xRatio: number;
+    }> = [];
+
+    const buildHelicopter = () => {
+      const helicopter = new THREE.Group();
+      helicopter.add(
+        createPolylineMaterialLine(
+          [
+            [-0.2, -0.02],
+            [0.14, -0.02],
+            [0.26, 0.05],
+            [0.1, 0.12],
+            [-0.14, 0.1],
+            [-0.2, -0.02],
+          ],
+          helicopterMaterial,
+        ),
+      );
+      helicopter.add(createLine([new THREE.Vector3(0.14, 0.02, 0), new THREE.Vector3(0.38, 0.08, 0)], helicopterMaterial));
+      helicopter.add(createLine([new THREE.Vector3(-0.1, -0.04, 0), new THREE.Vector3(0.12, -0.04, 0)], helicopterMaterial));
+      helicopter.add(createLine([new THREE.Vector3(-0.04, -0.04, 0), new THREE.Vector3(-0.12, -0.12, 0)], helicopterMaterial));
+      helicopter.add(createLine([new THREE.Vector3(0.05, -0.04, 0), new THREE.Vector3(0.16, -0.12, 0)], helicopterMaterial));
+      const rotor = createLine([new THREE.Vector3(-0.34, 0.16, 0), new THREE.Vector3(0.34, 0.16, 0)], helicopterMaterial);
+      helicopter.add(rotor);
+      return { helicopter, rotor };
+    };
+
+    const firstHeli = buildHelicopter();
+    dayGroup.add(firstHeli.helicopter);
+    helicopters.push({ group: firstHeli.helicopter, rotor: firstHeli.rotor, speed: 0.24, phase: 0.18, baseY: 1.28, xRatio: -0.18 });
+
+    const secondHeli = buildHelicopter();
+    secondHeli.helicopter.scale.setScalar(0.86);
+    dayGroup.add(secondHeli.helicopter);
+    helicopters.push({ group: secondHeli.helicopter, rotor: secondHeli.rotor, speed: 0.2, phase: 0.66, baseY: 1.9, xRatio: 0.46 });
 
     const nightGroundMaterial = new THREE.MeshBasicMaterial({
       transparent: true,
@@ -539,10 +699,14 @@ export function HeroThreeBackground() {
 
       dayCloudMaterial.color = border.clone().lerp(new THREE.Color('#ffffff'), 0.18);
       sunArcMaterial.color = accent.clone().lerp(border, 0.35);
-      dayGroundMaterial.color = border.clone().lerp(foreground, 0.12);
-      turbineMaterial.color = foreground.clone().lerp(border, 0.28);
+      dayGroundMaterial.color = accent.clone().lerp(border, 0.55);
+      turbineMaterial.color = foreground.clone().lerp(border, 0.4);
       hubMaterial.color = accent.clone().lerp(border, 0.45);
       windLineMaterial.color = accent.clone().lerp(border, 0.4);
+      vesselMaterial.color = foreground.clone().lerp(border, 0.48);
+      vesselAccentMaterial.color = accent.clone().lerp(border, 0.52);
+      helicopterMaterial.color = foreground.clone().lerp(border, 0.38);
+      seaLineMaterial.color = accent.clone().lerp(border, 0.48);
 
       wheelRimMaterial.color = accent;
       wheelAccentMaterial.color = border;
@@ -608,6 +772,10 @@ export function HeroThreeBackground() {
 
       windLines.forEach(({ line, xRatio }) => {
         line.position.x = xRatio * halfWidth;
+      });
+
+      helicopters.forEach(({ group, xRatio }) => {
+        group.position.x = xRatio * halfWidth;
       });
     };
 
@@ -716,6 +884,37 @@ export function HeroThreeBackground() {
           line.rotation.z = -0.02 - pointer.x * 0.12;
           const material = line.material as THREE.LineBasicMaterial;
           material.opacity = 0.12 + Math.abs(pointer.x) * 0.18;
+        });
+        seaLines.forEach((line, index) => {
+          const definition = seaLineDefinitions[index];
+          const geometry = line.geometry as THREE.BufferGeometry;
+          const attribute = geometry.getAttribute('position') as THREE.BufferAttribute;
+          for (let pointIndex = 0; pointIndex < attribute.count; pointIndex += 1) {
+            const x = -camera.right + pointIndex * ((camera.right * 2) / Math.max(attribute.count - 1, 1));
+            const y =
+              definition.y +
+              Math.sin(elapsed * definition.speed + pointIndex * 0.72 + definition.phase) * definition.amplitude * windForce +
+              Math.cos(elapsed * (definition.speed * 0.58) + pointIndex * 0.3) * definition.amplitude * 0.42;
+            attribute.setXYZ(pointIndex, x, y, 0);
+          }
+          attribute.needsUpdate = true;
+        });
+        vessels.forEach(({ group, speed, phase, laneY, direction, bob }) => {
+          const travel = (((elapsed * speed * windForce) + phase) % 1 + 1) % 1;
+          const range = camera.right * 2 + 1.4;
+          group.position.x = -camera.right - 0.7 + travel * range;
+          if (direction === -1) {
+            group.position.x = camera.right + 0.7 - travel * range;
+          }
+          group.position.y = laneY + Math.sin(elapsed * 1.6 + phase * 8) * bob;
+          group.rotation.z = Math.sin(elapsed * 1.6 + phase * 5) * 0.03;
+        });
+        helicopters.forEach(({ group, rotor, speed, phase, baseY, xRatio }) => {
+          const baseX = xRatio * (camera.right - 0.5);
+          group.position.x = baseX + Math.sin(elapsed * speed + phase) * 1.15;
+          group.position.y = baseY + Math.cos(elapsed * speed * 2 + phase) * 0.14 + pointer.y * 0.08;
+          group.rotation.z = Math.sin(elapsed * speed * 1.4 + phase) * 0.05;
+          rotor.rotation.z += prefersReducedMotion ? 0 : 0.22 + windForce * 0.04;
         });
       }
 
