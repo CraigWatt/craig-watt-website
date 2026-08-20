@@ -51,7 +51,13 @@ async function grafanaRequest(pathname, init = {}, allowNotFound = false) {
     return null;
   }
 
-  return response.json();
+  const body = await response.text().catch(() => '');
+
+  if (!body.trim()) {
+    return null;
+  }
+
+  return JSON.parse(body);
 }
 
 function maybeParseGrafanaApiError(error) {
