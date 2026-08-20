@@ -20,7 +20,9 @@
     "build-storybook": "storybook build -c services/website/.storybook -o services/website/storybook-static",
     "test": "jest --config jest.config.cjs",
     "e2e": "playwright test -c services/website-e2e/playwright.config.ts",
-    "build:functions": "node ./tools/build-functions.mjs"
+    "build:functions": "node ./tools/build-functions.mjs",
+    "build:grafana": "node ./tools/grafana/build-dashboards.mjs",
+    "sync:grafana": "node ./tools/grafana/sync-dashboards.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1111.0",
@@ -63,6 +65,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/three": "^0.185.4",
+    "@grafana/grafana-foundation-sdk": "^0.0.18",
     "@typescript-eslint/eslint-plugin": "^8.67.0",
     "@typescript-eslint/parser": "^8.67.0",
     "babel-jest": "^30.4.1",
@@ -95,14 +98,5 @@
     "inflight": "^2.0.0",
     "cross-spawn": "7.0.6",
     "abab": "2.0.7"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@heroui/shared-utils",
-      "@swc/core",
-      "core-js-pure",
-      "esbuild",
-      "unrs-resolver"
-    ]
   }
 }

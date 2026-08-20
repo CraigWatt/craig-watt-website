@@ -77,6 +77,9 @@ jobs:
       - name: Build Lambda handlers
         run: pnpm build:functions
 
+      - name: Build Grafana dashboards
+        run: pnpm build:grafana
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4.0.1
         with:
@@ -102,3 +105,20 @@ jobs:
             -var="t212_api_secret=${{ secrets.T212_API_SECRET }}" \
             -var="contact_email_to=${{ secrets.CONTACT_EMAIL_TO }}" \
             -var="contact_email_from=${{ secrets.CONTACT_EMAIL_FROM }}"
+
+      - name: Rebuild Grafana dashboards with live AWS resource IDs
+        working-directory: infra
+        env:
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: |
+          export GRAFANA_WEBSITE_DOMAIN="craigwatt.co.uk"
+          export GRAFANA_API_GATEWAY_ID="$(terraform output -raw api_id)"
+          export GRAFANA_CLOUDFRONT_DISTRIBUTION_ID="$(terraform output -raw distribution_id)"
+          cd ..
+          pnpm build:grafana
+
+      - name: Sync Grafana dashboards
+        env:
+          GRAFANA_SERVICE_ACCOUNT_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACCOUNT_TOKEN }}
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+        run: pnpm sync:grafana

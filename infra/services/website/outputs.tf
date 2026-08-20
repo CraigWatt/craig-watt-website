@@ -3,9 +3,19 @@ output "distribution_domain_name" {
   value       = aws_cloudfront_distribution.website.domain_name
 }
 
+output "distribution_id" {
+  description = "CloudFront distribution ID"
+  value       = aws_cloudfront_distribution.website.id
+}
+
 output "distribution_hosted_zone_id" {
   description = "CloudFront hosted zone ID for Route 53 alias records"
   value       = aws_cloudfront_distribution.website.hosted_zone_id
+}
+
+output "api_id" {
+  description = "API Gateway ID"
+  value       = aws_apigatewayv2_api.website.id
 }
 
 output "api_endpoint" {

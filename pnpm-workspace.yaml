@@ -1,3 +1,9 @@
 packages:
   - "services/*"
   - "platform/*"
+onlyBuiltDependencies:
+  - "@heroui/shared-utils"
+  - "@swc/core"
+  - "core-js-pure"
+  - "esbuild"
+  - "unrs-resolver"

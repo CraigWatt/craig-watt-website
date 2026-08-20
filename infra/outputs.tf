@@ -14,6 +14,14 @@ output "distribution_domain_name" {
   value = module.website.distribution_domain_name
 }
 
+output "distribution_id" {
+  value = module.website.distribution_id
+}
+
+output "api_id" {
+  value = module.website.api_id
+}
+
 output "api_endpoint" {
   value = module.website.api_endpoint
 }

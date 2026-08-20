@@ -70,6 +70,9 @@ jobs:
       - name: Build Lambda handlers
         run: pnpm build:functions
 
+      - name: Build Grafana dashboards
+        run: pnpm build:grafana
+
       - name: Build static website
         run: pnpm build
 
