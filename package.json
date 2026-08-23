@@ -25,7 +25,7 @@
     "sync:grafana": "node ./tools/grafana/sync-dashboards.mjs"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1111.0",
+    "@aws-sdk/client-s3": "^3.1114.0",
     "@aws-sdk/client-ses": "^3.1111.0",
     "@content-collections/core": "^0.15.2",
     "@content-collections/next": "^0.2.11",
