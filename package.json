@@ -85,7 +85,7 @@
     "prettier": "^3.9.6",
     "remark-frontmatter": "^5.0.0",
     "remark-mdx-frontmatter": "^5.2.0",
-    "storybook": "^10.5.8",
+    "storybook": "^10.5.9",
     "tailwindcss": "4.3.3",
     "ts-jest": "^29.4.12",
     "ts-node": "^10.9.2",
